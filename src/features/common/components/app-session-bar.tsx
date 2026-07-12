@@ -1,19 +1,30 @@
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { useCallback, useState } from "react";
 import { Link as RouterLink } from "react-router-dom";
 import { useAuth } from "@/features/auth";
+import { TrustbuddyMark } from "@/features/common/components/trustbuddy-mark";
 import { paths } from "@/routes/paths";
 
 const toolbarSx = {
   gap: 1.5,
-  minHeight: 48,
+  minHeight: 52,
   px: { xs: 2, sm: 3 },
+} as const;
+
+const brandLinkSx = {
+  color: "text.primary",
+  display: "inline-flex",
+  alignItems: "center",
+  textDecoration: "none",
+  "&:hover": {
+    opacity: 0.85,
+  },
 } as const;
 
 const spacerSx = { flexGrow: 1 } as const;
@@ -34,32 +45,40 @@ export function AppSessionBar() {
   return (
     <AppBar position="sticky" color="default" elevation={0} component="header">
       <Toolbar variant="dense" sx={toolbarSx}>
-        <IconButton
+        <Box
           component={RouterLink}
           to={paths.home}
-          edge="start"
-          color="inherit"
-          aria-label="Home"
-          size="small"
+          aria-label="Trustbuddy home"
+          sx={brandLinkSx}
         >
-          <HomeOutlinedIcon fontSize="small" />
-        </IconButton>
+          <TrustbuddyMark />
+        </Box>
+        <Box sx={spacerSx} />
         {username ? (
-          <Typography variant="body2" color="text.secondary" noWrap>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            noWrap
+            sx={{ maxWidth: { xs: "6.5rem", sm: "14rem" } }}
+          >
             {username}
           </Typography>
         ) : null}
-        <Box sx={spacerSx} />
-        <Button
+        <IconButton
           color="inherit"
           size="small"
+          aria-label={isLoggingOut ? "Signing out" : "Log out"}
           onClick={() => {
             void onLogout();
           }}
           disabled={isLoggingOut}
         >
-          {isLoggingOut ? "Signing out…" : "Log out"}
-        </Button>
+          {isLoggingOut ? (
+            <CircularProgress color="inherit" size={18} />
+          ) : (
+            <LogoutOutlinedIcon fontSize="small" />
+          )}
+        </IconButton>
       </Toolbar>
     </AppBar>
   );

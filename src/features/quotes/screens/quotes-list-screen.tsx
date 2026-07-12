@@ -4,30 +4,34 @@ import Container from "@mui/material/Container";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { useTheme } from "@mui/material/styles";
+import useMediaQuery from "@mui/material/useMediaQuery";
 import { useCallback, useEffect } from "react";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import { getUserFacingErrorMessage } from "@/api/types";
 import { PageErrorAlert } from "@/features/common/components/page-error-alert";
 import { PageLoading } from "@/features/common/components/page-loading";
-import { QuotesTable } from "@/features/quotes/components/quotes-table";
+import { QuotesCards } from "@/features/quotes/components/quotes-cards";
 import {
   QUOTES_LIST_DEFAULTS,
   useQuotesList,
 } from "@/features/quotes/hooks/use-quotes-list";
 import { paths } from "@/routes/paths";
 
-const containerSx = { py: 3 } as const;
+const containerSx = { py: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } } as const;
 const headerSx = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  gap: 2,
+  gap: 1.5,
   flexWrap: "wrap",
 } as const;
 const paginationSx = {
   display: "flex",
   justifyContent: "center",
   pt: 1,
+  overflowX: "auto",
+  maxWidth: "100%",
 } as const;
 
 const EMPTY_QUOTES: never[] = [];
@@ -53,6 +57,8 @@ function pageSearchParams(page: number): URLSearchParams {
 }
 
 export function QuotesListScreen() {
+  const theme = useTheme();
+  const isCompact = useMediaQuery(theme.breakpoints.down("sm"));
   const [searchParams, setSearchParams] = useSearchParams();
   const pageFromUrl = parsePageParam(searchParams.get("page"));
   const pageIndex0 = pageFromUrl - 1;
@@ -123,7 +129,7 @@ export function QuotesListScreen() {
           </PageErrorAlert>
         ) : null}
 
-        {!isPending && !isError ? <QuotesTable quotes={quotes} /> : null}
+        {!isPending && !isError ? <QuotesCards quotes={quotes} /> : null}
 
         {showPagination ? (
           <Box sx={paginationSx}>
@@ -132,8 +138,11 @@ export function QuotesListScreen() {
               page={(data?.number ?? 0) + 1}
               onChange={onPageChange}
               color="primary"
-              showFirstButton
-              showLastButton
+              size={isCompact ? "small" : "medium"}
+              siblingCount={isCompact ? 0 : 1}
+              boundaryCount={1}
+              showFirstButton={!isCompact}
+              showLastButton={!isCompact}
             />
           </Box>
         ) : null}

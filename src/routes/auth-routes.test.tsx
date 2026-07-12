@@ -135,7 +135,7 @@ describe("auth routes", () => {
     await user.click(screen.getByRole("button", { name: /^sign in$/i }));
 
     expect(
-      await screen.findByRole("heading", { name: /quote wizard/i }),
+      await screen.findByRole("heading", { name: /^personal$/i }),
     ).toBeInTheDocument();
   });
 

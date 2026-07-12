@@ -1,7 +1,8 @@
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useCallback } from "react";
@@ -13,19 +14,20 @@ import {
 import { getUserFacingErrorMessage } from "@/api/types";
 import { PageErrorAlert } from "@/features/common/components/page-error-alert";
 import { PageLoading } from "@/features/common/components/page-loading";
-import { formatQuotePremium } from "@/features/quotes/utils/format-quote";
 import { useQuote } from "@/features/wizard/hooks/use-quote";
 import { paths } from "@/routes/paths";
 
 const containerSx = {
-  py: { xs: 6, sm: 8 },
+  py: { xs: 2, sm: 3 },
+  px: { xs: 2, sm: 3 },
   display: "flex",
   justifyContent: "center",
 } as const;
 
-const panelSx = {
+const cardSx = {
   width: "100%",
-  maxWidth: 440,
+  maxWidth: 480,
+  p: { xs: 2.5, sm: 4 },
 } as const;
 
 const iconWrapSx = {
@@ -40,23 +42,11 @@ const headerSx = {
 
 const introSx = { mt: 1 } as const;
 
-const premiumBannerSx = {
+const actionsSx = {
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
-  gap: 0.5,
-  px: 2,
-  py: 2.5,
-  borderRadius: 1,
-  border: 1,
-  borderColor: "divider",
-  bgcolor: "background.paper",
-  textAlign: "center",
-} as const;
-
-const actionsSx = {
-  display: "flex",
-  justifyContent: "center",
+  gap: 1,
   pt: 1,
 } as const;
 
@@ -73,11 +63,9 @@ export function SuccessScreen() {
     return <Navigate to={paths.home} replace />;
   }
 
-  const premium = formatQuotePremium(quote?.estimatedMonthlyPremium);
-
   return (
     <Container component="main" maxWidth="sm" sx={containerSx}>
-      <Box sx={panelSx}>
+      <Paper elevation={0} variant="outlined" sx={cardSx}>
         <Stack spacing={3}>
           {isPending ? <PageLoading label="Loading quote" /> : null}
 
@@ -90,30 +78,17 @@ export function SuccessScreen() {
           {!isPending && !isError && quote ? (
             <>
               <Box sx={iconWrapSx} aria-hidden>
-                <CheckCircleOutlineIcon sx={{ fontSize: 48 }} />
+                <CheckCircleIcon sx={{ fontSize: 72 }} />
               </Box>
 
               <Box sx={headerSx}>
                 <Typography component="h1" variant="h5">
-                  Quote submitted
+                  Your quote has been submitted!
                 </Typography>
                 <Typography color="text.secondary" sx={introSx}>
                   {quote.name
-                    ? `Your quote for ${quote.name} has been submitted.`
-                    : "Your quote has been submitted."}
-                </Typography>
-              </Box>
-
-              <Box sx={premiumBannerSx}>
-                <Typography
-                  color="text.secondary"
-                  variant="body2"
-                  sx={{ fontWeight: 500 }}
-                >
-                  Estimated monthly premium
-                </Typography>
-                <Typography component="p" variant="h5" sx={{ m: 0 }}>
-                  {premium}
+                    ? `Thank you, ${quote.name}! We've received your information and will be in touch soon.`
+                    : "We've received your information and will be in touch soon."}
                 </Typography>
               </Box>
 
@@ -123,8 +98,17 @@ export function SuccessScreen() {
                   to={paths.home}
                   variant="contained"
                   size="large"
+                  fullWidth
                 >
-                  Back to quotes
+                  Ok
+                </Button>
+                <Button
+                  component={RouterLink}
+                  to={paths.wizardPersonal}
+                  variant="text"
+                  color="primary"
+                >
+                  Start a new quote
                 </Button>
               </Box>
             </>
@@ -137,13 +121,14 @@ export function SuccessScreen() {
                 to={paths.home}
                 variant="contained"
                 size="large"
+                fullWidth
               >
-                Back to quotes
+                Ok
               </Button>
             </Box>
           ) : null}
         </Stack>
-      </Box>
+      </Paper>
     </Container>
   );
 }

@@ -14,6 +14,10 @@ const successRoutes = [
     children: [
       { path: paths.success, element: <SuccessRoute /> },
       { path: paths.home, element: <div>Quotes home</div> },
+      {
+        path: paths.wizardPersonal,
+        element: <div>New quote</div>,
+      },
     ],
   },
 ];
@@ -52,17 +56,22 @@ describe("SuccessScreen", () => {
     });
 
     expect(
-      await screen.findByRole("heading", { name: /quote submitted/i }),
+      await screen.findByRole("heading", {
+        name: /your quote has been submitted/i,
+      }),
     ).toBeInTheDocument();
     expect(
-      await screen.findByText(
-        /your quote for ada lovelace has been submitted/i,
-      ),
+      await screen.findByText(/thank you, ada lovelace/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/estimated monthly premium/i)).toBeInTheDocument();
-    expect(screen.getByText(/\$175\.50/)).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /back to quotes/i }),
-    ).toHaveAttribute("href", paths.home);
+      screen.queryByText(/estimated monthly premium/i),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^ok$/i })).toHaveAttribute(
+      "href",
+      paths.home,
+    );
+    expect(
+      screen.getByRole("link", { name: /start a new quote/i }),
+    ).toHaveAttribute("href", paths.wizardPersonal);
   });
 });

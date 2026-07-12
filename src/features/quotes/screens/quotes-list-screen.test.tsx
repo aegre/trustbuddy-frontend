@@ -46,10 +46,10 @@ describe("QuotesListScreen", () => {
     );
     expect(await screen.findByText("Grace Hopper")).toBeInTheDocument();
     expect(screen.getByText("grace@example.com")).toBeInTheDocument();
-    expect(screen.getByText("DRAFT")).toBeInTheDocument();
+    expect(screen.getByText("Draft")).toBeInTheDocument();
 
-    const row = screen.getByRole("row", { name: /grace hopper/i });
-    expect(row).toHaveAttribute("href", wizardPersonalHref("q-42"));
+    const card = screen.getByRole("link", { name: /grace hopper/i });
+    expect(card).toHaveAttribute("href", wizardPersonalHref("q-42"));
   });
 
   it("given_emptyList_when_loaded_then_showsEmptyMessage", async () => {

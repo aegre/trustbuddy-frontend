@@ -4,8 +4,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import { useForm } from "react-hook-form";
+import { Link as RouterLink } from "react-router-dom";
 import {
   emptyPersonalDefaults,
   personalSchema,
@@ -18,9 +18,23 @@ export type PersonalFormProps = {
   errorMessage?: string | null;
   isSubmitting?: boolean;
   readOnly?: boolean;
+  /** Read-only browse: link to the next wizard step. */
+  nextTo?: string;
 };
 
 const formSx = { width: "100%" } as const;
+
+const actionsSx = {
+  display: "flex",
+  flexDirection: { xs: "column-reverse", sm: "row" },
+  justifyContent: "flex-end",
+  alignItems: { xs: "stretch", sm: "center" },
+  gap: 1.5,
+  pt: 1,
+  "& > .MuiButton-root": {
+    width: { xs: "100%", sm: "auto" },
+  },
+} as const;
 
 export function PersonalForm({
   onSubmit,
@@ -28,6 +42,7 @@ export function PersonalForm({
   errorMessage,
   isSubmitting = false,
   readOnly = false,
+  nextTo,
 }: PersonalFormProps) {
   const disabled = isSubmitting || readOnly;
 
@@ -50,10 +65,6 @@ export function PersonalForm({
       sx={formSx}
     >
       <Stack spacing={3}>
-        <Typography component="h2" variant="h6">
-          Personal information
-        </Typography>
-
         {errorMessage ? (
           <Alert severity="error" role="alert">
             {errorMessage}
@@ -118,8 +129,21 @@ export function PersonalForm({
           }}
         />
 
+        {readOnly && nextTo ? (
+          <Box sx={actionsSx}>
+            <Button
+              component={RouterLink}
+              to={nextTo}
+              variant="contained"
+              size="large"
+            >
+              Next
+            </Button>
+          </Box>
+        ) : null}
+
         {readOnly ? null : (
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Box sx={actionsSx}>
             <Button
               type="submit"
               variant="contained"

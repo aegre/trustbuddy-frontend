@@ -92,6 +92,9 @@ export function PersonalStep({ quoteId, quote, readOnly }: WizardStepProps) {
       errorMessage={errorMessage}
       isSubmitting={isSubmitting}
       readOnly={readOnly}
+      nextTo={
+        readOnly && quoteId ? wizardHref("coverage", { quoteId }) : undefined
+      }
     />
   );
 }
