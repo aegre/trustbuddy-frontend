@@ -1,0 +1,182 @@
+import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
+import { Navigate } from "react-router-dom";
+import { describe, expect, it } from "vitest";
+import { createQuoteFixture } from "@/test/factories";
+import { server } from "@/test/msw/server";
+import { renderAppRouter } from "@/test/render";
+import { paths } from "@/routes/paths";
+import { ProtectedOutlet } from "@/routes/protected-outlet";
+import { WizardRoute } from "@/routes/wizard-route";
+
+const wizardRoutes = [
+  {
+    element: <ProtectedOutlet />,
+    children: [
+      {
+        path: paths.wizardBase,
+        element: <Navigate to={paths.wizardPersonal} replace />,
+      },
+      { path: paths.wizardStep, element: <WizardRoute /> },
+      { path: paths.home, element: <div>Quotes home</div> },
+    ],
+  },
+];
+
+function renderWizardAt(initialEntry: string) {
+  return renderAppRouter({
+    initialEntry,
+    routes: wizardRoutes,
+    initialAuthenticated: true,
+  });
+}
+
+function mockQuote(overrides: Parameters<typeof createQuoteFixture>[0] = {}) {
+  const quote = createQuoteFixture(overrides);
+  server.use(
+    http.get("*/api/v1/quotes/:id", () =>
+      HttpResponse.json(quote, { status: 200 }),
+    ),
+  );
+  return quote;
+}
+
+describe("wizard routes", () => {
+  it("given_personalStep_when_loaded_then_showsStepperAndStub", async () => {
+    renderWizardAt(paths.wizardPersonal);
+
+    expect(
+      await screen.findByRole("heading", { name: /quote wizard/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /personal information/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^next$/i })).toHaveAttribute(
+      "href",
+      `${paths.wizardBase}/coverage`,
+    );
+    expect(screen.queryByRole("link", { name: /^previous$/i })).toBeNull();
+  });
+
+  it("given_submittedQuote_when_loaded_then_showsReadOnlyGuard", async () => {
+    mockQuote({
+      id: "q-sub",
+      name: "Submitted User",
+      status: "SUBMITTED",
+    });
+    renderWizardAt(`${paths.wizardPersonal}?quoteId=q-sub`);
+
+    expect(
+      await screen.findByText(
+        /this quote is submitted and can no longer be edited/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/viewing submitted user \(read-only\)/i),
+    ).toBeInTheDocument();
+  });
+
+  it("given_draftQuote_when_loaded_then_allowsEdit", async () => {
+    mockQuote({ id: "q-9", name: "Ada Lovelace", status: "DRAFT" });
+    renderWizardAt(`${paths.wizardPersonal}?quoteId=q-9`);
+
+    expect(
+      await screen.findByText(/editing ada lovelace \(draft\)/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/can no longer be edited/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("given_quoteId_when_loaded_then_showsQuoteFromQuery", async () => {
+    mockQuote({ id: "q-9", name: "Ada Lovelace", status: "DRAFT" });
+    renderWizardAt(`${paths.wizardPersonal}?quoteId=q-9`);
+
+    expect(
+      await screen.findByText(/editing ada lovelace \(draft\)/i),
+    ).toBeInTheDocument();
+  });
+
+  it("given_quoteId_when_navigatingSteps_then_preservesQuery", async () => {
+    mockQuote({ id: "q-9", name: "Ada Lovelace", status: "DRAFT" });
+    const user = userEvent.setup();
+    renderWizardAt(`${paths.wizardPersonal}?quoteId=q-9`);
+
+    expect(
+      await screen.findByText(/editing ada lovelace \(draft\)/i),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("link", { name: /^next$/i }));
+
+    expect(
+      await screen.findByRole("heading", { name: /^coverage$/i }),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText(/coverage for ada lovelace/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^previous$/i })).toHaveAttribute(
+      "href",
+      `${paths.wizardPersonal}?quoteId=q-9`,
+    );
+    expect(screen.getByRole("link", { name: /^next$/i })).toHaveAttribute(
+      "href",
+      `${paths.wizardBase}/review?quoteId=q-9`,
+    );
+  });
+
+  it("given_quoteLoadError_when_retry_then_loadsQuote", async () => {
+    let attempts = 0;
+    server.use(
+      http.get("*/api/v1/quotes/:id", () => {
+        attempts += 1;
+        if (attempts === 1) {
+          return HttpResponse.json(
+            { message: "Temporary failure" },
+            { status: 500 },
+          );
+        }
+        return HttpResponse.json(
+          createQuoteFixture({ id: "q-err", name: "Retry User" }),
+          { status: 200 },
+        );
+      }),
+    );
+
+    const user = userEvent.setup();
+    renderWizardAt(`${paths.wizardPersonal}?quoteId=q-err`);
+
+    expect(
+      await screen.findByText(/could not load quote/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: /personal/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /^next$/i })).toBeNull();
+
+    await user.click(screen.getByRole("button", { name: /^retry$/i }));
+
+    expect(
+      await screen.findByText(/editing retry user \(draft\)/i),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^next$/i })).toBeInTheDocument();
+  });
+
+  it("given_invalidStepSlug_when_loaded_then_redirectsToPersonal", async () => {
+    mockQuote({ id: "q-1", name: "Redirect User", status: "DRAFT" });
+    renderWizardAt(`${paths.wizardBase}/not-a-step?quoteId=q-1`);
+
+    expect(
+      await screen.findByRole("heading", { name: /personal information/i }),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText(/editing redirect user \(draft\)/i),
+    ).toBeInTheDocument();
+  });
+
+  it("given_wizardBase_when_loaded_then_redirectsToPersonal", async () => {
+    renderWizardAt(paths.wizardBase);
+
+    expect(
+      await screen.findByRole("heading", { name: /personal information/i }),
+    ).toBeInTheDocument();
+  });
+});

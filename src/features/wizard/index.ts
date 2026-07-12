@@ -1,1 +1,1 @@
-export { WizardPersonalStubScreen } from "@/features/wizard/screens/wizard-personal-stub-screen";
+export { WizardScreen } from "@/features/wizard/screens/wizard-screen";

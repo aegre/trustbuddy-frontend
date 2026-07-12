@@ -4,7 +4,7 @@ import { LoginRoute } from "@/routes/login-route";
 import { paths } from "@/routes/paths";
 import { ProtectedOutlet } from "@/routes/protected-outlet";
 import { QuotesListRoute } from "@/routes/quotes-list-route";
-import { WizardPersonalRoute } from "@/routes/wizard-personal-route";
+import { WizardRoute } from "@/routes/wizard-route";
 
 export const router = createBrowserRouter([
   {
@@ -24,8 +24,12 @@ export const router = createBrowserRouter([
         element: <QuotesListRoute />,
       },
       {
-        path: paths.wizardPersonal,
-        element: <WizardPersonalRoute />,
+        path: paths.wizardBase,
+        element: <Navigate to={paths.wizardPersonal} replace />,
+      },
+      {
+        path: paths.wizardStep,
+        element: <WizardRoute />,
       },
     ],
   },

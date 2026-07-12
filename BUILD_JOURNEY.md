@@ -131,13 +131,13 @@ src/
 
 ## Phase 3 — Dashboard / list of quotes
 
-**Status:** In progress on `feat/phase-3-quotes-list`.
+**Status:** Done (merged).
 
 **Deliverables** (under `features/quotes/`)
 
 - [x] List + Query hook via Orval `useListQuotes` (`useQuotesList` wrapper; fixed page/size)
 - [x] table/list UI (columns: name, email, status, premium, dates; empty/loading/error)
-- [x] CTA → `/wizard/personal` (new); row → `/wizard/personal?quoteId=` (stub screen until Phase 4)
+- [x] CTA → `/wizard/personal` (new); row → `/wizard/personal?quoteId=`
 - [x] MSW list fixture + component test (hook + screen tests + factories)
 
 **Done when:** Logged-in user sees quotes from API (or MSW in tests).
@@ -146,12 +146,15 @@ src/
 
 ## Phase 4 — Wizard setup
 
+**Status:** Done on `feat/phase-4-wizard-shell` (ready to merge).
+
 **Deliverables** (under `features/wizard/`)
 
-- Step registry + stepper layout; routes `/wizard/:stepSlug`
-- `utils/step-guards`, `utils/wizard-href`
-- Quote loaded via Query `['quote', quoteId]`; UI-only context if needed
-- Stub step components; DRAFT-only edit guards; code-split wizard routes
+- [x] Step registry + stepper layout; routes `/wizard/:stepSlug`
+- [x] `utils/step-guards`, `utils/wizard-href`
+- [x] Quote loaded via Orval `useGetQuote` (`useQuote` wrapper; skip fetch when no `quoteId`)
+- [x] Stub step components; code-split wizard routes
+- [x] DRAFT-only edit guards (`isQuoteEditable` + read-only banner; no UI context needed yet)
 
 **Done when:** Step navigation + chrome work without real forms.
 
