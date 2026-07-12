@@ -1,5 +1,8 @@
-/**
- * Auth feature module (login, session UI context).
- * Subfolders (screens, schemas, context, …) are added when files appear.
- */
-export const AUTH_FEATURE = "auth" as const;
+export { LoginScreen } from "@/features/auth/screens/login-screen";
+export type { LoginScreenProps } from "@/features/auth/screens/login-screen";
+export { LoginForm } from "@/features/auth/components/login-form";
+export type { LoginFormProps } from "@/features/auth/components/login-form";
+export {
+  loginSchema,
+  type LoginFormValues,
+} from "@/features/auth/schemas/login";
