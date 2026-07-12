@@ -79,7 +79,7 @@ After API contract changes: in the API repo run `make openapi-export`, then here
 
 ---
 
-# Thought process
+# Thought Process
 
 So first thing before doing any code is to get the whole picture to translate it to technical requirements.
 
