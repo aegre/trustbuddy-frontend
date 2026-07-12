@@ -11,7 +11,7 @@ include .env
 export $(shell sed -n 's/=.*//p' .env)
 endif
 
-.PHONY: help run build docker-build stack-up stack-down stack-logs
+.PHONY: help run build lint format format-check docker-build stack-up stack-down stack-logs
 
 help: ## Show available targets
 	@echo "Trustbuddy Frontend — available targets:"
@@ -23,6 +23,15 @@ run: ## Run Vite dev server locally
 
 build: ## Production build
 	$(NPM) run build
+
+lint: ## Lint with oxlint (react, a11y, perf)
+	$(NPM) run lint
+
+format: ## Format with Prettier
+	$(NPM) run format
+
+format-check: ## Check Prettier formatting
+	$(NPM) run format:check
 
 docker-build: ## Build frontend Docker image
 	docker build -t $(DOCKER_IMAGE) --build-arg VITE_API_BASE_URL=$(VITE_API_BASE_URL) .
