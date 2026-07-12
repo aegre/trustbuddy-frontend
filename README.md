@@ -12,7 +12,7 @@ So first thing before doing any code is to get the whole picture to translate it
 - State Context API (UI/auth state)
 - Navigation React Router
 - Integration with trustbuddy-api
-- Testing Playwright + Vitest
+- Testing Playwright + Vitest (unit/component via vitest-gwt)
 
 So according to these requirements we need to use React + Vite for a CSR application. I was initially planning to build a Next.js application due to how I can handle the different routes internally in the server side, but a client focused rendering logic makes sense, I just need to focus on code splitting to make the form as smooth as possible. Also I can use Tanstack Query for server state (quotes, API responses), using caching to avoid hitting the api as much as possible, while invalidating the cache when needed. Context stays for UI and auth state so it does not overlap with Query.
 
@@ -34,7 +34,7 @@ I can foresee 9 main steps, with intermediate steps for optimizations and tuning
 
 ## Technical extras
 
-We are also using OpenAPI from the api project so this way we can generate api types easily, we just need a way to sync the generated schema from swagger. Dockerizing a project like this is not a big deal, we can just serve the static files or run react inside the container. I'll go with the second approach. For testing: Vitest + MSW for unit/component tests, Playwright for E2E.
+We are also using OpenAPI from the api project so this way we can generate api types easily, we just need a way to sync the generated schema from swagger. Dockerizing a project like this is not a big deal, we can just serve the static files or run react inside the container. I'll go with the second approach. For testing: Vitest + MSW + vitest-gwt for unit/component tests, Playwright for E2E.
 
 # AI Driven Development
 
