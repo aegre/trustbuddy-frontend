@@ -4,17 +4,17 @@ Vite + React 19 + TypeScript (CSR). Pairs with [trustbuddy-api](https://github.c
 
 ## Stack
 
-| Area | Choice |
-|------|--------|
-| UI | Material UI (MUI) + Emotion |
-| Routing | React Router |
-| Forms | React Hook Form + Yup (`@hookform/resolvers/yup`) |
-| Server state | TanStack Query (quotes, mutations, cache invalidation) |
-| UI / auth state | React Context — logged-in flags, wizard UI-only state; **not** API payloads |
-| Auth session | HttpOnly cookie via `POST /api/v1/auth/token`; requests use `credentials: 'include'`; logout via `POST /api/v1/auth/logout` |
-| API | Feature `client/` modules → shared `apiFetch` → trustbuddy-api; real API in the app; MSW in unit tests only |
-| Formatting | Prettier (`make format` once wired) |
-| Linting | Project lint target (`make lint` once wired; currently oxlint from Vite scaffold) |
+| Area            | Choice                                                                                                                      |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| UI              | Material UI (MUI) + Emotion                                                                                                 |
+| Routing         | React Router                                                                                                                |
+| Forms           | React Hook Form + Yup (`@hookform/resolvers/yup`)                                                                           |
+| Server state    | TanStack Query (quotes, mutations, cache invalidation)                                                                      |
+| UI / auth state | React Context — logged-in flags, wizard UI-only state; **not** API payloads                                                 |
+| Auth session    | HttpOnly cookie via `POST /api/v1/auth/token`; requests use `credentials: 'include'`; logout via `POST /api/v1/auth/logout` |
+| API             | Feature `client/` modules → shared `apiFetch` → trustbuddy-api; real API in the app; MSW in unit tests only                 |
+| Formatting      | Prettier (`make format` / `make format-check`)                                                                              |
+| Linting         | Oxlint — React, jsx-a11y, react-perf (`make lint`)                                                                          |
 
 ## Folder layout
 
@@ -34,17 +34,17 @@ src/
 
 Each feature module uses subfolders as they gain files (no empty placeholders):
 
-| Subfolder | Purpose |
-|-----------|---------|
-| `components/` | Feature UI (forms, cards, shells) |
-| `screens/` | Full-page screen composition (e.g. login) |
-| `layouts/` | Route layouts (providers, shared chrome) |
-| `context/` | React context providers (when needed) |
-| `hooks/` | Feature hooks (Query wrappers OK here) |
-| `types/` | Domain types and registries |
-| `utils/` | Pure helpers, mappers, guards, formatters |
-| `schemas/` | Yup validation for feature forms |
-| `client/` | Browser API endpoint wrappers over `apiFetch` |
+| Subfolder     | Purpose                                       |
+| ------------- | --------------------------------------------- |
+| `components/` | Feature UI (forms, cards, shells)             |
+| `screens/`    | Full-page screen composition (e.g. login)     |
+| `layouts/`    | Route layouts (providers, shared chrome)      |
+| `context/`    | React context providers (when needed)         |
+| `hooks/`      | Feature hooks (Query wrappers OK here)        |
+| `types/`      | Domain types and registries                   |
+| `utils/`      | Pure helpers, mappers, guards, formatters     |
+| `schemas/`    | Yup validation for feature forms              |
+| `client/`     | Browser API endpoint wrappers over `apiFetch` |
 
 - **`routes/`** — routing, redirects, auth guards; delegate UI to `features/`.
 - **`api/`** — shared spine only: `apiFetch`, config, errors, OpenAPI codegen, DTO aliases in `types.ts`. No feature logic.

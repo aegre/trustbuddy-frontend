@@ -26,14 +26,14 @@ flowchart LR
   ApiSpine --> Quotes
 ```
 
-| Concern | Choice |
-|---------|--------|
-| Auth | Cookie JWT — `POST /api/v1/auth/token` + `credentials: 'include'`; Context only tracks logged-in / loading |
-| Server state | TanStack Query calling feature `client/` wrappers |
-| UI/auth state | React Context under `features/*/context/` |
-| Types | `openapi-typescript` → `src/api/generated/schema.ts`; import DTOs only via `@/api/types` |
-| Testing | Vitest + MSW (`src/test/msw/`, factories); Playwright for critical E2E |
-| Docker | Container runs the React app (Vite/Node), per README |
+| Concern       | Choice                                                                                                     |
+| ------------- | ---------------------------------------------------------------------------------------------------------- |
+| Auth          | Cookie JWT — `POST /api/v1/auth/token` + `credentials: 'include'`; Context only tracks logged-in / loading |
+| Server state  | TanStack Query calling feature `client/` wrappers                                                          |
+| UI/auth state | React Context under `features/*/context/`                                                                  |
+| Types         | `openapi-typescript` → `src/api/generated/schema.ts`; import DTOs only via `@/api/types`                   |
+| Testing       | Vitest + MSW (`src/test/msw/`, factories); Playwright for critical E2E                                     |
+| Docker        | Container runs the React app (Vite/Node), per README                                                       |
 
 ## Folder structure
 
@@ -62,17 +62,17 @@ src/
 
 **Feature subfolders:**
 
-| Subfolder | Purpose |
-|-----------|---------|
+| Subfolder     | Purpose                                                                      |
+| ------------- | ---------------------------------------------------------------------------- |
 | `components/` | Feature UI (forms, cards, shells); wizard: `steps/*-step.tsx` + `*-form.tsx` |
-| `screens/` | Full-page composition (e.g. login) |
-| `layouts/` | Feature chrome / providers |
-| `context/` | React context (auth, wizard UI-only) |
-| `hooks/` | Feature hooks (Query wrappers OK here) |
-| `types/` | Domain registries (wizard steps) |
-| `utils/` | Pure helpers, step guards, href builders |
-| `schemas/` | Yup form schemas aligned with request DTOs |
-| `client/` | Thin API endpoint wrappers over `apiFetch` |
+| `screens/`    | Full-page composition (e.g. login)                                           |
+| `layouts/`    | Feature chrome / providers                                                   |
+| `context/`    | React context (auth, wizard UI-only)                                         |
+| `hooks/`      | Feature hooks (Query wrappers OK here)                                       |
+| `types/`      | Domain registries (wizard steps)                                             |
+| `utils/`      | Pure helpers, step guards, href builders                                     |
+| `schemas/`    | Yup form schemas aligned with request DTOs                                   |
+| `client/`     | Thin API endpoint wrappers over `apiFetch`                                   |
 
 **Routes (target):** `/login` · `/` (quotes list) · `/wizard/:stepSlug?quoteId=` with steps `personal` | `coverage` | `review` · success after submit.
 
@@ -85,6 +85,7 @@ src/
 ## Phase 1 — Initial setup
 
 **Deliverables**
+
 - Scaffold Vite + React + TypeScript; deps: MUI, React Router, RHF, Yup, TanStack Query, openapi-typescript
 - Create folder spine above; `@/` alias; ESLint/Prettier; Husky + lint-staged
 - `Makefile`: `install`, `dev`, `build`, `test`, `lint`, `format`, `verify`, `openapi-*`, `docker-*`
@@ -100,6 +101,7 @@ src/
 ## Phase 2 — Login screen
 
 **Deliverables** (under `features/auth/`)
+
 - `client/auth.ts` → token + logout
 - Yup `schemas/` + login form/screen; `AuthContext` for session UI state
 - Thin `routes/` for `/login` + protected outlet
@@ -114,6 +116,7 @@ src/
 ## Phase 3 — Dashboard / list of quotes
 
 **Deliverables** (under `features/quotes/`)
+
 - `client/` list + Query hook; table/list UI (fixed page/size for now)
 - Columns: name, email, status, premium, dates; empty/loading/error
 - CTA → `/wizard/personal` (new); row → `/wizard/personal?quoteId=`
@@ -126,6 +129,7 @@ src/
 ## Phase 4 — Wizard setup
 
 **Deliverables** (under `features/wizard/`)
+
 - Step registry + stepper layout; routes `/wizard/:stepSlug`
 - `utils/step-guards`, `utils/wizard-href`
 - Quote loaded via Query `['quote', quoteId]`; UI-only context if needed
@@ -138,6 +142,7 @@ src/
 ## Phase 5 — Wizard personal data step
 
 **Deliverables**
+
 - `schemas/` + `components/steps/personal-step.tsx` + `personal-form.tsx`
 - New: `POST /api/v1/quotes` then set `quoteId` in URL; edit: `PATCH /api/v1/quotes/{id}`
 - Prefill from detail Query; handle **409**
@@ -150,6 +155,7 @@ src/
 ## Phase 6 — Wizard coverage step
 
 **Deliverables**
+
 - Coverage/health form + senior conditionals (age > 65)
 - `PATCH .../coverage`; show `estimatedMonthlyPremium` from response
 - Continue gated on required fields (mirror API submit rules where practical)
@@ -161,6 +167,7 @@ src/
 ## Phase 7 — Confirmation + success
 
 **Deliverables**
+
 - Review step summary; `POST .../submit`
 - Success screen; retry on `SUBMISSION_FAILED`; **409** messaging
 - Invalidate list/detail queries; Playwright full happy path
@@ -172,6 +179,7 @@ src/
 ## Phase 8 — Pagination on dashboard
 
 **Deliverables**
+
 - Wire `page` / `size` (optional sort) to `PageQuoteResponse`
 - MUI pagination; Query keys include page params; tests
 
@@ -182,6 +190,7 @@ src/
 ## Phase 9 — UI tweaks
 
 **Deliverables**
+
 - Polish via `features/common` theme; loading/empty/error consistency
 - Stepper/form/dashboard density; auth edge cases; basic a11y
 - README / AGENTS “run against local API” notes

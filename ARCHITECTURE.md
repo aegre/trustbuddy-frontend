@@ -74,27 +74,27 @@ src/
 
 Feature subfolders are created only when files appear:
 
-| Subfolder | Purpose |
-|-----------|---------|
+| Subfolder     | Purpose                                                   |
+| ------------- | --------------------------------------------------------- |
 | `components/` | Feature UI; wizard uses `steps/*-step.tsx` + `*-form.tsx` |
-| `screens/` | Full-page composition |
-| `layouts/` | Feature chrome / providers |
-| `context/` | React context (auth, wizard UI-only) |
-| `hooks/` | Feature hooks (including Query wrappers) |
-| `types/` | Domain registries (e.g. wizard steps) |
-| `utils/` | Pure helpers, guards, href builders |
-| `schemas/` | Yup form schemas aligned with request DTOs |
-| `client/` | Thin endpoint wrappers over `apiFetch` |
+| `screens/`    | Full-page composition                                     |
+| `layouts/`    | Feature chrome / providers                                |
+| `context/`    | React context (auth, wizard UI-only)                      |
+| `hooks/`      | Feature hooks (including Query wrappers)                  |
+| `types/`      | Domain registries (e.g. wizard steps)                     |
+| `utils/`      | Pure helpers, guards, href builders                       |
+| `schemas/`    | Yup form schemas aligned with request DTOs                |
+| `client/`     | Thin endpoint wrappers over `apiFetch`                    |
 
 ## Layer rules
 
-| Layer | May depend on | Must not |
-|-------|---------------|----------|
-| `routes/` | `features/*` screens/layouts | Call API or hold Yup/business rules |
-| `features/*/components` | schemas, hooks, context, `@/api/types` | Import generated `schema.ts` directly |
-| `features/*/client` | `@/api/client`, `@/api/types`, `@/api/errors` | Own React state or UI |
-| `api/` | env/config, fetch | Feature UI or Query hooks |
-| `test/msw` | OpenAPI-shaped fixtures | Live in production feature paths |
+| Layer                   | May depend on                                 | Must not                              |
+| ----------------------- | --------------------------------------------- | ------------------------------------- |
+| `routes/`               | `features/*` screens/layouts                  | Call API or hold Yup/business rules   |
+| `features/*/components` | schemas, hooks, context, `@/api/types`        | Import generated `schema.ts` directly |
+| `features/*/client`     | `@/api/client`, `@/api/types`, `@/api/errors` | Own React state or UI                 |
+| `api/`                  | env/config, fetch                             | Feature UI or Query hooks             |
+| `test/msw`              | OpenAPI-shaped fixtures                       | Live in production feature paths      |
 
 ## OpenAPI types
 
