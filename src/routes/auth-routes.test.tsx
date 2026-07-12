@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 import { Navigate } from "react-router-dom";
-import { createQuotesPageFixture } from "@/test/factories";
+import { createQuoteFixture, createQuotesPageFixture } from "@/test/factories";
 import { server } from "@/test/msw/server";
 import { renderAppRouter } from "@/test/render";
 import { GuestOutlet } from "@/routes/guest-outlet";
@@ -83,6 +83,86 @@ describe("auth routes", () => {
 
     expect(
       await screen.findByRole("heading", { name: /^quotes$/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^log out$/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("given_sessionBootstrap_when_pending_then_showsCheckingSession", () => {
+    server.use(
+      http.get("*/api/v1/auth/me", async () => {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return HttpResponse.json({ username: "dev-user" }, { status: 200 });
+      }),
+    );
+
+    renderAppAt(paths.home);
+
+    expect(
+      screen.getByRole("status", { name: /checking session/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("given_guest_when_visitsWizardWithQuoteId_then_loginReturnIncludesSearch", async () => {
+    server.use(
+      http.get("*/api/v1/quotes", () =>
+        HttpResponse.json(createQuotesPageFixture({ content: [] }), {
+          status: 200,
+        }),
+      ),
+      http.get("*/api/v1/quotes/:id", () =>
+        HttpResponse.json(createQuoteFixture({ id: "q-1", name: "Ada" }), {
+          status: 200,
+        }),
+      ),
+    );
+
+    const user = userEvent.setup();
+    renderAppAt("/wizard/personal?quoteId=q-1", {
+      initialAuthenticated: false,
+    });
+
+    expect(
+      await screen.findByRole("heading", { name: /sign in to trustbuddy/i }),
+    ).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Username"), "agent");
+    await user.type(
+      screen.getByLabelText("Password", { selector: "input" }),
+      "secret",
+    );
+    await user.click(screen.getByRole("button", { name: /^sign in$/i }));
+
+    expect(
+      await screen.findByRole("heading", { name: /quote wizard/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("given_authenticated_when_logout_then_returnsToLogin", async () => {
+    server.use(
+      http.get("*/api/v1/quotes", () =>
+        HttpResponse.json(createQuotesPageFixture({ content: [] }), {
+          status: 200,
+        }),
+      ),
+      http.post(
+        "*/api/v1/auth/logout",
+        () => new HttpResponse(null, { status: 204 }),
+      ),
+    );
+
+    const user = userEvent.setup();
+    renderAppAt(paths.home, { initialAuthenticated: true });
+
+    expect(
+      await screen.findByRole("heading", { name: /^quotes$/i }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^log out$/i }));
+
+    expect(
+      await screen.findByRole("heading", { name: /sign in to trustbuddy/i }),
     ).toBeInTheDocument();
   });
 

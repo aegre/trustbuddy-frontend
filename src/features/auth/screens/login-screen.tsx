@@ -6,23 +6,10 @@ import { getUserFacingErrorMessage } from "@/api/types";
 import { LoginForm } from "@/features/auth/components/login-form";
 import { useAuth } from "@/features/auth/context/use-auth";
 import type { LoginFormValues } from "@/features/auth/schemas/login";
-import { paths } from "@/routes/paths";
+import { redirectPathFromLocationState } from "@/routes/login-redirect";
 
 const containerSx = { py: 8 } as const;
 const paperSx = { p: 4 } as const;
-
-function redirectFromLocationState(state: unknown): string {
-  if (
-    typeof state === "object" &&
-    state !== null &&
-    "from" in state &&
-    typeof state.from === "string" &&
-    state.from.startsWith("/")
-  ) {
-    return state.from;
-  }
-  return paths.home;
-}
 
 export function LoginScreen() {
   const { login, isPending } = useAuth();
@@ -35,7 +22,9 @@ export function LoginScreen() {
       setErrorMessage(null);
       try {
         await login(values);
-        navigate(redirectFromLocationState(location.state), { replace: true });
+        navigate(redirectPathFromLocationState(location.state), {
+          replace: true,
+        });
       } catch (error) {
         setErrorMessage(
           getUserFacingErrorMessage(error, "Invalid credentials"),

@@ -1,6 +1,8 @@
 import { useMemo } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "@/features/auth";
+import { AppSessionBar } from "@/features/common/components/app-session-bar";
+import { PageLoading } from "@/features/common/components/page-loading";
 import { paths } from "@/routes/paths";
 
 /**
@@ -11,17 +13,22 @@ export function ProtectedOutlet() {
   const { isAuthenticated, isPending } = useAuth();
   const location = useLocation();
   const loginRedirectState = useMemo(
-    () => ({ from: location.pathname }),
-    [location.pathname],
+    () => ({ from: `${location.pathname}${location.search}` }),
+    [location.pathname, location.search],
   );
 
   if (isPending) {
-    return null;
+    return <PageLoading label="Checking session" />;
   }
 
   if (!isAuthenticated) {
     return <Navigate to={paths.login} replace state={loginRedirectState} />;
   }
 
-  return <Outlet />;
+  return (
+    <>
+      <AppSessionBar />
+      <Outlet />
+    </>
+  );
 }
