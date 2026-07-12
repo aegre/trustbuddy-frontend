@@ -21,10 +21,18 @@ import { paths } from "@/routes/paths";
 const containerSx = { py: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } } as const;
 const headerSx = {
   display: "flex",
-  alignItems: "center",
+  alignItems: { xs: "stretch", sm: "flex-start" },
   justifyContent: "space-between",
-  gap: 1.5,
-  flexWrap: "wrap",
+  gap: 2,
+  flexDirection: { xs: "column", sm: "row" },
+} as const;
+const headerCopySx = {
+  minWidth: 0,
+  flex: "1 1 auto",
+} as const;
+const createButtonSx = {
+  flexShrink: 0,
+  alignSelf: { xs: "stretch", sm: "flex-start" },
 } as const;
 const paginationSx = {
   display: "flex",
@@ -111,15 +119,21 @@ export function QuotesListScreen() {
     <Container component="main" maxWidth="lg" sx={containerSx}>
       <Stack spacing={2}>
         <Box sx={headerSx}>
-          <Typography component="h1" variant="h5">
-            Quotes
-          </Typography>
+          <Box sx={headerCopySx}>
+            <Typography component="h1" variant="h4" sx={{ fontWeight: 700 }}>
+              Your quotes
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+              Review drafts, submitted quotes, and start a new one.
+            </Typography>
+          </Box>
           <Button
             component={RouterLink}
             to={paths.wizardPersonal}
             variant="contained"
+            sx={createButtonSx}
           >
-            New quote
+            + Create new quote
           </Button>
         </Box>
 

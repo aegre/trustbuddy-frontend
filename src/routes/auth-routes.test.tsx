@@ -66,7 +66,7 @@ describe("auth routes", () => {
     renderAppAt(paths.home);
 
     expect(
-      await screen.findByRole("heading", { name: /^quotes$/i }),
+      await screen.findByRole("heading", { name: /your quotes/i }),
     ).toBeInTheDocument();
   });
 
@@ -82,7 +82,7 @@ describe("auth routes", () => {
     renderAppAt(paths.home, { initialAuthenticated: true });
 
     expect(
-      await screen.findByRole("heading", { name: /^quotes$/i }),
+      await screen.findByRole("heading", { name: /your quotes/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /^log out$/i }),
@@ -156,7 +156,7 @@ describe("auth routes", () => {
     renderAppAt(paths.home, { initialAuthenticated: true });
 
     expect(
-      await screen.findByRole("heading", { name: /^quotes$/i }),
+      await screen.findByRole("heading", { name: /your quotes/i }),
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /^log out$/i }));
@@ -178,7 +178,7 @@ describe("auth routes", () => {
     renderAppAt(paths.login, { initialAuthenticated: true });
 
     expect(
-      await screen.findByRole("heading", { name: /^quotes$/i }),
+      await screen.findByRole("heading", { name: /your quotes/i }),
     ).toBeInTheDocument();
   });
 
@@ -203,7 +203,7 @@ describe("auth routes", () => {
 
     await waitFor(() => {
       expect(
-        screen.getByRole("heading", { name: /^quotes$/i }),
+        screen.getByRole("heading", { name: /your quotes/i }),
       ).toBeInTheDocument();
     });
   });
