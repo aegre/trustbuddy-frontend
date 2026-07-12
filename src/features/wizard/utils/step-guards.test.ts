@@ -3,6 +3,7 @@ import {
   getNextWizardStep,
   getPreviousWizardStep,
   getWizardStepIndex,
+  isWizardStepAccessible,
   parseWizardStepSlug,
 } from "@/features/wizard/utils/step-guards";
 import { WIZARD_STEPS } from "@/features/wizard/types/wizard-step-registry";
@@ -38,5 +39,20 @@ describe("step guards", () => {
     expect(getPreviousWizardStep("coverage")).toBe("personal");
     expect(getNextWizardStep("coverage")).toBe("review");
     expect(getNextWizardStep("review")).toBeNull();
+  });
+
+  it("gates stepper access by quote id and coverage", () => {
+    expect(isWizardStepAccessible("personal", {})).toBe(true);
+    expect(isWizardStepAccessible("coverage", {})).toBe(false);
+    expect(isWizardStepAccessible("review", {})).toBe(false);
+
+    expect(isWizardStepAccessible("coverage", { quoteId: "q-1" })).toBe(true);
+    expect(isWizardStepAccessible("review", { quoteId: "q-1" })).toBe(false);
+    expect(
+      isWizardStepAccessible("review", {
+        quoteId: "q-1",
+        quote: { coverageType: "STANDARD" },
+      }),
+    ).toBe(true);
   });
 });

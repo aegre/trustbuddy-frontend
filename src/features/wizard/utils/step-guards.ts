@@ -3,6 +3,7 @@ import {
   WIZARD_STEP_SLUGS,
   type WizardStepSlug,
 } from "@/features/wizard/types/wizard-steps";
+import type { QuoteResponse } from "@/api/types";
 
 export function parseWizardStepSlug(
   value: string | undefined,
@@ -33,4 +34,30 @@ export function getNextWizardStep(slug: WizardStepSlug): WizardStepSlug | null {
     return null;
   }
   return WIZARD_STEP_SLUGS[index + 1] ?? null;
+}
+
+export type WizardStepAccessContext = {
+  quoteId?: string;
+  quote?: QuoteResponse | null;
+};
+
+/**
+ * Which stepper steps can be opened.
+ * Personal is always available; coverage needs a quote id;
+ * review needs coverage already saved on the quote.
+ */
+export function isWizardStepAccessible(
+  slug: WizardStepSlug,
+  context: WizardStepAccessContext,
+): boolean {
+  if (slug === "personal") {
+    return true;
+  }
+  if (!context.quoteId) {
+    return false;
+  }
+  if (slug === "coverage") {
+    return true;
+  }
+  return Boolean(context.quote?.coverageType);
 }
