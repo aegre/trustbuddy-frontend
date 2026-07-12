@@ -44,6 +44,10 @@ export function WizardScreen() {
     return <Navigate to={wizardHref("personal", { quoteId })} replace />;
   }
 
+  if (stepSlug !== "personal" && !quoteId) {
+    return <Navigate to={wizardHref("personal")} replace />;
+  }
+
   const step = WIZARD_STEP_BY_SLUG[stepSlug];
   const StepComponent = step.Component;
   const showStepChrome = !quoteId || (!isPending && !isError);

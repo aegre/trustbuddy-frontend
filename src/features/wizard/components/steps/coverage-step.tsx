@@ -162,7 +162,6 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
   const onSubmit = useCallback(
     async (values: CoverageFormValues) => {
       if (!quoteId) {
-        setErrorMessage("Save personal information before updating coverage");
         return;
       }
 
@@ -200,14 +199,9 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
     ],
   );
 
+  // Coverage / review require quoteId — WizardScreen redirects otherwise.
   if (!quoteId) {
-    return (
-      <CoverageForm
-        onSubmit={onSubmit}
-        errorMessage="Save personal information before updating coverage"
-        readOnly
-      />
-    );
+    return null;
   }
 
   return (

@@ -60,6 +60,16 @@ describe("wizard routes", () => {
     expect(screen.queryByRole("link", { name: /^previous$/i })).toBeNull();
   });
 
+  it("given_coverageWithoutQuoteId_when_loaded_then_redirectsToPersonal", async () => {
+    const { router } = renderWizardAt(`${paths.wizardBase}/coverage`);
+
+    expect(
+      await screen.findByRole("heading", { name: /personal information/i }),
+    ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(paths.wizardPersonal);
+    expect(router.state.location.search).toBe("");
+  });
+
   it("given_submittedQuote_when_loaded_then_showsReadOnlyGuard", async () => {
     mockQuote({
       id: "q-sub",

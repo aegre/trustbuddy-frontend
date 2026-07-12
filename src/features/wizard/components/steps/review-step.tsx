@@ -12,9 +12,7 @@ export function ReviewStep({ quote, readOnly }: WizardStepProps) {
       <Typography color="text.secondary" sx={bodySx}>
         {readOnly && quote
           ? `Viewing ${quote.name} (read-only). Submit flow arrives in Phase 7.`
-          : quote
-            ? `Review ${quote.name} before submit. Submit flow arrives in Phase 7.`
-            : "Stub review step. Create personal info first (Phase 5)."}
+          : `Review ${quote?.name ?? "quote"} before submit. Submit flow arrives in Phase 7.`}
       </Typography>
     </>
   );
