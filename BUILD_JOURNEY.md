@@ -177,13 +177,16 @@ src/
 
 ## Phase 6 — Wizard coverage step
 
+**Status:** Done on `feat/phase-6-coverage-step`.
+
 **Deliverables**
 
-- Coverage/health form + senior conditionals (age > 65)
-- `PATCH .../coverage`; show `estimatedMonthlyPremium` from response
-- Continue gated on required fields (mirror API submit rules where practical)
+- [x] Coverage/health form + senior conditionals (age > 65)
+- [x] `PATCH .../coverage`; show `estimatedMonthlyPremium` from response
+- [x] Continue gated on required fields (mirror API submit rules where practical)
+- [x] MSW coverage PATCH / premium / 409 tests
 
-**Done when:** Coverage persists and premium updates on screen.
+**Done when:** Coverage persists and premium updates on screen. ✅
 
 ---
 

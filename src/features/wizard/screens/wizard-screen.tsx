@@ -44,12 +44,16 @@ export function WizardScreen() {
     return <Navigate to={wizardHref("personal", { quoteId })} replace />;
   }
 
+  if (stepSlug !== "personal" && !quoteId) {
+    return <Navigate to={wizardHref("personal")} replace />;
+  }
+
   const step = WIZARD_STEP_BY_SLUG[stepSlug];
   const StepComponent = step.Component;
   const showStepChrome = !quoteId || (!isPending && !isError);
   const readOnly = Boolean(quoteId && quote && !isQuoteEditable(quote));
   const hideNext =
-    stepSlug === "personal" &&
+    (stepSlug === "personal" || stepSlug === "coverage") &&
     (!quoteId || (!isPending && !isError && !readOnly));
 
   let body: ReactNode;
