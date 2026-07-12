@@ -47,8 +47,7 @@ If `../trustbuddy-api` is missing, `stack-all-up` warns and starts the frontend 
 From `trustbuddy-api`:
 
 ```bash
-cp .env.example .env
-make stack-up           # API + PostgreSQL + Redis + Kafka
+make stack-up           # API + PostgreSQL + Redis + Kafka (creates .env from .env.example if missing)
 ```
 
 Host JVM alternative (infra still in Docker):
@@ -69,7 +68,7 @@ make run                # or make dev → http://localhost:5173
 Frontend-only Docker:
 
 ```bash
-make stack-up           # http://localhost:3000 — still needs API on :8080
+make stack-up           # http://localhost:3000 — creates .env if missing; still needs API on :8080
 ```
 
 ## Dev login
