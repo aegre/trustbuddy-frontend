@@ -5,17 +5,12 @@
  * Insurance quote API for Trustbuddy
  * OpenAPI spec version: v1
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import type {
-  DataTag,
-  DefinedInitialDataOptions,
-  DefinedUseQueryResult,
+  MutationFunction,
   QueryClient,
-  QueryFunction,
-  QueryKey,
-  UndefinedInitialDataOptions,
-  UseQueryOptions,
-  UseQueryResult,
+  UseMutationOptions,
+  UseMutationResult,
 } from "@tanstack/react-query";
 
 import type { AuthTokenRequest, AuthTokenResponse } from "../model";
@@ -23,24 +18,6 @@ import type { AuthTokenRequest, AuthTokenResponse } from "../model";
 import { customFetch } from "../../mutator/custom-fetch";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
-
-const withQueryKey = <T extends object, K>(
-  query: T,
-  queryKey: K,
-): T & { queryKey: K } => {
-  const result = { queryKey } as T & { queryKey: K };
-  for (const key of Object.keys(query)) {
-    // The explicit queryKey always wins, matching the previous
-    // `{ ...query, queryKey }` spread where it was set last.
-    if (key === "queryKey") continue;
-    Object.defineProperty(result, key, {
-      enumerable: true,
-      configurable: true,
-      get: () => (query as Record<string, unknown>)[key],
-    });
-  }
-  return result;
-};
 
 export type tokenResponse200 = {
   data: AuthTokenResponse;
@@ -72,130 +49,72 @@ export const token = async (
   });
 };
 
-export const getTokenQueryKey = (authTokenRequest?: AuthTokenRequest) => {
-  return ["POST", `/api/v1/auth/token`, authTokenRequest] as const;
-};
-
-export const getTokenQueryOptions = <
-  TData = Awaited<ReturnType<typeof token>>,
+export const getTokenMutationOptions = <
   TError = unknown,
->(
-  authTokenRequest: AuthTokenRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof token>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey = queryOptions?.queryKey ?? getTokenQueryKey(authTokenRequest);
-
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof token>>> = ({
-    signal,
-  }) => token(authTokenRequest, { signal, ...requestOptions });
-
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof token>>,
     TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+    { data: AuthTokenRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof token>>,
+  TError,
+  { data: AuthTokenRequest },
+  TContext
+> => {
+  const mutationKey = ["token"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof token>>,
+    { data: AuthTokenRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return token(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
 };
 
-export type TokenQueryResult = NonNullable<Awaited<ReturnType<typeof token>>>;
-export type TokenQueryError = unknown;
+export type TokenMutationResult = NonNullable<
+  Awaited<ReturnType<typeof token>>
+>;
+export type TokenMutationBody = AuthTokenRequest;
+export type TokenMutationError = unknown;
 
-export function useToken<
-  TData = Awaited<ReturnType<typeof token>>,
-  TError = unknown,
->(
-  authTokenRequest: AuthTokenRequest,
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof token>>, TError, TData>
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof token>>,
-          TError,
-          Awaited<ReturnType<typeof token>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useToken<
-  TData = Awaited<ReturnType<typeof token>>,
-  TError = unknown,
->(
-  authTokenRequest: AuthTokenRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof token>>, TError, TData>
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof token>>,
-          TError,
-          Awaited<ReturnType<typeof token>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useToken<
-  TData = Awaited<ReturnType<typeof token>>,
-  TError = unknown,
->(
-  authTokenRequest: AuthTokenRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof token>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
 /**
  * @summary Obtain a JWT access token
  */
-
-export function useToken<
-  TData = Awaited<ReturnType<typeof token>>,
-  TError = unknown,
->(
-  authTokenRequest: AuthTokenRequest,
+export const useToken = <TError = unknown, TContext = unknown>(
   options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof token>>, TError, TData>
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof token>>,
+      TError,
+      { data: AuthTokenRequest },
+      TContext
     >;
     request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getTokenQueryOptions(authTokenRequest, options);
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
+): UseMutationResult<
+  Awaited<ReturnType<typeof token>>,
+  TError,
+  { data: AuthTokenRequest },
+  TContext
+> => {
+  return useMutation(getTokenMutationOptions(options), queryClient);
+};
 export type logoutResponse200 = {
   data: void;
   status: 200;
@@ -223,119 +142,67 @@ export const logout = async (
   });
 };
 
-export const getLogoutQueryKey = () => {
-  return ["POST", `/api/v1/auth/logout`] as const;
-};
-
-export const getLogoutQueryOptions = <
-  TData = Awaited<ReturnType<typeof logout>>,
+export const getLogoutMutationOptions = <
   TError = unknown,
+  TContext = unknown,
 >(options?: {
-  query?: Partial<
-    UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey = queryOptions?.queryKey ?? getLogoutQueryKey();
-
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof logout>>> = ({
-    signal,
-  }) => logout({ signal, ...requestOptions });
-
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof logout>>,
     TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+    void,
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof logout>>,
+  TError,
+  void,
+  TContext
+> => {
+  const mutationKey = ["logout"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof logout>>,
+    void
+  > = () => {
+    return logout(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
 };
 
-export type LogoutQueryResult = NonNullable<Awaited<ReturnType<typeof logout>>>;
-export type LogoutQueryError = unknown;
+export type LogoutMutationResult = NonNullable<
+  Awaited<ReturnType<typeof logout>>
+>;
 
-export function useLogout<
-  TData = Awaited<ReturnType<typeof logout>>,
-  TError = unknown,
->(
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof logout>>,
-          TError,
-          Awaited<ReturnType<typeof logout>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useLogout<
-  TData = Awaited<ReturnType<typeof logout>>,
-  TError = unknown,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof logout>>,
-          TError,
-          Awaited<ReturnType<typeof logout>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useLogout<
-  TData = Awaited<ReturnType<typeof logout>>,
-  TError = unknown,
->(
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+export type LogoutMutationError = unknown;
+
 /**
  * @summary Clear the access-token cookie
  */
-
-export function useLogout<
-  TData = Awaited<ReturnType<typeof logout>>,
-  TError = unknown,
->(
+export const useLogout = <TError = unknown, TContext = unknown>(
   options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof logout>>,
+      TError,
+      void,
+      TContext
     >;
     request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getLogoutQueryOptions(options);
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
+): UseMutationResult<
+  Awaited<ReturnType<typeof logout>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getLogoutMutationOptions(options), queryClient);
+};

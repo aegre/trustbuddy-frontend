@@ -6,11 +6,11 @@ export type {
   AuthTokenRequest,
   AuthTokenResponse,
   CreateQuoteRequest,
+  ListQuotesParams,
   QuoteResponse,
   UpdatePersonalInfoRequest,
   UpdateCoverageRequest,
   PageQuoteResponse,
-  Pageable,
 } from "@/api/generated/model";
 
 export type { ApiError, ApiErrorBody } from "@/api/errors";

@@ -17,6 +17,7 @@ export const getListQuotesResponseMock = (
 ): PageQuoteResponse => ({
   totalElements: faker.helpers.arrayElement([faker.number.int(), undefined]),
   totalPages: faker.helpers.arrayElement([faker.number.int(), undefined]),
+  numberOfElements: faker.helpers.arrayElement([faker.number.int(), undefined]),
   pageable: faker.helpers.arrayElement([
     {
       paged: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
@@ -29,11 +30,11 @@ export const getListQuotesResponseMock = (
       offset: faker.helpers.arrayElement([faker.number.int(), undefined]),
       sort: faker.helpers.arrayElement([
         {
-          unsorted: faker.helpers.arrayElement([
+          sorted: faker.helpers.arrayElement([
             faker.datatype.boolean(),
             undefined,
           ]),
-          sorted: faker.helpers.arrayElement([
+          unsorted: faker.helpers.arrayElement([
             faker.datatype.boolean(),
             undefined,
           ]),
@@ -47,9 +48,8 @@ export const getListQuotesResponseMock = (
     },
     undefined,
   ]),
-  numberOfElements: faker.helpers.arrayElement([faker.number.int(), undefined]),
-  first: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   last: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  first: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
   size: faker.helpers.arrayElement([faker.number.int(), undefined]),
   content: faker.helpers.arrayElement([
     Array.from(
@@ -128,11 +128,11 @@ export const getListQuotesResponseMock = (
   number: faker.helpers.arrayElement([faker.number.int(), undefined]),
   sort: faker.helpers.arrayElement([
     {
+      sorted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
       unsorted: faker.helpers.arrayElement([
         faker.datatype.boolean(),
         undefined,
       ]),
-      sorted: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
       empty: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
     },
     undefined,
@@ -214,78 +214,6 @@ export const getCreateQuoteResponseMock = (
 });
 
 export const getSubmitQuoteResponseMock = (
-  overrideResponse: Partial<Extract<QuoteResponse, object>> = {},
-): QuoteResponse => ({
-  id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
-  name: faker.helpers.arrayElement([
-    faker.string.alpha({ length: { min: 10, max: 20 } }),
-    undefined,
-  ]),
-  email: faker.helpers.arrayElement([
-    faker.string.alpha({ length: { min: 10, max: 20 } }),
-    undefined,
-  ]),
-  age: faker.helpers.arrayElement([faker.number.int(), undefined]),
-  zipCode: faker.helpers.arrayElement([
-    faker.string.alpha({ length: { min: 10, max: 20 } }),
-    undefined,
-  ]),
-  coverageType: faker.helpers.arrayElement([
-    faker.helpers.arrayElement(["BASIC", "STANDARD", "PREMIUM"] as const),
-    undefined,
-  ]),
-  hasPreexistingConditions: faker.helpers.arrayElement([
-    faker.datatype.boolean(),
-    undefined,
-  ]),
-  conditions: faker.helpers.arrayElement([
-    faker.helpers.arrayElements([
-      "DIABETES",
-      "HEART_DISEASE",
-      "HYPERTENSION",
-      "CANCER_HISTORY",
-      "OTHER",
-    ] as const),
-    undefined,
-  ]),
-  takesPrescriptionMedication: faker.helpers.arrayElement([
-    faker.datatype.boolean(),
-    undefined,
-  ]),
-  usesTobacco: faker.helpers.arrayElement([
-    faker.datatype.boolean(),
-    undefined,
-  ]),
-  needsSpouseCoverage: faker.helpers.arrayElement([
-    faker.datatype.boolean(),
-    undefined,
-  ]),
-  estimatedMonthlyPremium: faker.helpers.arrayElement([
-    faker.number.float({ fractionDigits: 2 }),
-    undefined,
-  ]),
-  status: faker.helpers.arrayElement([
-    faker.helpers.arrayElement([
-      "DRAFT",
-      "SUBMITTED",
-      "SUBMISSION_FAILED",
-      "EXPIRED",
-    ] as const),
-    undefined,
-  ]),
-  createdAt: faker.helpers.arrayElement([
-    faker.date.past().toISOString().slice(0, 19) + "Z",
-    undefined,
-  ]),
-  updatedAt: faker.helpers.arrayElement([
-    faker.date.past().toISOString().slice(0, 19) + "Z",
-    undefined,
-  ]),
-  version: faker.helpers.arrayElement([faker.number.int(), undefined]),
-  ...overrideResponse,
-});
-
-export const getUpdateCoverageResponseMock = (
   overrideResponse: Partial<Extract<QuoteResponse, object>> = {},
 ): QuoteResponse => ({
   id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
@@ -501,6 +429,78 @@ export const getUpdatePersonalInfoResponseMock = (
   ...overrideResponse,
 });
 
+export const getUpdateCoverageResponseMock = (
+  overrideResponse: Partial<Extract<QuoteResponse, object>> = {},
+): QuoteResponse => ({
+  id: faker.helpers.arrayElement([faker.string.uuid(), undefined]),
+  name: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  email: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  age: faker.helpers.arrayElement([faker.number.int(), undefined]),
+  zipCode: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
+  coverageType: faker.helpers.arrayElement([
+    faker.helpers.arrayElement(["BASIC", "STANDARD", "PREMIUM"] as const),
+    undefined,
+  ]),
+  hasPreexistingConditions: faker.helpers.arrayElement([
+    faker.datatype.boolean(),
+    undefined,
+  ]),
+  conditions: faker.helpers.arrayElement([
+    faker.helpers.arrayElements([
+      "DIABETES",
+      "HEART_DISEASE",
+      "HYPERTENSION",
+      "CANCER_HISTORY",
+      "OTHER",
+    ] as const),
+    undefined,
+  ]),
+  takesPrescriptionMedication: faker.helpers.arrayElement([
+    faker.datatype.boolean(),
+    undefined,
+  ]),
+  usesTobacco: faker.helpers.arrayElement([
+    faker.datatype.boolean(),
+    undefined,
+  ]),
+  needsSpouseCoverage: faker.helpers.arrayElement([
+    faker.datatype.boolean(),
+    undefined,
+  ]),
+  estimatedMonthlyPremium: faker.helpers.arrayElement([
+    faker.number.float({ fractionDigits: 2 }),
+    undefined,
+  ]),
+  status: faker.helpers.arrayElement([
+    faker.helpers.arrayElement([
+      "DRAFT",
+      "SUBMITTED",
+      "SUBMISSION_FAILED",
+      "EXPIRED",
+    ] as const),
+    undefined,
+  ]),
+  createdAt: faker.helpers.arrayElement([
+    faker.date.past().toISOString().slice(0, 19) + "Z",
+    undefined,
+  ]),
+  updatedAt: faker.helpers.arrayElement([
+    faker.date.past().toISOString().slice(0, 19) + "Z",
+    undefined,
+  ]),
+  version: faker.helpers.arrayElement([faker.number.int(), undefined]),
+  ...overrideResponse,
+});
+
 export const getListQuotesMockHandler = (
   overrideResponse?:
     | PageQuoteResponse
@@ -579,32 +579,6 @@ export const getSubmitQuoteMockHandler = (
   );
 };
 
-export const getUpdateCoverageMockHandler = (
-  overrideResponse?:
-    | QuoteResponse
-    | ((
-        info: Parameters<Parameters<typeof http.patch>[1]>[0],
-      ) => Promise<QuoteResponse> | QuoteResponse),
-  options?: RequestHandlerOptions,
-) => {
-  return http.patch(
-    "*/api/v1/quotes/:id/coverage",
-    async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
-      await delay(0);
-
-      return HttpResponse.json(
-        overrideResponse !== undefined
-          ? typeof overrideResponse === "function"
-            ? await overrideResponse(info)
-            : overrideResponse
-          : getUpdateCoverageResponseMock(),
-        { status: 200 },
-      );
-    },
-    options,
-  );
-};
-
 export const getGetQuoteMockHandler = (
   overrideResponse?:
     | QuoteResponse
@@ -656,11 +630,37 @@ export const getUpdatePersonalInfoMockHandler = (
     options,
   );
 };
+
+export const getUpdateCoverageMockHandler = (
+  overrideResponse?:
+    | QuoteResponse
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<QuoteResponse> | QuoteResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch(
+    "*/api/v1/quotes/:id/coverage",
+    async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+      await delay(0);
+
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getUpdateCoverageResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
 export const getQuotesMock = () => [
   getListQuotesMockHandler(),
   getCreateQuoteMockHandler(),
   getSubmitQuoteMockHandler(),
-  getUpdateCoverageMockHandler(),
   getGetQuoteMockHandler(),
   getUpdatePersonalInfoMockHandler(),
+  getUpdateCoverageMockHandler(),
 ];
