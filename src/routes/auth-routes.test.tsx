@@ -44,10 +44,29 @@ function renderAppAt(
 
 describe("auth routes", () => {
   it("given_guest_when_visitsHome_then_redirectsToLogin", async () => {
-    renderAppAt(paths.home);
+    renderAppAt(paths.home, { initialAuthenticated: false });
 
     expect(
       await screen.findByRole("heading", { name: /sign in to trustbuddy/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("given_validCookie_when_visitsHome_then_restoresSessionViaMe", async () => {
+    server.use(
+      http.get("*/api/v1/auth/me", () =>
+        HttpResponse.json({ username: "dev-user" }, { status: 200 }),
+      ),
+      http.get("*/api/v1/quotes", () =>
+        HttpResponse.json(createQuotesPageFixture({ content: [] }), {
+          status: 200,
+        }),
+      ),
+    );
+
+    renderAppAt(paths.home);
+
+    expect(
+      await screen.findByRole("heading", { name: /^quotes$/i }),
     ).toBeInTheDocument();
   });
 
@@ -93,7 +112,7 @@ describe("auth routes", () => {
     );
 
     const user = userEvent.setup();
-    renderAppAt(paths.login);
+    renderAppAt(paths.login, { initialAuthenticated: false });
 
     await user.type(screen.getByLabelText("Username"), "agent");
     await user.type(

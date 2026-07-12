@@ -4,17 +4,17 @@ Vite + React 19 + TypeScript (CSR). Pairs with [trustbuddy-api](https://github.c
 
 ## Stack
 
-| Area            | Choice                                                                                                                      |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| UI              | Material UI (MUI) + Emotion                                                                                                 |
-| Routing         | React Router                                                                                                                |
-| Forms           | React Hook Form + Yup (`@hookform/resolvers/yup`)                                                                           |
-| Server state    | TanStack Query (quotes, mutations, cache invalidation)                                                                      |
-| UI / auth state | React Context — logged-in flags, wizard UI-only state; **not** API payloads                                                 |
-| Auth session    | HttpOnly cookie via `POST /api/v1/auth/token`; requests use `credentials: 'include'`; logout via `POST /api/v1/auth/logout` |
-| API             | Orval-generated React Query clients + MSW mocks → `customFetch` (cookie credentials) → trustbuddy-api                       |
-| Formatting      | Prettier (`make format` / `make format-check`)                                                                              |
-| Linting         | Oxlint — React, jsx-a11y, react-perf (`make lint`)                                                                          |
+| Area            | Choice                                                                                                                                                                       |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| UI              | Material UI (MUI) + Emotion                                                                                                                                                  |
+| Routing         | React Router                                                                                                                                                                 |
+| Forms           | React Hook Form + Yup (`@hookform/resolvers/yup`)                                                                                                                            |
+| Server state    | TanStack Query (quotes, mutations, cache invalidation)                                                                                                                       |
+| UI / auth state | React Context — logged-in flags, wizard UI-only state; **not** API payloads                                                                                                  |
+| Auth session    | HttpOnly cookie via `POST /api/v1/auth/token`; session check via `GET /api/v1/auth/me` on load; logout via `POST /api/v1/auth/logout`; requests use `credentials: 'include'` |
+| API             | Orval-generated React Query clients + MSW mocks → `customFetch` (cookie credentials) → trustbuddy-api                                                                        |
+| Formatting      | Prettier (`make format` / `make format-check`)                                                                                                                               |
+| Linting         | Oxlint — React, jsx-a11y, react-perf (`make lint`)                                                                                                                           |
 
 ## Folder layout
 

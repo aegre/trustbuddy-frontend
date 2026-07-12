@@ -37,9 +37,10 @@ flowchart LR
 ### Auth
 
 1. Login form → Orval `token` / `useToken` → `POST /api/v1/auth/token` (cookie set by API).
-2. `AuthContext` records logged-in / loading for the UI.
-3. Later API calls use `credentials: 'include'` via `customFetch`.
-4. Logout → Orval logout operation clears the cookie and context.
+2. On app load, `AuthProvider` calls `GET /api/v1/auth/me` (cookie credentials) to restore the session after refresh.
+3. `AuthContext` records logged-in / loading / username for the UI (not the JWT).
+4. Later API calls use `credentials: 'include'` via `customFetch`.
+5. Logout → Orval logout operation clears the cookie and context.
 
 ### Quotes / wizard
 
