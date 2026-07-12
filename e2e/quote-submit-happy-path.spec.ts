@@ -57,7 +57,9 @@ test.describe("quote submit happy path", () => {
     ).toBeVisible();
     await expect(page).toHaveURL(/\/success\?quoteId=/);
     await expect(
-      page.getByText(new RegExp(`thanks, ${name}`, "i")),
+      page.getByText(
+        new RegExp(`your quote for ${name} has been submitted`, "i"),
+      ),
     ).toBeVisible();
   });
 });

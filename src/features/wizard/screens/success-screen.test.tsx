@@ -55,11 +55,12 @@ describe("SuccessScreen", () => {
       await screen.findByRole("heading", { name: /quote submitted/i }),
     ).toBeInTheDocument();
     expect(
-      await screen.findByText(/thanks, ada lovelace/i),
+      await screen.findByText(
+        /your quote for ada lovelace has been submitted/i,
+      ),
     ).toBeInTheDocument();
     expect(screen.getByText(/estimated monthly premium/i)).toBeInTheDocument();
     expect(screen.getByText(/\$175\.50/)).toBeInTheDocument();
-    expect(screen.getByText("SUBMITTED")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /back to quotes/i }),
     ).toHaveAttribute("href", paths.home);

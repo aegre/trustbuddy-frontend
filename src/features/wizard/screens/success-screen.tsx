@@ -2,7 +2,6 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlineOutlin
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
@@ -14,10 +13,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { getUserFacingErrorMessage } from "@/api/types";
-import {
-  formatQuotePremium,
-  formatQuoteStatus,
-} from "@/features/quotes/utils/format-quote";
+import { formatQuotePremium } from "@/features/quotes/utils/format-quote";
 import { useQuote } from "@/features/wizard/hooks/use-quote";
 import { paths } from "@/routes/paths";
 
@@ -64,13 +60,6 @@ const premiumBannerSx = {
   textAlign: "center",
 } as const;
 
-const metaRowSx = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 2,
-} as const;
-
 const actionsSx = {
   display: "flex",
   justifyContent: "center",
@@ -99,7 +88,6 @@ export function SuccessScreen() {
     return <Navigate to={paths.home} replace />;
   }
 
-  const statusLabel = formatQuoteStatus(quote?.status);
   const premium = formatQuotePremium(quote?.estimatedMonthlyPremium);
 
   return (
@@ -131,8 +119,9 @@ export function SuccessScreen() {
                   Quote submitted
                 </Typography>
                 <Typography color="text.secondary" sx={introSx}>
-                  Thanks{quote.name ? `, ${quote.name}` : ""}. Your quote has
-                  been submitted.
+                  {quote.name
+                    ? `Your quote for ${quote.name} has been submitted.`
+                    : "Your quote has been submitted."}
                 </Typography>
               </Box>
 
@@ -140,25 +129,13 @@ export function SuccessScreen() {
                 <Typography
                   color="text.secondary"
                   variant="body2"
-                  fontWeight={500}
+                  sx={{ fontWeight: 500 }}
                 >
                   Estimated monthly premium
                 </Typography>
                 <Typography component="p" variant="h4" sx={{ m: 0 }}>
                   {premium}
                 </Typography>
-              </Box>
-
-              <Box sx={metaRowSx}>
-                <Typography color="text.secondary" variant="body2">
-                  Status
-                </Typography>
-                <Chip
-                  label={statusLabel}
-                  size="small"
-                  color="success"
-                  variant="outlined"
-                />
               </Box>
 
               <Box sx={actionsSx}>
