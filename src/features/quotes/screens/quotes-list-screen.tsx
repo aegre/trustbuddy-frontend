@@ -1,14 +1,14 @@
-import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import { getUserFacingErrorMessage } from "@/api/types";
+import { PageErrorAlert } from "@/features/common/components/page-error-alert";
+import { PageLoading } from "@/features/common/components/page-loading";
 import { QuotesTable } from "@/features/quotes/components/quotes-table";
 import {
   QUOTES_LIST_DEFAULTS,
@@ -16,18 +16,13 @@ import {
 } from "@/features/quotes/hooks/use-quotes-list";
 import { paths } from "@/routes/paths";
 
-const containerSx = { py: 4 } as const;
+const containerSx = { py: 3 } as const;
 const headerSx = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
   gap: 2,
   flexWrap: "wrap",
-} as const;
-const loadingSx = {
-  display: "flex",
-  justifyContent: "center",
-  py: 6,
 } as const;
 const paginationSx = {
   display: "flex",
@@ -104,18 +99,9 @@ export function QuotesListScreen() {
   const totalPages = data?.totalPages ?? 0;
   const showPagination = !isPending && !isError && totalPages > 1;
 
-  const errorAction = useMemo(
-    () => (
-      <Button color="inherit" size="small" onClick={onRetry}>
-        Retry
-      </Button>
-    ),
-    [onRetry],
-  );
-
   return (
     <Container component="main" maxWidth="lg" sx={containerSx}>
-      <Stack spacing={3}>
+      <Stack spacing={2}>
         <Box sx={headerSx}>
           <Typography component="h1" variant="h5">
             Quotes
@@ -129,18 +115,12 @@ export function QuotesListScreen() {
           </Button>
         </Box>
 
-        {isPending ? (
-          <Box sx={loadingSx}>
-            <output aria-label="Loading quotes">
-              <CircularProgress />
-            </output>
-          </Box>
-        ) : null}
+        {isPending ? <PageLoading label="Loading quotes" /> : null}
 
         {isError ? (
-          <Alert severity="error" action={errorAction}>
+          <PageErrorAlert onRetry={onRetry}>
             {getUserFacingErrorMessage(error, "Could not load quotes")}
-          </Alert>
+          </PageErrorAlert>
         ) : null}
 
         {!isPending && !isError ? <QuotesTable quotes={quotes} /> : null}
