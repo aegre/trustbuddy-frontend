@@ -84,17 +84,28 @@ src/
 
 ## Phase 1 — Initial setup
 
-**Deliverables**
+**Status:** In progress (partial). Agent docs, Docker, and lint/format landed in this PR; remaining setup continues in follow-up PRs.
 
-- Scaffold Vite + React + TypeScript; deps: MUI, React Router, RHF, Yup, TanStack Query, openapi-typescript
-- Create folder spine above; `@/` alias; ESLint/Prettier; Husky + lint-staged
-- `Makefile`: `install`, `dev`, `build`, `test`, `lint`, `format`, `verify`, `openapi-*`, `docker-*`
-- `AGENTS.md` + thin `CLAUDE.md` pointing at it
-- OpenAPI codegen + `apiFetch` + `errors` + `types` facade
-- Vitest + MSW + Testing Library; Playwright stub; `src/test/` layout
-- Dockerfile; `.env.example` (`VITE_API_BASE_URL`); expand `.gitignore`
+### Done in this PR
 
-**Done when:** `make dev` / `make verify` work; generated schema committed; empty smoke test passes.
+- [x] `AGENTS.md`, `ARCHITECTURE.md`, `CLAUDE.md`
+- [x] GitHub PR template
+- [x] Dockerfile + compose + `.env.example` + Makefile docker targets (`docker-build`, `stack-up`/`down`/`logs`)
+- [x] Oxlint (React, jsx-a11y, react-perf) + Prettier; Makefile `lint` / `format` / `format-check`
+- [x] Expanded `.gitignore` for env/build artifacts
+
+### Remaining (follow-up PRs)
+
+- [ ] Install app stack deps: MUI, React Router, RHF, Yup, TanStack Query
+- [ ] OpenAPI codegen path (trialing Orval in a separate branch — not in this PR); `customFetch` / types facade; Makefile `openapi-*`
+- [ ] `@/` path alias (Vite + TypeScript)
+- [ ] Feature folder spine: `src/features/{common,auth,quotes,wizard}`, `src/routes/`, `src/test/` (create folders only as files appear)
+- [ ] Husky + lint-staged
+- [ ] Makefile `install`, `test`, `verify` (and align `run` with plan’s `dev` naming if desired)
+- [ ] Vitest + Testing Library + Playwright stub; empty smoke test so `make verify` passes
+- [ ] Optional: shared `api` errors helper alongside codegen
+
+**Done when:** `make run` / `make verify` work; generated API clients committed; empty smoke test passes.
 
 ---
 
