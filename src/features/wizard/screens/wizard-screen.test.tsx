@@ -43,7 +43,7 @@ function mockQuote(overrides: Parameters<typeof createQuoteFixture>[0] = {}) {
 }
 
 describe("wizard routes", () => {
-  it("given_personalStep_when_loaded_then_showsStepperAndStub", async () => {
+  it("given_personalStep_when_loaded_then_showsFormAndContinue", async () => {
     renderWizardAt(paths.wizardPersonal);
 
     expect(
@@ -52,10 +52,11 @@ describe("wizard routes", () => {
     expect(
       screen.getByRole("heading", { name: /personal information/i }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /^next$/i })).toHaveAttribute(
-      "href",
-      `${paths.wizardBase}/coverage`,
-    );
+    expect(screen.getByLabelText("Full name")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^continue$/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^next$/i })).toBeNull();
     expect(screen.queryByRole("link", { name: /^previous$/i })).toBeNull();
   });
 
@@ -72,42 +73,59 @@ describe("wizard routes", () => {
         /this quote is submitted and can no longer be edited/i,
       ),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText("Full name")).toHaveValue("Submitted User");
     expect(
-      screen.getByText(/viewing submitted user \(read-only\)/i),
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: /^continue$/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^next$/i })).toHaveAttribute(
+      "href",
+      `${paths.wizardBase}/coverage?quoteId=q-sub`,
+    );
   });
 
-  it("given_draftQuote_when_loaded_then_allowsEdit", async () => {
-    mockQuote({ id: "q-9", name: "Ada Lovelace", status: "DRAFT" });
+  it("given_draftQuote_when_loaded_then_prefillsEditableForm", async () => {
+    mockQuote({
+      id: "q-9",
+      name: "Ada Lovelace",
+      email: "ada@example.com",
+      age: 36,
+      zipCode: "06600",
+      status: "DRAFT",
+    });
     renderWizardAt(`${paths.wizardPersonal}?quoteId=q-9`);
 
+    expect(await screen.findByLabelText("Full name")).toHaveValue(
+      "Ada Lovelace",
+    );
+    expect(screen.getByLabelText("Email")).toHaveValue("ada@example.com");
     expect(
-      await screen.findByText(/editing ada lovelace \(draft\)/i),
+      screen.getByRole("button", { name: /^continue$/i }),
     ).toBeInTheDocument();
     expect(
       screen.queryByText(/can no longer be edited/i),
     ).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^next$/i })).toBeNull();
   });
 
   it("given_quoteId_when_loaded_then_showsQuoteFromQuery", async () => {
     mockQuote({ id: "q-9", name: "Ada Lovelace", status: "DRAFT" });
     renderWizardAt(`${paths.wizardPersonal}?quoteId=q-9`);
 
-    expect(
-      await screen.findByText(/editing ada lovelace \(draft\)/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByLabelText("Full name")).toHaveValue(
+      "Ada Lovelace",
+    );
   });
 
-  it("given_quoteId_when_navigatingSteps_then_preservesQuery", async () => {
+  it("given_quoteId_when_navigatingViaStepper_then_preservesQuery", async () => {
     mockQuote({ id: "q-9", name: "Ada Lovelace", status: "DRAFT" });
     const user = userEvent.setup();
     renderWizardAt(`${paths.wizardPersonal}?quoteId=q-9`);
 
-    expect(
-      await screen.findByText(/editing ada lovelace \(draft\)/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByLabelText("Full name")).toHaveValue(
+      "Ada Lovelace",
+    );
 
-    await user.click(screen.getByRole("link", { name: /^next$/i }));
+    await user.click(screen.getByRole("tab", { name: /^coverage$/i }));
 
     expect(
       await screen.findByRole("heading", { name: /^coverage$/i }),
@@ -154,10 +172,10 @@ describe("wizard routes", () => {
 
     await user.click(screen.getByRole("button", { name: /^retry$/i }));
 
+    expect(await screen.findByLabelText("Full name")).toHaveValue("Retry User");
     expect(
-      await screen.findByText(/editing retry user \(draft\)/i),
+      screen.getByRole("button", { name: /^continue$/i }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /^next$/i })).toBeInTheDocument();
   });
 
   it("given_invalidStepSlug_when_loaded_then_redirectsToPersonal", async () => {
@@ -167,9 +185,9 @@ describe("wizard routes", () => {
     expect(
       await screen.findByRole("heading", { name: /personal information/i }),
     ).toBeInTheDocument();
-    expect(
-      await screen.findByText(/editing redirect user \(draft\)/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByLabelText("Full name")).toHaveValue(
+      "Redirect User",
+    );
   });
 
   it("given_wizardBase_when_loaded_then_redirectsToPersonal", async () => {

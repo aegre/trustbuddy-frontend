@@ -22,6 +22,8 @@ export type WizardLayoutProps = {
   stepSlug: WizardStepSlug;
   quoteId?: string;
   showStepChrome?: boolean;
+  /** When true, hide the layout Next link (step owns continue, e.g. personal form). */
+  hideNext?: boolean;
   children: ReactNode;
 };
 
@@ -45,11 +47,12 @@ export function WizardLayout({
   stepSlug,
   quoteId,
   showStepChrome = true,
+  hideNext = false,
   children,
 }: WizardLayoutProps) {
   const activeStep = getWizardStepIndex(stepSlug);
   const previous = getPreviousWizardStep(stepSlug);
-  const next = getNextWizardStep(stepSlug);
+  const next = hideNext ? null : getNextWizardStep(stepSlug);
 
   return (
     <Container component="main" maxWidth="md" sx={containerSx}>

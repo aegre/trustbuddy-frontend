@@ -47,6 +47,10 @@ export function WizardScreen() {
   const step = WIZARD_STEP_BY_SLUG[stepSlug];
   const StepComponent = step.Component;
   const showStepChrome = !quoteId || (!isPending && !isError);
+  const readOnly = Boolean(quoteId && quote && !isQuoteEditable(quote));
+  const hideNext =
+    stepSlug === "personal" &&
+    (!quoteId || (!isPending && !isError && !readOnly));
 
   let body: ReactNode;
   if (!quoteId) {
@@ -66,7 +70,6 @@ export function WizardScreen() {
       </Alert>
     );
   } else {
-    const readOnly = !isQuoteEditable(quote);
     body = (
       <Stack spacing={2}>
         {readOnly && quote ? <QuoteNotEditableAlert quote={quote} /> : null}
@@ -80,6 +83,7 @@ export function WizardScreen() {
       stepSlug={stepSlug}
       quoteId={quoteId}
       showStepChrome={showStepChrome}
+      hideNext={hideNext}
     >
       {body}
     </WizardLayout>
