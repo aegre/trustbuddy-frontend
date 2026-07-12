@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { useEffect, useRef } from "react";
 import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { formatQuotePremium } from "@/features/quotes/utils/format-quote";
 import { ConditionCards } from "@/features/wizard/components/condition-cards";
@@ -20,6 +21,7 @@ import {
 
 export type CoverageFormProps = {
   onSubmit: (values: CoverageFormValues) => void | Promise<void>;
+  onValuesChange?: (values: CoverageFormValues) => void;
   defaultValues?: Partial<CoverageFormValues>;
   age?: number;
   estimatedMonthlyPremium?: number;
@@ -32,6 +34,7 @@ const formSx = { width: "100%" } as const;
 
 export function CoverageForm({
   onSubmit,
+  onValuesChange,
   defaultValues,
   age,
   estimatedMonthlyPremium,
@@ -42,6 +45,9 @@ export function CoverageForm({
   const disabled = isSubmitting || readOnly;
   const senior = isSeniorApplicant(age);
   const schema = createCoverageSchema(age);
+  const skipValuesChange = useRef(true);
+  const onValuesChangeRef = useRef(onValuesChange);
+  onValuesChangeRef.current = onValuesChange;
 
   const {
     control,
@@ -54,10 +60,19 @@ export function CoverageForm({
     defaultValues: { ...emptyCoverageDefaults, ...defaultValues },
   });
 
+  const watchedValues = useWatch({ control });
   const hasPreexistingConditions = useWatch({
     control,
     name: "hasPreexistingConditions",
   });
+
+  useEffect(() => {
+    if (skipValuesChange.current) {
+      skipValuesChange.current = false;
+      return;
+    }
+    onValuesChangeRef.current?.(watchedValues as CoverageFormValues);
+  }, [watchedValues]);
 
   return (
     <Box

@@ -113,6 +113,20 @@ describe("CoverageForm", () => {
     expect(screen.getByText(/\$120\.50/)).toBeInTheDocument();
   });
 
+  it("given_fieldChange_when_incomplete_then_callsOnValuesChange", async () => {
+    const user = userEvent.setup();
+    const onValuesChange = vi.fn();
+    renderCoverageForm({ onValuesChange });
+
+    await user.click(screen.getByRole("radio", { name: /^standard$/i }));
+
+    await waitFor(() => {
+      expect(onValuesChange).toHaveBeenCalledWith(
+        expect.objectContaining({ coverageType: "STANDARD" }),
+      );
+    });
+  });
+
   it("given_readOnly_when_rendered_then_hidesSubmit", () => {
     renderCoverageForm({
       readOnly: true,

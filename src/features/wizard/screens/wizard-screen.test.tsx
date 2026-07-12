@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { Navigate } from "react-router-dom";
@@ -342,6 +342,56 @@ describe("wizard routes", () => {
     expect(screen.getByText(/estimated monthly premium/i)).toHaveTextContent(
       /\$120\.50/,
     );
+  });
+
+  it("given_incompleteCoverage_when_typeChanged_then_updatesPremium", async () => {
+    mockQuote({
+      id: "q-cov-live",
+      name: "Ada Lovelace",
+      age: 36,
+      status: "DRAFT",
+      estimatedMonthlyPremium: 100,
+    });
+    let patchCount = 0;
+    server.use(
+      http.patch("*/api/v1/quotes/:id/coverage", async ({ request }) => {
+        patchCount += 1;
+        const body = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json(
+          createQuoteFixture({
+            id: "q-cov-live",
+            name: "Ada Lovelace",
+            age: 36,
+            status: "DRAFT",
+            coverageType: body.coverageType as "BASIC" | "STANDARD" | "PREMIUM",
+            estimatedMonthlyPremium: 155.25,
+          }),
+          { status: 200 },
+        );
+      }),
+    );
+
+    const user = userEvent.setup();
+    renderWizardAt(`${paths.wizardBase}/coverage?quoteId=q-cov-live`);
+
+    expect(
+      await screen.findByRole("heading", { name: /^coverage$/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/estimated monthly premium/i)).toHaveTextContent(
+      /\$100\.00/,
+    );
+
+    await user.click(screen.getByRole("radio", { name: /^standard$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/estimated monthly premium/i)).toHaveTextContent(
+        /\$155\.25/,
+      );
+    });
+    expect(patchCount).toBeGreaterThanOrEqual(1);
+    expect(
+      screen.getByRole("button", { name: /^continue$/i }),
+    ).toBeInTheDocument();
   });
 
   it("given_draftQuote_when_coverageSaved_then_patchesAndAdvancesToReview", async () => {
