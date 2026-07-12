@@ -14,7 +14,7 @@ include .env
 export $(shell sed -n 's/=.*//p' .env)
 endif
 
-.PHONY: help install run dev build lint format format-check precommit test verify openapi-sync openapi-codegen openapi-update docker-build stack-up stack-down stack-logs
+.PHONY: help install run dev build lint format format-check precommit test verify openapi-sync openapi-codegen openapi-update docker-build stack-up stack-down stack-logs stack-all-up stack-all-down stack-all-logs
 
 help: ## Show available targets
 	@echo "Trustbuddy Frontend — available targets:"
@@ -71,3 +71,23 @@ stack-down: ## Stop frontend container
 
 stack-logs: ## Tail frontend container logs
 	$(COMPOSE) logs -f
+
+stack-all-up: ## Start API stack (if sibling present) + frontend containers
+	@if [ -f "$(API_REPO)/Makefile" ]; then \
+		$(MAKE) -C "$(API_REPO)" stack-up; \
+	else \
+		echo "Warning: $(API_REPO) not found — starting frontend only."; \
+	fi
+	$(MAKE) stack-up
+
+stack-all-down: ## Stop frontend + API stack (if sibling present)
+	$(MAKE) stack-down
+	@if [ -f "$(API_REPO)/Makefile" ]; then \
+		$(MAKE) -C "$(API_REPO)" stack-down; \
+	fi
+
+stack-all-logs: ## Tail frontend logs (prints hint for API logs if sibling present)
+	@if [ -f "$(API_REPO)/Makefile" ]; then \
+		echo "API logs: make -C $(API_REPO) stack-logs"; \
+	fi
+	$(MAKE) stack-logs

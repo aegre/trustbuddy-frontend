@@ -1,8 +1,85 @@
 # trustbuddy-frontend
 
-# Installation
+React (Vite) SPA for the Trustbuddy insurance quote flow. Pairs with [trustbuddy-api](https://github.com/aegre/trustbuddy-api).
 
-## Thought process
+## Prerequisites
+
+- Node.js LTS and npm
+- `make`
+- Docker + Docker Compose (for the API stack and optional frontend container)
+- Sibling clone of [trustbuddy-api](https://github.com/aegre/trustbuddy-api) next to this repo (`../trustbuddy-api`)
+
+## Installation
+
+```bash
+cp .env.example .env    # VITE_API_BASE_URL=http://localhost:8080
+make install            # npm install (+ Husky prepare)
+```
+
+In the API repo, also copy `.env.example` → `.env`. For browser login from Vite and/or the frontend Docker image, set:
+
+```bash
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+```
+
+## Run everything in Docker
+
+With the API sibling checked out beside this repo:
+
+```bash
+make stack-all-up       # API + Postgres/Redis/Kafka (if present) + frontend
+# Frontend: http://localhost:3000
+# API:      http://localhost:8080  (Swagger: /swagger-ui.html)
+make stack-all-down     # stop both
+```
+
+If `../trustbuddy-api` is missing, `stack-all-up` warns and starts the frontend containers only.
+
+## Run the API (Docker)
+
+From `trustbuddy-api`:
+
+```bash
+cp .env.example .env
+make stack-up           # API + PostgreSQL + Redis + Kafka
+```
+
+Host JVM alternative (infra still in Docker):
+
+```bash
+make infra-up
+make run-dev            # API on http://localhost:8080
+```
+
+## Run the frontend (local Vite)
+
+Typical while iterating (API already up):
+
+```bash
+make run                # or make dev → http://localhost:5173
+```
+
+Frontend-only Docker:
+
+```bash
+make stack-up           # http://localhost:3000 — still needs API on :8080
+```
+
+## Dev login
+
+Local API default: `dev-user` / `dev-password`.
+
+## Verify / OpenAPI
+
+```bash
+make verify             # build + lint + format check + unit tests
+```
+
+After API contract changes: in the API repo run `make openapi-export`, then here `make openapi-update`.
+
+---
+
+# Thought process
 
 So first thing before doing any code is to get the whole picture to translate it to technical requirements.
 
