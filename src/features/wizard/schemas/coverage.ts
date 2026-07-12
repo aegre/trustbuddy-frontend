@@ -35,7 +35,7 @@ export function createCoverageSchema(age?: number) {
       ? yup
           .boolean()
           .required("Indicate whether you have pre-existing conditions")
-      : yup.boolean().optional(),
+      : yup.boolean().nullable().optional(),
     conditions: yup
       .array()
       .of(

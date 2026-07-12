@@ -11,7 +11,10 @@ import {
 import { getUserFacingErrorMessage } from "@/api/types";
 import { QUOTES_LIST_DEFAULTS } from "@/features/quotes/hooks/use-quotes-list";
 import { CoverageForm } from "@/features/wizard/components/steps/coverage-form";
-import type { CoverageFormValues } from "@/features/wizard/schemas/coverage";
+import {
+  isSeniorApplicant,
+  type CoverageFormValues,
+} from "@/features/wizard/schemas/coverage";
 import type { WizardStepProps } from "@/features/wizard/types/wizard-steps";
 import {
   toPartialUpdateCoverageRequest,
@@ -55,13 +58,20 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
     if (!quote) {
       return undefined;
     }
+    const senior = isSeniorApplicant(quote.age);
     return {
       coverageType: quote.coverageType ?? "",
-      takesPrescriptionMedication: quote.takesPrescriptionMedication,
-      usesTobacco: quote.usesTobacco,
-      needsSpouseCoverage: quote.needsSpouseCoverage,
-      hasPreexistingConditions: quote.hasPreexistingConditions,
-      conditions: (quote.conditions ?? []) as CoverageFormValues["conditions"],
+      takesPrescriptionMedication:
+        quote.takesPrescriptionMedication ?? undefined,
+      usesTobacco: quote.usesTobacco ?? undefined,
+      needsSpouseCoverage: quote.needsSpouseCoverage ?? undefined,
+      // Non-seniors must not keep API `null` — Yup rejects it and the field is hidden.
+      hasPreexistingConditions: senior
+        ? (quote.hasPreexistingConditions ?? undefined)
+        : undefined,
+      conditions: senior
+        ? ((quote.conditions ?? []) as CoverageFormValues["conditions"])
+        : [],
     };
   }, [quote]);
 
