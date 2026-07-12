@@ -75,7 +75,7 @@ src/
 | `schemas/`    | Yup form schemas aligned with request DTOs                                                      |
 | `client/`     | Prefer Orval-generated hooks under `src/api/generated/`; keep feature wrappers only when needed |
 
-**Routes (target):** `/login` · `/` (quotes list) · `/wizard/:stepSlug?quoteId=` with steps `personal` | `coverage` | `review` · success after submit.
+**Routes (target):** `/login` · `/` (quotes list) · `/wizard/:stepSlug?quoteId=` with steps `personal` | `coverage` | `review` · `/success?quoteId=` after submit.
 
 **OpenAPI workflow:** `make openapi-sync` / `openapi-codegen` / `openapi-update` from `../trustbuddy-api/openapi/openapi.json`; gitignore local `openapi/openapi.json`; commit `src/api/generated/**` (Orval).
 
@@ -192,13 +192,15 @@ src/
 
 ## Phase 7 — Confirmation + success
 
+**Status:** Done on `feat/phase-7-confirmation`.
+
 **Deliverables**
 
-- Review step summary; `POST .../submit`
-- Success screen; retry on `SUBMISSION_FAILED`; **409** messaging
-- Invalidate list/detail queries; Playwright full happy path
+- [x] Review step summary; `POST .../submit`
+- [x] Success screen (`/success?quoteId=`); retry on `SUBMISSION_FAILED`; **409** messaging
+- [x] Invalidate list/detail queries; Playwright full happy path (local FE + API; not in `make verify`)
 
-**Done when:** Draft → submitted path works end-to-end.
+**Done when:** Draft → submitted path works end-to-end. ✅
 
 ---
 

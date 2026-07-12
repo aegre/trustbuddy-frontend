@@ -47,6 +47,7 @@ flowchart LR
 1. List/detail via Orval React Query hooks under `src/api/generated/quotes/`.
 2. Wizard steps use the same generated mutations; invalidate list/detail on success.
 3. Wizard URL: `/wizard/:stepSlug?quoteId=` (`personal` | `coverage` | `review`).
+4. Submit (`POST .../submit`) from Review → `/success?quoteId=`. `SUBMISSION_FAILED` quotes stay form-locked but can retry submit on Review.
 
 ## Folder layout
 
