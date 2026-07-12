@@ -103,7 +103,9 @@ export function QuotesListScreen() {
 
   const quotes = data?.content ?? EMPTY_QUOTES;
   const totalPages = data?.totalPages ?? 0;
-  const showPagination = !isPending && !isError && totalPages > 1;
+  const showListSkeleton = isFetching && !isError;
+  const showCards = !isFetching && !isError;
+  const showPagination = Boolean(data) && !isError && totalPages > 1;
 
   return (
     <Container component="main" maxWidth="lg" sx={containerSx}>
@@ -121,7 +123,11 @@ export function QuotesListScreen() {
           </Button>
         </Box>
 
-        {isPending ? <QuotesListSkeleton /> : null}
+        {showListSkeleton ? (
+          <QuotesListSkeleton
+            label={isPending ? "Loading quotes" : "Refreshing quotes"}
+          />
+        ) : null}
 
         {isError ? (
           <PageErrorAlert onRetry={onRetry}>
@@ -129,7 +135,7 @@ export function QuotesListScreen() {
           </PageErrorAlert>
         ) : null}
 
-        {!isPending && !isError ? <QuotesCards quotes={quotes} /> : null}
+        {showCards ? <QuotesCards quotes={quotes} /> : null}
 
         {showPagination ? (
           <Box sx={paginationSx}>
@@ -145,12 +151,6 @@ export function QuotesListScreen() {
               showLastButton={!isCompact}
             />
           </Box>
-        ) : null}
-
-        {isFetching && !isPending ? (
-          <Typography variant="caption" color="text.secondary">
-            Refreshing…
-          </Typography>
         ) : null}
       </Stack>
     </Container>
