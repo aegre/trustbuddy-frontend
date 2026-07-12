@@ -15,6 +15,9 @@ dist-ssr
 .env.local
 .env.*.local
 
+# OpenAPI contract synced from trustbuddy-api (regenerate locally)
+openapi/openapi.json
+
 # Editor directories and files
 .vscode
 .idea

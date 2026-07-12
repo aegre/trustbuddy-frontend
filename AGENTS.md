@@ -12,7 +12,7 @@ Vite + React 19 + TypeScript (CSR). Pairs with [trustbuddy-api](https://github.c
 | Server state    | TanStack Query (quotes, mutations, cache invalidation)                                                                      |
 | UI / auth state | React Context — logged-in flags, wizard UI-only state; **not** API payloads                                                 |
 | Auth session    | HttpOnly cookie via `POST /api/v1/auth/token`; requests use `credentials: 'include'`; logout via `POST /api/v1/auth/logout` |
-| API             | Feature `client/` modules → shared `apiFetch` → trustbuddy-api; real API in the app; MSW in unit tests only                 |
+| API             | Orval-generated React Query clients + MSW mocks → `customFetch` (cookie credentials) → trustbuddy-api                       |
 | Formatting      | Prettier (`make format` / `make format-check`)                                                                              |
 | Linting         | Oxlint — React, jsx-a11y, react-perf (`make lint`)                                                                          |
 
@@ -34,23 +34,23 @@ src/
 
 Each feature module uses subfolders as they gain files (no empty placeholders):
 
-| Subfolder     | Purpose                                       |
-| ------------- | --------------------------------------------- |
-| `components/` | Feature UI (forms, cards, shells)             |
-| `screens/`    | Full-page screen composition (e.g. login)     |
-| `layouts/`    | Route layouts (providers, shared chrome)      |
-| `context/`    | React context providers (when needed)         |
-| `hooks/`      | Feature hooks (Query wrappers OK here)        |
-| `types/`      | Domain types and registries                   |
-| `utils/`      | Pure helpers, mappers, guards, formatters     |
-| `schemas/`    | Yup validation for feature forms              |
-| `client/`     | Browser API endpoint wrappers over `apiFetch` |
+| Subfolder     | Purpose                                                                                         |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| `components/` | Feature UI (forms, cards, shells)                                                               |
+| `screens/`    | Full-page screen composition (e.g. login)                                                       |
+| `layouts/`    | Route layouts (providers, shared chrome)                                                        |
+| `context/`    | React context providers (when needed)                                                           |
+| `hooks/`      | Feature hooks (Query wrappers OK here)                                                          |
+| `types/`      | Domain types and registries                                                                     |
+| `utils/`      | Pure helpers, mappers, guards, formatters                                                       |
+| `schemas/`    | Yup validation for feature forms                                                                |
+| `client/`     | Prefer Orval-generated hooks under `src/api/generated/`; keep feature wrappers only when needed |
 
 - **`routes/`** — routing, redirects, auth guards; delegate UI to `features/`.
-- **`api/`** — shared spine only: `apiFetch`, config, errors, OpenAPI codegen, DTO aliases in `types.ts`. No feature logic.
+- **`api/`** — shared spine: `customFetch` mutator, config, DTO aliases in `types.ts`, Orval output under `generated/`. No feature UI.
 - **`features/common/`** — shared across features (e.g. `AppThemeProvider`, MUI theme).
 - **`features/*`** — domain modules; wizard steps split into `components/steps/*-step.tsx` (wiring) and `*-form.tsx` (RHF + MUI fields).
-- **Query vs Context** — Query for server data; Context for UI/auth session only. Do not stash quote DTOs in Context.
+- **Query vs Context** — use Orval/TanStack Query hooks for server data; Context for UI/auth session only. Do not stash quote DTOs in Context.
 
 ## Conventions
 
@@ -58,14 +58,12 @@ Each feature module uses subfolders as they gain files (no empty placeholders):
 - Validate forms with Yup schemas in `features/*/schemas/`; wire via `yupResolver`.
 - Run `make verify` before finishing once the Makefile exists (compile + lint + format check + unit tests).
 - After `npm install`, Husky should install the pre-commit hook via `prepare` (when added). Use `make precommit` to format and lint **staged files only** (same as the hook).
-- **Testing** — Vitest + MSW (`src/test/msw/`). Intercept HTTP in tests via `setupServer`; do **not** mock API responses in the running app. Prefer MSW handlers over `vi.mock` of `client/` modules when the code under test calls the API.
-- Local API: frontend `make dev` / `npm run dev` + trustbuddy-api `make run-dev`.
-- OpenAPI contract: `make openapi-update` syncs `../trustbuddy-api/openapi/openapi.json` → `openapi/openapi.json` (gitignored) and regenerates `src/api/generated/schema.ts` via `openapi-typescript`. Use `make openapi-sync` to copy the spec only, or `make openapi-codegen` after a manual sync. Refresh the API export first with `make openapi-export` in trustbuddy-api.
-- API paths use the `/api/v1` prefix from the OpenAPI spec (`apiFetch` auto-prefixes).
-- **API DTO types** — import from `@/api/types` only. Do **not** import `components`, `paths`, or `operations` from `src/api/generated/schema.ts` outside `types.ts`; that file is codegen output and an implementation detail.
-  - `types.ts` owns aliases over the generated schema (e.g. `AuthTokenRequest`, `QuoteResponse`) plus app-only types (e.g. `ApiErrorBody`).
-  - When OpenAPI marks response fields optional but runtime code requires them, add a `*Body` wire type and a narrowed validated type in `types.ts`.
-  - Form Yup schemas stay hand-written in `features/*/schemas/` but should align with request DTO shapes; prefer reusing DTO types (e.g. `AuthTokenRequest`) over duplicating inline `{ username; password }` objects.
+- **Testing** — Vitest + MSW. Prefer Orval-generated handlers from `src/api/generated/**/*.msw.ts` in `src/test/msw/`; do **not** mock API responses in the running app.
+- Local API: frontend `make run` / `npm run dev` + trustbuddy-api `make run-dev`.
+- OpenAPI contract: `make openapi-update` syncs `../trustbuddy-api/openapi/openapi.json` → `openapi/openapi.json` (gitignored) and regenerates Orval clients/models/MSW via `orval.config.ts`. Use `make openapi-sync` or `make openapi-codegen` alone when needed. Refresh the API export first with `make openapi-export` in trustbuddy-api.
+- **API DTO types** — import from `@/api/types` only. Do **not** import generated model files outside `types.ts` / Orval output consumers.
+  - `types.ts` re-exports aliases over Orval models (e.g. `AuthTokenRequest`, `QuoteResponse`).
+  - Form Yup schemas stay hand-written in `features/*/schemas/` but should align with request DTO shapes.
 - **Never** store the JWT in `localStorage` or `sessionStorage`.
 
 ## Do not commit
@@ -75,6 +73,6 @@ Each feature module uses subfolders as they gain files (no empty placeholders):
 - `openapi/openapi.json` (synced locally from trustbuddy-api)
 - Secrets and credentials
 
-## Commit generated types
+## Commit generated clients
 
-- `src/api/generated/schema.ts` — regenerate with `make openapi-update` when the API contract changes
+- `src/api/generated/**` — regenerate with `make openapi-update` when the API contract changes

@@ -5,9 +5,9 @@ Vite + React CSR SPA for the multi-step insurance quote flow. Pairs with [trustb
 ## Principles
 
 - **Thin routes** — `src/routes/` owns URL wiring and auth redirects only; UI and domain live in `features/`.
-- **Feature modules** — vertical slices (`auth`, `quotes`, `wizard`, `common`) own their screens, forms, schemas, and API wrappers.
-- **Shared API spine** — one browser `apiFetch` + OpenAPI DTO aliases; feature `client/` modules stay thin wrappers.
-- **Split state** — TanStack Query owns server state (quotes, mutations, cache); React Context owns UI/auth session flags only.
+- **Feature modules** — vertical slices (`auth`, `quotes`, `wizard`, `common`) own screens, forms, and schemas.
+- **Shared API spine** — Orval-generated React Query clients + models; `customFetch` mutator with cookie credentials; DTO aliases in `types.ts`.
+- **Split state** — TanStack Query (via Orval hooks) owns server state; React Context owns UI/auth session flags only.
 - **Cookie auth** — JWT stays in an HttpOnly cookie; never in `localStorage` / `sessionStorage`.
 
 ## Request flow
@@ -18,9 +18,8 @@ flowchart LR
     Routes[routes]
     Features[features]
     AuthCtx[AuthContext]
-    TQ[TanStack Query]
-    Clients[feature client modules]
-    ApiSpine[apiFetch]
+    OrvalHooks[Orval React Query hooks]
+    Mutator[customFetch]
   end
   subgraph backend [trustbuddy-api]
     Cookie[HttpOnly access_token]
@@ -28,47 +27,47 @@ flowchart LR
   end
   Routes --> Features
   Features --> AuthCtx
-  Features --> TQ
-  TQ --> Clients
-  AuthCtx --> Clients
-  Clients --> ApiSpine
-  ApiSpine -->|"credentials include"| Cookie
-  ApiSpine --> Quotes
+  Features --> OrvalHooks
+  AuthCtx --> OrvalHooks
+  OrvalHooks --> Mutator
+  Mutator -->|"credentials include"| Cookie
+  Mutator --> Quotes
 ```
 
 ### Auth
 
-1. Login form → `POST /api/v1/auth/token` (cookie set by API).
+1. Login form → Orval `token` / `useToken` → `POST /api/v1/auth/token` (cookie set by API).
 2. `AuthContext` records logged-in / loading for the UI.
-3. Later API calls use `credentials: 'include'` so the browser sends the cookie.
-4. Logout → `POST /api/v1/auth/logout` clears the cookie and context.
+3. Later API calls use `credentials: 'include'` via `customFetch`.
+4. Logout → Orval logout operation clears the cookie and context.
 
 ### Quotes / wizard
 
-1. List and detail load through TanStack Query → feature `client/` → `apiFetch`.
-2. Wizard steps mutate via the same clients; Query invalidates list/detail on success.
+1. List/detail via Orval React Query hooks under `src/api/generated/quotes/`.
+2. Wizard steps use the same generated mutations; invalidate list/detail on success.
 3. Wizard URL: `/wizard/:stepSlug?quoteId=` (`personal` | `coverage` | `review`).
 
 ## Folder layout
 
 ```
 src/
-  api/                 # shared HTTP spine only
+  api/
     config.ts
-    client.ts          # apiFetch (credentials: 'include')
-    errors.ts
-    types.ts           # DTO aliases — public import surface
-    generated/
-      schema.ts        # openapi-typescript output (committed)
+    mutator/custom-fetch.ts   # Orval mutator (credentials: include)
+    types.ts                  # DTO aliases — public import surface
+    generated/                # Orval output (committed)
+      model/
+      authentication/
+      quotes/
   features/
     common/            # theme, shared UI
-    auth/              # login, AuthContext, auth client
-    quotes/            # list UI + client
-    wizard/            # steps, forms, schemas, guards, client
+    auth/              # login, AuthContext
+    quotes/            # list UI
+    wizard/            # steps, forms, schemas, guards
   routes/              # thin route elements — no domain logic
   test/
     setup.ts
-    msw/
+    msw/               # compose Orval *.msw.ts handlers
     factories/
 ```
 
@@ -80,37 +79,36 @@ Feature subfolders are created only when files appear:
 | `screens/`    | Full-page composition                                     |
 | `layouts/`    | Feature chrome / providers                                |
 | `context/`    | React context (auth, wizard UI-only)                      |
-| `hooks/`      | Feature hooks (including Query wrappers)                  |
+| `hooks/`      | Feature hooks (thin wrappers over Orval when useful)      |
 | `types/`      | Domain registries (e.g. wizard steps)                     |
 | `utils/`      | Pure helpers, guards, href builders                       |
 | `schemas/`    | Yup form schemas aligned with request DTOs                |
-| `client/`     | Thin endpoint wrappers over `apiFetch`                    |
 
 ## Layer rules
 
-| Layer                   | May depend on                                 | Must not                              |
-| ----------------------- | --------------------------------------------- | ------------------------------------- |
-| `routes/`               | `features/*` screens/layouts                  | Call API or hold Yup/business rules   |
-| `features/*/components` | schemas, hooks, context, `@/api/types`        | Import generated `schema.ts` directly |
-| `features/*/client`     | `@/api/client`, `@/api/types`, `@/api/errors` | Own React state or UI                 |
-| `api/`                  | env/config, fetch                             | Feature UI or Query hooks             |
-| `test/msw`              | OpenAPI-shaped fixtures                       | Live in production feature paths      |
+| Layer                   | May depend on                                       | Must not                                                       |
+| ----------------------- | --------------------------------------------------- | -------------------------------------------------------------- |
+| `routes/`               | `features/*` screens/layouts                        | Call API or hold Yup/business rules                            |
+| `features/*/components` | schemas, hooks, context, `@/api/types`, Orval hooks | Import generated model files instead of `@/api/types` for DTOs |
+| `api/mutator`           | env/config, fetch                                   | Feature UI                                                     |
+| `api/generated`         | Orval output only — regenerate, do not hand-edit    | —                                                              |
+| `test/msw`              | Orval `*.msw.ts`, factories                         | Live in production feature paths                               |
 
-## OpenAPI types
+## OpenAPI / Orval
 
 1. Sync contract from trustbuddy-api → local `openapi/openapi.json` (gitignored).
-2. Generate `src/api/generated/schema.ts` (committed).
-3. Expose aliases only from `src/api/types.ts`.
-4. App code imports `@/api/types` — never generated paths/operations elsewhere.
+2. Run Orval (`make openapi-codegen`) → `src/api/generated/**` (committed).
+3. Expose DTO aliases from `src/api/types.ts`.
+4. Tests can reuse generated MSW handlers from `*.msw.ts`.
 
 ## Testing boundary
 
-- **Vitest + MSW** — unit/component tests intercept real `client/` → `apiFetch` HTTP.
+- **Vitest + MSW** — unit/component tests; prefer Orval-generated handlers.
 - **Playwright** — critical E2E paths (login, wizard submit).
 - Do not mock API responses inside the running app; MSW is for tests only.
 
 ## Local runtime
 
-- Frontend: Vite dev server (see Makefile / `npm run dev` once wired).
+- Frontend: Vite dev server (`make run` / `npm run dev`).
 - Backend: trustbuddy-api on `http://localhost:8080` with CORS allowing the frontend origin.
-- Env: `VITE_API_BASE_URL` (see `.env.example` when added).
+- Env: `VITE_API_BASE_URL` (see `.env.example`).

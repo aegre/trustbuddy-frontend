@@ -29,10 +29,10 @@ flowchart LR
 | Concern       | Choice                                                                                                     |
 | ------------- | ---------------------------------------------------------------------------------------------------------- |
 | Auth          | Cookie JWT — `POST /api/v1/auth/token` + `credentials: 'include'`; Context only tracks logged-in / loading |
-| Server state  | TanStack Query calling feature `client/` wrappers                                                          |
+| Server state  | TanStack Query via Orval-generated hooks                                                                   |
 | UI/auth state | React Context under `features/*/context/`                                                                  |
-| Types         | `openapi-typescript` → `src/api/generated/schema.ts`; import DTOs only via `@/api/types`                   |
-| Testing       | Vitest + MSW (`src/test/msw/`, factories); Playwright for critical E2E                                     |
+| Types         | Orval → `src/api/generated/` (models, React Query hooks, MSW); import DTOs via `@/api/types`               |
+| Testing       | Vitest + MSW (`src/test/msw/`, Orval `*.msw.ts` handlers, factories); Playwright for critical E2E          |
 | Docker        | Container runs the React app (Vite/Node), per README                                                       |
 
 ## Folder structure
@@ -41,42 +41,43 @@ Feature-sliced modules with a thin route layer and a shared API spine. Create su
 
 ```
 src/
-  api/                 # shared HTTP spine only
+  api/
     config.ts
-    client.ts          # browser apiFetch with credentials: 'include'
-    errors.ts
-    types.ts           # DTO aliases — only public import surface for schemas
-    generated/
-      schema.ts        # committed codegen output
+    mutator/custom-fetch.ts   # Orval mutator (credentials: include)
+    types.ts                  # DTO aliases — public import surface
+    generated/                # Orval output (committed)
+      model/
+      authentication/
+      quotes/
   features/
     common/            # theme, AppThemeProvider, shared UI
-    auth/              # login screen, schemas, client, AuthContext
-    quotes/            # list UI + client
-    wizard/            # steps, forms, schemas, guards, client, optional UI context
+    auth/              # login screen, schemas, AuthContext
+    quotes/            # list UI
+    wizard/            # steps, forms, schemas, guards, optional UI context
   routes/              # thin route elements / loaders — no domain logic
   test/
     setup.ts
-    msw/
+    msw/               # compose Orval *.msw.ts handlers
     factories/
 ```
 
 **Feature subfolders:**
 
-| Subfolder     | Purpose                                                                      |
-| ------------- | ---------------------------------------------------------------------------- |
-| `components/` | Feature UI (forms, cards, shells); wizard: `steps/*-step.tsx` + `*-form.tsx` |
-| `screens/`    | Full-page composition (e.g. login)                                           |
-| `layouts/`    | Feature chrome / providers                                                   |
-| `context/`    | React context (auth, wizard UI-only)                                         |
-| `hooks/`      | Feature hooks (Query wrappers OK here)                                       |
-| `types/`      | Domain registries (wizard steps)                                             |
-| `utils/`      | Pure helpers, step guards, href builders                                     |
-| `schemas/`    | Yup form schemas aligned with request DTOs                                   |
-| `client/`     | Thin API endpoint wrappers over `apiFetch`                                   |
+| Subfolder     | Purpose                                                                                         |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| `components/` | Feature UI (forms, cards, shells); wizard: `steps/*-step.tsx` + `*-form.tsx`                    |
+| `screens/`    | Full-page composition (e.g. login)                                                              |
+| `layouts/`    | Feature chrome / providers                                                                      |
+| `context/`    | React context (auth, wizard UI-only)                                                            |
+| `hooks/`      | Feature hooks (Query wrappers OK here)                                                          |
+| `types/`      | Domain registries (wizard steps)                                                                |
+| `utils/`      | Pure helpers, step guards, href builders                                                        |
+| `schemas/`    | Yup form schemas aligned with request DTOs                                                      |
+| `client/`     | Prefer Orval-generated hooks under `src/api/generated/`; keep feature wrappers only when needed |
 
 **Routes (target):** `/login` · `/` (quotes list) · `/wizard/:stepSlug?quoteId=` with steps `personal` | `coverage` | `review` · success after submit.
 
-**OpenAPI workflow:** `make openapi-sync` / `openapi-codegen` / `openapi-update` from `../trustbuddy-api/openapi/openapi.json`; gitignore local `openapi/openapi.json`; commit `src/api/generated/schema.ts`.
+**OpenAPI workflow:** `make openapi-sync` / `openapi-codegen` / `openapi-update` from `../trustbuddy-api/openapi/openapi.json`; gitignore local `openapi/openapi.json`; commit `src/api/generated/**` (Orval).
 
 **AGENTS.md:** Document stack, folder rules, path alias `@/`, DTO-only-via-`types.ts`, Yup aligned with DTOs, Context vs Query, cookie auth (no JWT in storage), and `make verify`.
 
@@ -84,25 +85,28 @@ src/
 
 ## Phase 1 — Initial setup
 
-**Status:** In progress (partial). Agent docs, Docker, and lint/format landed in this PR; remaining setup continues in follow-up PRs.
+**Status:** In progress (partial). Agent docs / Docker / lint landed in #4; this PR adds stack deps, Orval codegen, and `@/` alias.
 
-### Done in this PR
+### Done
 
-- [x] `AGENTS.md`, `ARCHITECTURE.md`, `CLAUDE.md`
-- [x] GitHub PR template
-- [x] Dockerfile + compose + `.env.example` + Makefile docker targets (`docker-build`, `stack-up`/`down`/`logs`)
-- [x] Oxlint (React, jsx-a11y, react-perf) + Prettier; Makefile `lint` / `format` / `format-check`
-- [x] Expanded `.gitignore` for env/build artifacts
+- [x] `AGENTS.md`, `ARCHITECTURE.md`, `CLAUDE.md` (#4)
+- [x] GitHub PR template (#4)
+- [x] Dockerfile + compose + `.env.example` + Makefile docker targets (#4)
+- [x] Oxlint (React, jsx-a11y, react-perf) + Prettier (#4)
+- [x] Expanded `.gitignore` for env/build artifacts (#4)
+- [x] App stack deps: MUI, React Router, RHF, Yup, TanStack Query
+- [x] Orval codegen (React Query + MSW) + `customFetch` mutator + `@/api/types` facade
+- [x] Makefile / npm `openapi-sync` / `openapi-codegen` / `openapi-update`
+- [x] `@/` path alias (Vite + TypeScript, no deprecated `baseUrl`)
+- [x] Docs updated for Orval (`AGENTS.md`, `ARCHITECTURE.md`, this plan)
 
 ### Remaining (follow-up PRs)
 
-- [ ] Install app stack deps: MUI, React Router, RHF, Yup, TanStack Query
-- [ ] OpenAPI codegen path (trialing Orval in a separate branch — not in this PR); `customFetch` / types facade; Makefile `openapi-*`
-- [ ] `@/` path alias (Vite + TypeScript)
 - [ ] Feature folder spine: `src/features/{common,auth,quotes,wizard}`, `src/routes/`, `src/test/` (create folders only as files appear)
 - [ ] Husky + lint-staged
 - [ ] Makefile `install`, `test`, `verify` (and align `run` with plan’s `dev` naming if desired)
 - [ ] Vitest + Testing Library + Playwright stub; empty smoke test so `make verify` passes
+- [ ] Wire Orval MSW handlers into `src/test/msw/` when tests land
 - [ ] Optional: shared `api` errors helper alongside codegen
 
 **Done when:** `make run` / `make verify` work; generated API clients committed; empty smoke test passes.
