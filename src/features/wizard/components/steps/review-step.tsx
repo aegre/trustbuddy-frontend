@@ -128,7 +128,7 @@ function ReviewSection({
   return (
     <Box>
       <Box sx={sectionHeaderSx}>
-        <Typography component="h3" variant="subtitle1" fontWeight={600}>
+        <Typography component="h3" variant="subtitle1" sx={{ fontWeight: 600 }}>
           {title}
         </Typography>
         {editTo ? (
@@ -243,7 +243,11 @@ export function ReviewStep({ quoteId, quote }: WizardStepProps) {
       {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
 
       <Box sx={premiumBannerSx}>
-        <Typography color="text.secondary" variant="body2" fontWeight={500}>
+        <Typography
+          color="text.secondary"
+          variant="body2"
+          sx={{ fontWeight: 500 }}
+        >
           Estimated monthly premium
         </Typography>
         <Typography component="p" variant="h5" sx={{ m: 0 }}>
