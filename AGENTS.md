@@ -56,7 +56,7 @@ Each feature module uses subfolders as they gain files (no empty placeholders):
 
 - Use `@/` path alias (`src/*`).
 - Validate forms with Yup schemas in `features/*/schemas/`; wire via `yupResolver`.
-- Run `make verify` before finishing (build + lint + format check + unit tests).
+- Run `make verify` before finishing (build + lint + format check + unit tests). CI runs the same via `.github/workflows/pr-validation.yml`.
 - After `npm install`, Husky installs the pre-commit hook via `prepare`. Use `make precommit` to format and lint **staged files only** (same as the hook).
 - **Testing** — Vitest + MSW. Prefer Orval-generated handlers from `src/api/generated/**/*.msw.ts` composed in `src/test/msw/`; do **not** mock API responses in the running app. Playwright config lives at repo root (`npm run test:e2e`) for later E2E flows.
 - Local API: frontend `make run` / `make dev` + trustbuddy-api `make run-dev`.

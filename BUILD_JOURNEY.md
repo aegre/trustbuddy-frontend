@@ -105,6 +105,7 @@ src/
 - [x] Vitest + Testing Library + Playwright stub; smoke test so `make verify` passes
 - [x] Wire Orval MSW handlers into `src/test/msw/`
 - [x] Shared `api` errors helper (`src/api/errors.ts`)
+- [x] GitHub Actions PR validation (`make verify` + Docker build)
 
 **Done when:** `make run` / `make verify` work; generated API clients committed; empty smoke test passes. ✅
 
