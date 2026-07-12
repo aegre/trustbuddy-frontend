@@ -1,7 +1,6 @@
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -79,12 +78,6 @@ const actionsSx = {
   pt: 1,
 } as const;
 
-const chipRowSx = {
-  display: "flex",
-  flexWrap: "wrap",
-  gap: 0.75,
-} as const;
-
 function formatYesNo(value: boolean | undefined): string {
   if (value === true) {
     return "Yes";
@@ -155,25 +148,15 @@ function ConditionsDetail({
 }: {
   conditions: NonNullable<QuoteResponse["conditions"]>;
 }) {
-  if (conditions.length === 0) {
-    return (
-      <Typography component="dd" sx={detailSx}>
-        —
-      </Typography>
-    );
-  }
+  const value =
+    conditions.length === 0
+      ? "—"
+      : conditions.map((condition) => formatEnumLabel(condition)).join(", ");
 
   return (
-    <Box component="dd" sx={{ ...detailSx, ...chipRowSx }}>
-      {conditions.map((condition) => (
-        <Chip
-          key={condition}
-          label={formatEnumLabel(condition)}
-          size="small"
-          variant="outlined"
-        />
-      ))}
-    </Box>
+    <Typography component="dd" sx={detailSx}>
+      {value}
+    </Typography>
   );
 }
 
