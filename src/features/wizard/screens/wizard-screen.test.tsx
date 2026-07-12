@@ -704,7 +704,7 @@ describe("wizard routes", () => {
     renderWizardAt(`${paths.wizardBase}/review?quoteId=q-done`);
 
     expect(
-      await screen.findByRole("heading", { name: /review & submit/i }),
+      await screen.findByRole("heading", { name: /^review$/i }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /submit/i }),
