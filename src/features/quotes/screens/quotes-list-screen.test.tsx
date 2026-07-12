@@ -1,22 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { MemoryRouter } from "react-router-dom";
 import { describe, expect, it } from "vitest";
-import { AppProviders } from "@/features/common/providers/app-providers";
-import { createTestQueryClient } from "@/features/common/query/query-client";
 import { QuotesListScreen } from "@/features/quotes/screens/quotes-list-screen";
 import { createQuoteFixture, createQuotesPageFixture } from "@/test/factories";
 import { server } from "@/test/msw/server";
+import { renderWithProviders } from "@/test/render";
 import { paths, wizardPersonalHref } from "@/routes/paths";
 
 function renderQuotesList() {
-  render(
-    <AppProviders initialAuthenticated queryClient={createTestQueryClient()}>
-      <MemoryRouter>
-        <QuotesListScreen />
-      </MemoryRouter>
-    </AppProviders>,
-  );
+  return renderWithProviders(<QuotesListScreen />, {
+    initialAuthenticated: true,
+  });
 }
 
 describe("QuotesListScreen", () => {

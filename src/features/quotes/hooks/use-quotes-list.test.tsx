@@ -1,22 +1,10 @@
-import { QueryClientProvider } from "@tanstack/react-query";
-import { renderHook, waitFor } from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import type { ReactNode } from "react";
 import { describe, expect, it } from "vitest";
-import { createTestQueryClient } from "@/features/common/query/query-client";
 import { useQuotesList } from "@/features/quotes/hooks/use-quotes-list";
 import { createQuotesPageFixture } from "@/test/factories";
 import { server } from "@/test/msw/server";
-
-function createWrapper() {
-  const queryClient = createTestQueryClient();
-
-  return function Wrapper({ children }: { children: ReactNode }) {
-    return (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-  };
-}
+import { renderHookWithProviders } from "@/test/render";
 
 describe("useQuotesList", () => {
   it("given_quotesExist_when_fetched_then_returnsPageContent", async () => {
@@ -40,9 +28,7 @@ describe("useQuotesList", () => {
       ),
     );
 
-    const { result } = renderHook(() => useQuotesList(), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHookWithProviders(() => useQuotesList());
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -64,9 +50,7 @@ describe("useQuotesList", () => {
       ),
     );
 
-    const { result } = renderHook(() => useQuotesList(), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHookWithProviders(() => useQuotesList());
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
@@ -83,9 +67,7 @@ describe("useQuotesList", () => {
       ),
     );
 
-    const { result } = renderHook(() => useQuotesList(), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHookWithProviders(() => useQuotesList());
 
     await waitFor(() => {
       expect(result.current.isError).toBe(true);
