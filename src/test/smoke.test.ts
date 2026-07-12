@@ -1,12 +1,25 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect } from "vitest";
+import test from "vitest-gwt";
 import { handlers } from "@/test/msw/handlers";
 
 describe("smoke", () => {
-  it("runs the Vitest harness", () => {
-    expect(true).toBe(true);
+  test("runs the Vitest harness", {
+    then: {
+      harness_is_ready,
+    },
   });
 
-  it("registers Orval MSW handlers", () => {
-    expect(handlers.length).toBeGreaterThan(0);
+  test("registers Orval MSW handlers", {
+    then: {
+      handlers_are_registered,
+    },
   });
 });
+
+function harness_is_ready() {
+  expect(true).toBe(true);
+}
+
+function handlers_are_registered() {
+  expect(handlers.length).toBeGreaterThan(0);
+}

@@ -60,5 +60,13 @@
     "jsx-a11y/scope": "error",
     "jsx-a11y/tabindex-no-positive": "error"
   },
-  "ignorePatterns": ["dist/**", "node_modules/**", "coverage/**"]
+  "ignorePatterns": ["dist/**", "node_modules/**", "coverage/**"],
+  "overrides": [
+    {
+      "files": ["**/*.{test,spec}.{ts,tsx}"],
+      "rules": {
+        "unicorn/no-thenable": "off"
+      }
+    }
+  ]
 }

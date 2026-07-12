@@ -103,7 +103,7 @@ Feature subfolders are created only when files appear:
 
 ## Testing boundary
 
-- **Vitest + MSW** — unit/component tests; prefer Orval-generated handlers.
+- **Vitest + MSW + vitest-gwt** — unit/component tests use `import test from 'vitest-gwt'` with `given` / `when` / `then` (or `scenario`); prefer Orval-generated handlers.
 - **Playwright** — critical E2E paths (login, wizard submit).
 - Do not mock API responses inside the running app; MSW is for tests only.
 

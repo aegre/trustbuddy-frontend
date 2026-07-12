@@ -32,7 +32,7 @@ flowchart LR
 | Server state  | TanStack Query via Orval-generated hooks                                                                   |
 | UI/auth state | React Context under `features/*/context/`                                                                  |
 | Types         | Orval → `src/api/generated/` (models, React Query hooks, MSW); import DTOs via `@/api/types`               |
-| Testing       | Vitest + MSW (`src/test/msw/`, Orval `*.msw.ts` handlers, factories); Playwright for critical E2E          |
+| Testing       | Vitest + MSW + vitest-gwt (`given`/`when`/`then`); Orval `*.msw.ts` handlers, factories; Playwright E2E    |
 | Docker        | Container runs the React app (Vite/Node), per README                                                       |
 
 ## Folder structure

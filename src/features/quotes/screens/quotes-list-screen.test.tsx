@@ -1,97 +1,147 @@
 import { screen } from "@testing-library/react";
 import { HttpResponse, http } from "msw";
-import { describe, expect, it } from "vitest";
+import { describe, expect } from "vitest";
+import test from "vitest-gwt";
 import { QuotesListScreen } from "@/features/quotes/screens/quotes-list-screen";
 import { createQuoteFixture, createQuotesPageFixture } from "@/test/factories";
 import { server } from "@/test/msw/server";
 import { renderWithProviders } from "@/test/render";
 import { paths, wizardPersonalHref } from "@/routes/paths";
 
-function renderQuotesList() {
-  return renderWithProviders(<QuotesListScreen />, {
+describe("QuotesListScreen", () => {
+  test("renders rows and new quote CTA when quotes load", {
+    given: {
+      quotes_list_with_one_quote,
+    },
+    when: {
+      rendering_quotes_list,
+    },
+    then: {
+      heading_and_cta_are_shown,
+      quote_row_is_shown,
+    },
+  });
+
+  test("shows empty message when list is empty", {
+    given: {
+      empty_quotes_list,
+    },
+    when: {
+      rendering_quotes_list,
+    },
+    then: {
+      empty_message_is_shown,
+    },
+  });
+
+  test("shows error and retry when API fails", {
+    given: {
+      quotes_list_error,
+    },
+    when: {
+      rendering_quotes_list,
+    },
+    then: {
+      error_and_retry_are_shown,
+    },
+  });
+
+  test("shows loading status while fetching", {
+    given: {
+      delayed_quotes_list,
+    },
+    when: {
+      rendering_quotes_list,
+    },
+    then: {
+      loading_status_is_shown,
+    },
+  });
+});
+
+function quotes_list_with_one_quote() {
+  const page = createQuotesPageFixture({
+    content: [
+      createQuoteFixture({
+        id: "q-42",
+        name: "Grace Hopper",
+        email: "grace@example.com",
+        status: "DRAFT",
+        estimatedMonthlyPremium: 99,
+      }),
+    ],
+  });
+
+  server.use(
+    http.get("*/api/v1/quotes", () => HttpResponse.json(page, { status: 200 })),
+  );
+}
+
+function empty_quotes_list() {
+  server.use(
+    http.get("*/api/v1/quotes", () =>
+      HttpResponse.json(createQuotesPageFixture({ content: [], empty: true }), {
+        status: 200,
+      }),
+    ),
+  );
+}
+
+function quotes_list_error() {
+  server.use(
+    http.get("*/api/v1/quotes", () =>
+      HttpResponse.json({ message: "Boom" }, { status: 500 }),
+    ),
+  );
+}
+
+function delayed_quotes_list() {
+  server.use(
+    http.get("*/api/v1/quotes", async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      return HttpResponse.json(createQuotesPageFixture(), { status: 200 });
+    }),
+  );
+}
+
+function rendering_quotes_list() {
+  renderWithProviders(<QuotesListScreen />, {
     initialAuthenticated: true,
   });
 }
 
-describe("QuotesListScreen", () => {
-  it("given_quotes_when_loaded_then_rendersRowsAndNewQuoteCta", async () => {
-    const page = createQuotesPageFixture({
-      content: [
-        createQuoteFixture({
-          id: "q-42",
-          name: "Grace Hopper",
-          email: "grace@example.com",
-          status: "DRAFT",
-          estimatedMonthlyPremium: 99,
-        }),
-      ],
-    });
+async function heading_and_cta_are_shown() {
+  expect(
+    await screen.findByRole("heading", { name: /^quotes$/i }),
+  ).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: /^new quote$/i })).toHaveAttribute(
+    "href",
+    paths.wizardPersonal,
+  );
+}
 
-    server.use(
-      http.get("*/api/v1/quotes", () =>
-        HttpResponse.json(page, { status: 200 }),
-      ),
-    );
+async function quote_row_is_shown() {
+  expect(await screen.findByText("Grace Hopper")).toBeInTheDocument();
+  expect(screen.getByText("grace@example.com")).toBeInTheDocument();
+  expect(screen.getByText("DRAFT")).toBeInTheDocument();
 
-    renderQuotesList();
+  const row = screen.getByRole("row", { name: /grace hopper/i });
+  expect(row).toHaveAttribute("href", wizardPersonalHref("q-42"));
+}
 
-    expect(
-      await screen.findByRole("heading", { name: /^quotes$/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /^new quote$/i })).toHaveAttribute(
-      "href",
-      paths.wizardPersonal,
-    );
-    expect(await screen.findByText("Grace Hopper")).toBeInTheDocument();
-    expect(screen.getByText("grace@example.com")).toBeInTheDocument();
-    expect(screen.getByText("DRAFT")).toBeInTheDocument();
+async function empty_message_is_shown() {
+  expect(await screen.findByText(/no quotes yet/i)).toBeInTheDocument();
+}
 
-    const row = screen.getByRole("row", { name: /grace hopper/i });
-    expect(row).toHaveAttribute("href", wizardPersonalHref("q-42"));
-  });
+async function error_and_retry_are_shown() {
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "Could not load quotes",
+  );
+  expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument();
+}
 
-  it("given_emptyList_when_loaded_then_showsEmptyMessage", async () => {
-    server.use(
-      http.get("*/api/v1/quotes", () =>
-        HttpResponse.json(
-          createQuotesPageFixture({ content: [], empty: true }),
-          { status: 200 },
-        ),
-      ),
-    );
-
-    renderQuotesList();
-
-    expect(await screen.findByText(/no quotes yet/i)).toBeInTheDocument();
-  });
-
-  it("given_apiError_when_loaded_then_showsErrorAndRetry", async () => {
-    server.use(
-      http.get("*/api/v1/quotes", () =>
-        HttpResponse.json({ message: "Boom" }, { status: 500 }),
-      ),
-    );
-
-    renderQuotesList();
-
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Could not load quotes",
-    );
-    expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument();
-  });
-
-  it("given_loading_when_rendered_then_showsStatus", () => {
-    server.use(
-      http.get("*/api/v1/quotes", async () => {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-        return HttpResponse.json(createQuotesPageFixture(), { status: 200 });
-      }),
-    );
-
-    renderQuotesList();
-
-    expect(
-      screen.getByRole("status", { name: /loading quotes/i }),
-    ).toBeInTheDocument();
-  });
-});
+function loading_status_is_shown() {
+  expect(
+    screen.getByRole("status", { name: /loading quotes/i }),
+  ).toBeInTheDocument();
+}

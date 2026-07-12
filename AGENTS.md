@@ -58,7 +58,7 @@ Each feature module uses subfolders as they gain files (no empty placeholders):
 - Validate forms with Yup schemas in `features/*/schemas/`; wire via `yupResolver`.
 - Run `make verify` before finishing (build + lint + format check + unit tests). CI runs the same via `.github/workflows/pr-validation.yml`.
 - After `npm install`, Husky installs the pre-commit hook via `prepare`. Use `make precommit` to format and lint **staged files only** (same as the hook).
-- **Testing** — Vitest + MSW. Prefer Orval-generated handlers from `src/api/generated/**/*.msw.ts` composed in `src/test/msw/`; do **not** mock API responses in the running app. Playwright config lives at repo root (`npm run test:e2e`) for later E2E flows.
+- **Testing** — Vitest + MSW + [vitest-gwt](https://github.com/devzeebo/vitest-gwt) (`given` / `when` / `then`, or `scenario` for multi-step flows). Prefer Orval-generated handlers from `src/api/generated/**/*.msw.ts` composed in `src/test/msw/`; do **not** mock API responses in the running app. Oxlint disables `unicorn/no-thenable` on `*.test.*` so GWT `then` clauses lint cleanly. Playwright config lives at repo root (`npm run test:e2e`) for later E2E flows.
 - Local API: frontend `make run` / `make dev` + trustbuddy-api `make run-dev`.
 - OpenAPI contract: `make openapi-update` syncs `../trustbuddy-api/openapi/openapi.json` → `openapi/openapi.json` (gitignored) and regenerates Orval clients/models/MSW via `orval.config.ts`. Use `make openapi-sync` or `make openapi-codegen` alone when needed. Refresh the API export first with `make openapi-export` in trustbuddy-api.
 - **API DTO types** — import from `@/api/types` only. Do **not** import generated model files outside `types.ts` / Orval output consumers.
