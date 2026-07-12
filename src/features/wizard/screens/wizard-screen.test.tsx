@@ -153,6 +153,22 @@ describe("wizard routes", () => {
       `${paths.wizardPersonal}?quoteId=q-9`,
     );
     expect(screen.queryByRole("link", { name: /^next$/i })).toBeNull();
+    expect(screen.queryByRole("tab", { name: /^review$/i })).toBeNull();
+  });
+
+  it("given_newQuote_when_personalLoaded_then_laterStepsAreNotClickable", async () => {
+    renderWizardAt(paths.wizardPersonal);
+
+    expect(
+      await screen.findByRole("heading", { name: /personal information/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("tab", { name: /^personal$/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: /^coverage$/i })).toBeNull();
+    expect(screen.queryByRole("tab", { name: /^review$/i })).toBeNull();
+    expect(screen.getByText(/^coverage$/i)).toBeInTheDocument();
+    expect(screen.getByText(/^review$/i)).toBeInTheDocument();
   });
 
   it("given_quoteLoadError_when_retry_then_loadsQuote", async () => {

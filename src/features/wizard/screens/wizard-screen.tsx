@@ -87,6 +87,7 @@ export function WizardScreen() {
     <WizardLayout
       stepSlug={stepSlug}
       quoteId={quoteId}
+      quote={quote}
       showStepChrome={showStepChrome}
       hideNext={hideNext}
     >

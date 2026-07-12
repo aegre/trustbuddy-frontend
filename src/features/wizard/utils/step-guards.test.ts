@@ -3,6 +3,7 @@ import {
   getNextWizardStep,
   getPreviousWizardStep,
   getWizardStepIndex,
+  isWizardStepAccessible,
   parseWizardStepSlug,
 } from "@/features/wizard/utils/step-guards";
 import { WIZARD_STEPS } from "@/features/wizard/types/wizard-step-registry";
@@ -38,5 +39,59 @@ describe("step guards", () => {
     expect(getPreviousWizardStep("coverage")).toBe("personal");
     expect(getNextWizardStep("coverage")).toBe("review");
     expect(getNextWizardStep("review")).toBeNull();
+  });
+
+  it("gates review with coverage Yup schema completion", () => {
+    expect(isWizardStepAccessible("personal", {})).toBe(true);
+    expect(isWizardStepAccessible("coverage", {})).toBe(false);
+    expect(isWizardStepAccessible("review", {})).toBe(false);
+
+    expect(isWizardStepAccessible("coverage", { quoteId: "q-1" })).toBe(true);
+    expect(
+      isWizardStepAccessible("review", {
+        quoteId: "q-1",
+        // API defaults coverageType to STANDARD; health answers still missing.
+        quote: { coverageType: "STANDARD" },
+      }),
+    ).toBe(false);
+    expect(
+      isWizardStepAccessible("review", {
+        quoteId: "q-1",
+        quote: {
+          coverageType: "STANDARD",
+          takesPrescriptionMedication: false,
+          usesTobacco: false,
+          needsSpouseCoverage: false,
+        },
+      }),
+    ).toBe(true);
+    expect(
+      isWizardStepAccessible("review", {
+        quoteId: "q-1",
+        quote: {
+          age: 70,
+          coverageType: "STANDARD",
+          takesPrescriptionMedication: false,
+          usesTobacco: false,
+          needsSpouseCoverage: false,
+          hasPreexistingConditions: true,
+          conditions: [],
+        },
+      }),
+    ).toBe(false);
+    expect(
+      isWizardStepAccessible("review", {
+        quoteId: "q-1",
+        quote: {
+          age: 70,
+          coverageType: "STANDARD",
+          takesPrescriptionMedication: false,
+          usesTobacco: false,
+          needsSpouseCoverage: false,
+          hasPreexistingConditions: true,
+          conditions: ["DIABETES"],
+        },
+      }),
+    ).toBe(true);
   });
 });
