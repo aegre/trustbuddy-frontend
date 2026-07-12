@@ -74,6 +74,7 @@ const premiumBannerSx = {
 const actionsSx = {
   display: "flex",
   flexWrap: "wrap",
+  justifyContent: "flex-end",
   gap: 1.5,
   pt: 1,
 } as const;
