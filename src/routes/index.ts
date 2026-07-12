@@ -1,5 +1,7 @@
 /**
- * Thin React Router route modules live here.
- * Pages and guards are added in Phase 2+.
+ * Route modules — path constants, guards, and thin route elements.
+ * Domain UI lives under `features/`.
  */
-export const ROUTES_MODULE = "routes" as const;
+export { paths } from "@/routes/paths";
+export type { AppPath } from "@/routes/paths";
+export { router } from "@/routes/router";
