@@ -53,13 +53,20 @@ export function toPartialUpdateCoverageRequest(
     request.needsSpouseCoverage = values.needsSpouseCoverage;
   }
 
-  if (isSeniorApplicant(age)) {
-    if (typeof values.hasPreexistingConditions === "boolean") {
+  if (
+    isSeniorApplicant(age) &&
+    typeof values.hasPreexistingConditions === "boolean"
+  ) {
+    const conditions =
+      values.hasPreexistingConditions === true
+        ? ((values.conditions ?? []) as ConditionValue[])
+        : [];
+    // Incomplete "yes" with no conditions — omit until the user picks at least one.
+    if (!(
+      values.hasPreexistingConditions === true && conditions.length === 0
+    )) {
       request.hasPreexistingConditions = values.hasPreexistingConditions;
-      request.conditions =
-        values.hasPreexistingConditions === true
-          ? ((values.conditions ?? []) as ConditionValue[])
-          : [];
+      request.conditions = conditions;
     }
   }
 

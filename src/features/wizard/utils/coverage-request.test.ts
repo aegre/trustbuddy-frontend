@@ -74,4 +74,36 @@ describe("coverage-request", () => {
       conditions: [],
     });
   });
+
+  it("given_seniorYesWithoutConditions_when_toPartial_then_omitsPreexisting", () => {
+    expect(
+      toPartialUpdateCoverageRequest(
+        {
+          coverageType: "STANDARD",
+          hasPreexistingConditions: true,
+          conditions: [],
+        },
+        70,
+      ),
+    ).toEqual({
+      coverageType: "STANDARD",
+    });
+  });
+
+  it("given_seniorYesWithConditions_when_toPartial_then_includesBoth", () => {
+    expect(
+      toPartialUpdateCoverageRequest(
+        {
+          coverageType: "STANDARD",
+          hasPreexistingConditions: true,
+          conditions: ["DIABETES"],
+        },
+        70,
+      ),
+    ).toEqual({
+      coverageType: "STANDARD",
+      hasPreexistingConditions: true,
+      conditions: ["DIABETES"],
+    });
+  });
 });
