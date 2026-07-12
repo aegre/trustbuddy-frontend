@@ -14,6 +14,14 @@ export function isApiError(error: unknown): error is ApiError {
   );
 }
 
+function isClientErrorStatus(status: number): boolean {
+  return status >= 400 && status < 500;
+}
+
+/**
+ * Extract a message from an API error body when present.
+ * Prefer `getUserFacingErrorMessage` for UI copy.
+ */
 export function getApiErrorMessage(
   error: unknown,
   fallback = "Something went wrong",
@@ -45,6 +53,20 @@ export function getApiErrorMessage(
     return message;
   }
 
+  return fallback;
+}
+
+/**
+ * Safe copy for end users: trust API body messages only for 4xx;
+ * otherwise return `fallback` (hides 5xx / unknown internals).
+ */
+export function getUserFacingErrorMessage(
+  error: unknown,
+  fallback = "Something went wrong",
+): string {
+  if (isApiError(error) && isClientErrorStatus(error.status)) {
+    return getApiErrorMessage(error, fallback);
+  }
   return fallback;
 }
 

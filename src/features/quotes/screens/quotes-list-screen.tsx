@@ -7,7 +7,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useCallback, useMemo } from "react";
 import { Link as RouterLink } from "react-router-dom";
-import { getApiErrorMessage } from "@/api/types";
+import { getUserFacingErrorMessage } from "@/api/types";
 import { QuotesTable } from "@/features/quotes/components/quotes-table";
 import { useQuotesList } from "@/features/quotes/hooks/use-quotes-list";
 import { paths } from "@/routes/paths";
@@ -73,7 +73,7 @@ export function QuotesListScreen() {
 
         {isError ? (
           <Alert severity="error" action={errorAction}>
-            {getApiErrorMessage(error, "Could not load quotes")}
+            {getUserFacingErrorMessage(error, "Could not load quotes")}
           </Alert>
         ) : null}
 

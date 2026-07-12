@@ -14,4 +14,9 @@ export type {
 } from "@/api/generated/model";
 
 export type { ApiError, ApiErrorBody } from "@/api/errors";
-export { createApiError, getApiErrorMessage, isApiError } from "@/api/errors";
+export {
+  createApiError,
+  getApiErrorMessage,
+  getUserFacingErrorMessage,
+  isApiError,
+} from "@/api/errors";
