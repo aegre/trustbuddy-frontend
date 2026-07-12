@@ -162,14 +162,16 @@ src/
 
 ## Phase 5 — Wizard personal data step
 
+**Status:** Done on `feat/phase-5-personal-step`.
+
 **Deliverables**
 
-- `schemas/` + `components/steps/personal-step.tsx` + `personal-form.tsx`
-- New: `POST /api/v1/quotes` then set `quoteId` in URL; edit: `PATCH /api/v1/quotes/{id}`
-- Prefill from detail Query; handle **409**
-- MSW create/update tests
+- [x] `schemas/` + `components/steps/personal-step.tsx` + `personal-form.tsx`
+- [x] New: `POST /api/v1/quotes` then set `quoteId` in URL; edit: `PATCH /api/v1/quotes/{id}`
+- [x] Prefill from detail Query; handle **409**
+- [x] MSW create/update tests
 
-**Done when:** User creates/updates personal info and advances with a real `quoteId`.
+**Done when:** User creates/updates personal info and advances with a real `quoteId`. ✅
 
 ---
 

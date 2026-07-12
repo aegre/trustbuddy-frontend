@@ -43,7 +43,7 @@ function mockQuote(overrides: Parameters<typeof createQuoteFixture>[0] = {}) {
 }
 
 describe("wizard routes", () => {
-  it("given_personalStep_when_loaded_then_showsStepperAndStub", async () => {
+  it("given_personalStep_when_loaded_then_showsFormAndContinue", async () => {
     renderWizardAt(paths.wizardPersonal);
 
     expect(
@@ -52,10 +52,11 @@ describe("wizard routes", () => {
     expect(
       screen.getByRole("heading", { name: /personal information/i }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /^next$/i })).toHaveAttribute(
-      "href",
-      `${paths.wizardBase}/coverage`,
-    );
+    expect(screen.getByLabelText("Full name")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^continue$/i }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^next$/i })).toBeNull();
     expect(screen.queryByRole("link", { name: /^previous$/i })).toBeNull();
   });
 
@@ -72,42 +73,59 @@ describe("wizard routes", () => {
         /this quote is submitted and can no longer be edited/i,
       ),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText("Full name")).toHaveValue("Submitted User");
     expect(
-      screen.getByText(/viewing submitted user \(read-only\)/i),
-    ).toBeInTheDocument();
+      screen.queryByRole("button", { name: /^continue$/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^next$/i })).toHaveAttribute(
+      "href",
+      `${paths.wizardBase}/coverage?quoteId=q-sub`,
+    );
   });
 
-  it("given_draftQuote_when_loaded_then_allowsEdit", async () => {
-    mockQuote({ id: "q-9", name: "Ada Lovelace", status: "DRAFT" });
+  it("given_draftQuote_when_loaded_then_prefillsEditableForm", async () => {
+    mockQuote({
+      id: "q-9",
+      name: "Ada Lovelace",
+      email: "ada@example.com",
+      age: 36,
+      zipCode: "06600",
+      status: "DRAFT",
+    });
     renderWizardAt(`${paths.wizardPersonal}?quoteId=q-9`);
 
+    expect(await screen.findByLabelText("Full name")).toHaveValue(
+      "Ada Lovelace",
+    );
+    expect(screen.getByLabelText("Email")).toHaveValue("ada@example.com");
     expect(
-      await screen.findByText(/editing ada lovelace \(draft\)/i),
+      screen.getByRole("button", { name: /^continue$/i }),
     ).toBeInTheDocument();
     expect(
       screen.queryByText(/can no longer be edited/i),
     ).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /^next$/i })).toBeNull();
   });
 
   it("given_quoteId_when_loaded_then_showsQuoteFromQuery", async () => {
     mockQuote({ id: "q-9", name: "Ada Lovelace", status: "DRAFT" });
     renderWizardAt(`${paths.wizardPersonal}?quoteId=q-9`);
 
-    expect(
-      await screen.findByText(/editing ada lovelace \(draft\)/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByLabelText("Full name")).toHaveValue(
+      "Ada Lovelace",
+    );
   });
 
-  it("given_quoteId_when_navigatingSteps_then_preservesQuery", async () => {
+  it("given_quoteId_when_navigatingViaStepper_then_preservesQuery", async () => {
     mockQuote({ id: "q-9", name: "Ada Lovelace", status: "DRAFT" });
     const user = userEvent.setup();
     renderWizardAt(`${paths.wizardPersonal}?quoteId=q-9`);
 
-    expect(
-      await screen.findByText(/editing ada lovelace \(draft\)/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByLabelText("Full name")).toHaveValue(
+      "Ada Lovelace",
+    );
 
-    await user.click(screen.getByRole("link", { name: /^next$/i }));
+    await user.click(screen.getByRole("tab", { name: /^coverage$/i }));
 
     expect(
       await screen.findByRole("heading", { name: /^coverage$/i }),
@@ -154,10 +172,10 @@ describe("wizard routes", () => {
 
     await user.click(screen.getByRole("button", { name: /^retry$/i }));
 
+    expect(await screen.findByLabelText("Full name")).toHaveValue("Retry User");
     expect(
-      await screen.findByText(/editing retry user \(draft\)/i),
+      screen.getByRole("button", { name: /^continue$/i }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /^next$/i })).toBeInTheDocument();
   });
 
   it("given_invalidStepSlug_when_loaded_then_redirectsToPersonal", async () => {
@@ -167,9 +185,9 @@ describe("wizard routes", () => {
     expect(
       await screen.findByRole("heading", { name: /personal information/i }),
     ).toBeInTheDocument();
-    expect(
-      await screen.findByText(/editing redirect user \(draft\)/i),
-    ).toBeInTheDocument();
+    expect(await screen.findByLabelText("Full name")).toHaveValue(
+      "Redirect User",
+    );
   });
 
   it("given_wizardBase_when_loaded_then_redirectsToPersonal", async () => {
@@ -177,6 +195,134 @@ describe("wizard routes", () => {
 
     expect(
       await screen.findByRole("heading", { name: /personal information/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("given_newQuote_when_personalSaved_then_createsAndAdvancesWithQuoteId", async () => {
+    server.use(
+      http.post("*/api/v1/quotes", async ({ request }) => {
+        const body = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json(
+          createQuoteFixture({
+            id: "q-created",
+            name: body.name as string,
+            email: body.email as string,
+            age: body.age as number,
+            zipCode: body.zipCode as string,
+          }),
+          { status: 200 },
+        );
+      }),
+      http.get("*/api/v1/quotes/:id", ({ params }) =>
+        HttpResponse.json(
+          createQuoteFixture({
+            id: String(params.id),
+            name: "Grace Hopper",
+            email: "grace@example.com",
+            age: 40,
+            zipCode: "10100",
+          }),
+          { status: 200 },
+        ),
+      ),
+    );
+
+    const user = userEvent.setup();
+    const { router } = renderWizardAt(paths.wizardPersonal);
+
+    await user.type(screen.getByLabelText("Full name"), "Grace Hopper");
+    await user.type(screen.getByLabelText("Email"), "grace@example.com");
+    await user.type(screen.getByLabelText("Age"), "40");
+    await user.type(screen.getByLabelText("ZIP code"), "10100");
+    await user.click(screen.getByRole("button", { name: /^continue$/i }));
+
+    expect(
+      await screen.findByRole("heading", { name: /^coverage$/i }),
+    ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(`${paths.wizardBase}/coverage`);
+    expect(router.state.location.search).toBe("?quoteId=q-created");
+  });
+
+  it("given_draftQuote_when_personalSaved_then_patchesAndAdvances", async () => {
+    mockQuote({
+      id: "q-9",
+      name: "Ada Lovelace",
+      email: "ada@example.com",
+      age: 36,
+      zipCode: "06600",
+      status: "DRAFT",
+    });
+    server.use(
+      http.patch("*/api/v1/quotes/:id", async ({ params, request }) => {
+        const body = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json(
+          createQuoteFixture({
+            id: String(params.id),
+            name: body.name as string,
+            email: body.email as string,
+            age: body.age as number,
+            zipCode: body.zipCode as string,
+            status: "DRAFT",
+          }),
+          { status: 200 },
+        );
+      }),
+    );
+
+    const user = userEvent.setup();
+    const { router } = renderWizardAt(`${paths.wizardPersonal}?quoteId=q-9`);
+
+    expect(await screen.findByLabelText("Full name")).toHaveValue(
+      "Ada Lovelace",
+    );
+
+    await user.clear(screen.getByLabelText("Full name"));
+    await user.type(screen.getByLabelText("Full name"), "Augusta Ada");
+    await user.click(screen.getByRole("button", { name: /^continue$/i }));
+
+    expect(
+      await screen.findByRole("heading", { name: /^coverage$/i }),
+    ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(`${paths.wizardBase}/coverage`);
+    expect(router.state.location.search).toBe("?quoteId=q-9");
+  });
+
+  it("given_409_when_personalSaved_then_showsAlertAndStays", async () => {
+    mockQuote({
+      id: "q-conflict",
+      name: "Conflict User",
+      email: "conflict@example.com",
+      age: 30,
+      zipCode: "12345",
+      status: "DRAFT",
+    });
+    server.use(
+      http.patch("*/api/v1/quotes/:id", () =>
+        HttpResponse.json(
+          { message: "Quote was updated elsewhere" },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    const user = userEvent.setup();
+    const { router } = renderWizardAt(
+      `${paths.wizardPersonal}?quoteId=q-conflict`,
+    );
+
+    expect(await screen.findByLabelText("Full name")).toHaveValue(
+      "Conflict User",
+    );
+
+    await user.click(screen.getByRole("button", { name: /^continue$/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Quote was updated elsewhere",
+    );
+    expect(router.state.location.pathname).toBe(paths.wizardPersonal);
+    expect(router.state.location.search).toBe("?quoteId=q-conflict");
+    expect(
+      screen.getByRole("heading", { name: /personal information/i }),
     ).toBeInTheDocument();
   });
 });

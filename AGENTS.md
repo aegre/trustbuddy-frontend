@@ -65,6 +65,7 @@ Each feature module uses subfolders as they gain files (no empty placeholders):
   - `types.ts` re-exports aliases over Orval models (e.g. `AuthTokenRequest`, `QuoteResponse`) plus `ApiError` helpers from `@/api/errors`.
   - Form Yup schemas stay hand-written in `features/*/schemas/` but should align with request DTO shapes.
 - **Never** store the JWT in `localStorage` or `sessionStorage`.
+- **React memoization** — do not add `useMemo` / `useCallback` or hoist tiny prop objects “for performance” by default. Modern React handles small object creation fine. Optimize only when there is evidence: a library memoizes on prop identity, React DevTools shows excess rerenders, or profiling shows a measurable win. Otherwise the indirection is cognitive overhead (e.g. MUI `slotProps` objects can stay inline).
 
 ## Do not commit
 
