@@ -113,6 +113,36 @@ describe("CoverageForm", () => {
     expect(screen.getByText(/\$120\.50/)).toBeInTheDocument();
   });
 
+  it("given_premiumLoading_when_rendered_then_showsSpinnerInsteadOfCost", () => {
+    renderCoverageForm({
+      estimatedMonthlyPremium: 120.5,
+      isPremiumLoading: true,
+    });
+
+    expect(screen.getByText(/estimated monthly premium/i)).toBeInTheDocument();
+    expect(
+      screen.getByLabelText(/updating estimated monthly premium/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/\$120\.50/)).not.toBeInTheDocument();
+  });
+
+  it("given_premiumError_when_retryClicked_then_callsOnRetryPremium", async () => {
+    const user = userEvent.setup();
+    const onRetryPremium = vi.fn();
+    renderCoverageForm({
+      estimatedMonthlyPremium: 100,
+      premiumErrorMessage: "Could not update premium",
+      onRetryPremium,
+      defaultValues: { coverageType: "STANDARD" },
+    });
+
+    await user.click(screen.getByRole("button", { name: /^retry$/i }));
+
+    expect(onRetryPremium).toHaveBeenCalledWith(
+      expect.objectContaining({ coverageType: "STANDARD" }),
+    );
+  });
+
   it("given_fieldChange_when_incomplete_then_callsOnValuesChange", async () => {
     const user = userEvent.setup();
     const onValuesChange = vi.fn();

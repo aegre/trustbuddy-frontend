@@ -1,9 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
+import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   getGetQuoteQueryKey,
   getListQuotesQueryKey,
+  updateCoverage,
   useUpdateCoverage,
 } from "@/api/generated/quotes/quotes";
 import { getUserFacingErrorMessage } from "@/api/types";
@@ -19,18 +21,35 @@ import { wizardHref } from "@/features/wizard/utils/wizard-href";
 
 const PREMIUM_PATCH_DEBOUNCE_MS = 300;
 
+function isAbortError(error: unknown): boolean {
+  return (
+    (error instanceof DOMException && error.name === "AbortError") ||
+    (error instanceof Error && error.name === "AbortError")
+  );
+}
+
 export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [premiumErrorMessage, setPremiumErrorMessage] = useState<string | null>(
+    null,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPremiumLoading, setIsPremiumLoading] = useState(false);
   const [premium, setPremium] = useState<number | undefined>(
     quote?.estimatedMonthlyPremium,
   );
-  const patchGeneration = useRef(0);
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const lastValuesRef = useRef<CoverageFormValues | null>(null);
+  const quoteIdRef = useRef(quoteId);
+  const ageRef = useRef(quote?.age);
+  const readOnlyRef = useRef(readOnly);
+  quoteIdRef.current = quoteId;
+  ageRef.current = quote?.age;
+  readOnlyRef.current = readOnly;
 
-  const updateCoverage = useUpdateCoverage();
+  const updateCoverageMutation = useUpdateCoverage();
 
   const defaultValues = useMemo((): Partial<CoverageFormValues> | undefined => {
     if (!quote) {
@@ -62,52 +81,82 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
     [queryClient],
   );
 
-  useEffect(() => {
-    return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-      patchGeneration.current += 1;
-    };
+  const cancelPendingPremiumPatch = useCallback(() => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
   }, []);
 
   const patchPremium = useCallback(
     async (values: CoverageFormValues) => {
-      if (!quoteId || readOnly) {
+      const id = quoteIdRef.current;
+      if (!id || readOnlyRef.current) {
+        setIsPremiumLoading(false);
         return;
       }
 
-      const data = toPartialUpdateCoverageRequest(values, quote?.age);
+      const data = toPartialUpdateCoverageRequest(values, ageRef.current);
       if (!data) {
+        setIsPremiumLoading(false);
         return;
       }
 
-      const generation = ++patchGeneration.current;
+      cancelPendingPremiumPatch();
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      setIsPremiumLoading(true);
+      setPremiumErrorMessage(null);
+
       try {
-        const response = await updateCoverage.mutateAsync({
-          id: quoteId,
-          data,
+        const response = await updateCoverage(id, data, {
+          signal: controller.signal,
         });
-        if (generation === patchGeneration.current) {
-          setPremium(response.data.estimatedMonthlyPremium);
+        setPremium(response.data.estimatedMonthlyPremium);
+        setIsPremiumLoading(false);
+      } catch (error) {
+        if (isAbortError(error)) {
+          return;
         }
-      } catch {
-        // Live refresh is best-effort; Continue still surfaces errors.
+        setIsPremiumLoading(false);
+        setPremiumErrorMessage(
+          getUserFacingErrorMessage(error, "Could not update premium"),
+        );
       }
     },
-    [quote?.age, quoteId, readOnly, updateCoverage],
+    [cancelPendingPremiumPatch],
   );
+
+  const debouncedPatchPremium = useMemo(
+    () =>
+      debounce((values: CoverageFormValues) => {
+        void patchPremium(values);
+      }, PREMIUM_PATCH_DEBOUNCE_MS),
+    [patchPremium],
+  );
+
+  useEffect(() => {
+    return () => {
+      debouncedPatchPremium.cancel();
+      cancelPendingPremiumPatch();
+    };
+  }, [cancelPendingPremiumPatch, debouncedPatchPremium]);
 
   const onValuesChange = useCallback(
     (values: CoverageFormValues) => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-      }
-      debounceTimer.current = setTimeout(() => {
-        void patchPremium(values);
-      }, PREMIUM_PATCH_DEBOUNCE_MS);
+      lastValuesRef.current = values;
+      setPremiumErrorMessage(null);
+      setIsPremiumLoading(true);
+      debouncedPatchPremium(values);
     },
-    [patchPremium],
+    [debouncedPatchPremium],
+  );
+
+  const onRetryPremium = useCallback(
+    (values: CoverageFormValues) => {
+      lastValuesRef.current = values;
+      debouncedPatchPremium.cancel();
+      void patchPremium(values);
+    },
+    [debouncedPatchPremium, patchPremium],
   );
 
   const onSubmit = useCallback(
@@ -117,22 +166,19 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
         return;
       }
 
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
-        debounceTimer.current = null;
-      }
+      debouncedPatchPremium.cancel();
+      cancelPendingPremiumPatch();
+      setIsPremiumLoading(false);
+      setPremiumErrorMessage(null);
 
       setErrorMessage(null);
       setIsSubmitting(true);
-      const generation = ++patchGeneration.current;
       try {
-        const response = await updateCoverage.mutateAsync({
+        const response = await updateCoverageMutation.mutateAsync({
           id: quoteId,
           data: toUpdateCoverageRequest(values, quote?.age),
         });
-        if (generation === patchGeneration.current) {
-          setPremium(response.data.estimatedMonthlyPremium);
-        }
+        setPremium(response.data.estimatedMonthlyPremium);
         await invalidateQuoteQueries(quoteId);
         navigate(wizardHref("review", { quoteId }));
       } catch (error) {
@@ -143,7 +189,15 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
         setIsSubmitting(false);
       }
     },
-    [invalidateQuoteQueries, navigate, quote?.age, quoteId, updateCoverage],
+    [
+      cancelPendingPremiumPatch,
+      debouncedPatchPremium,
+      invalidateQuoteQueries,
+      navigate,
+      quote?.age,
+      quoteId,
+      updateCoverageMutation,
+    ],
   );
 
   if (!quoteId) {
@@ -161,9 +215,12 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
       key={quoteId}
       onSubmit={onSubmit}
       onValuesChange={readOnly ? undefined : onValuesChange}
+      onRetryPremium={readOnly ? undefined : onRetryPremium}
       defaultValues={defaultValues}
       age={quote?.age}
       estimatedMonthlyPremium={premium}
+      isPremiumLoading={isPremiumLoading}
+      premiumErrorMessage={premiumErrorMessage}
       errorMessage={errorMessage}
       isSubmitting={isSubmitting}
       readOnly={readOnly}

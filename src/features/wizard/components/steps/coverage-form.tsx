@@ -2,6 +2,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useEffect, useRef } from "react";
@@ -22,9 +23,12 @@ import {
 export type CoverageFormProps = {
   onSubmit: (values: CoverageFormValues) => void | Promise<void>;
   onValuesChange?: (values: CoverageFormValues) => void;
+  onRetryPremium?: (values: CoverageFormValues) => void;
   defaultValues?: Partial<CoverageFormValues>;
   age?: number;
   estimatedMonthlyPremium?: number;
+  isPremiumLoading?: boolean;
+  premiumErrorMessage?: string | null;
   errorMessage?: string | null;
   isSubmitting?: boolean;
   readOnly?: boolean;
@@ -32,12 +36,23 @@ export type CoverageFormProps = {
 
 const formSx = { width: "100%" } as const;
 
+const premiumRowSx = {
+  display: "flex",
+  alignItems: "center",
+  flexWrap: "wrap",
+  gap: 1,
+  minHeight: 24,
+} as const;
+
 export function CoverageForm({
   onSubmit,
   onValuesChange,
+  onRetryPremium,
   defaultValues,
   age,
   estimatedMonthlyPremium,
+  isPremiumLoading = false,
+  premiumErrorMessage,
   errorMessage,
   isSubmitting = false,
   readOnly = false,
@@ -52,6 +67,7 @@ export function CoverageForm({
   const {
     control,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm<CoverageFormValues>({
     resolver: yupResolver(schema) as Resolver<CoverageFormValues>,
@@ -74,6 +90,11 @@ export function CoverageForm({
     onValuesChangeRef.current?.(watchedValues as CoverageFormValues);
   }, [watchedValues]);
 
+  const showPremiumRow =
+    typeof estimatedMonthlyPremium === "number" ||
+    isPremiumLoading ||
+    Boolean(premiumErrorMessage);
+
   return (
     <Box
       component="form"
@@ -86,11 +107,39 @@ export function CoverageForm({
           Coverage
         </Typography>
 
-        {typeof estimatedMonthlyPremium === "number" ? (
-          <Typography variant="body1">
-            Estimated monthly premium:{" "}
-            <strong>{formatQuotePremium(estimatedMonthlyPremium)}</strong>
-          </Typography>
+        {showPremiumRow ? (
+          <Stack spacing={1}>
+            <Typography component="div" variant="body1" sx={premiumRowSx}>
+              <span>Estimated monthly premium:</span>
+              {isPremiumLoading ? (
+                <CircularProgress
+                  size={16}
+                  aria-label="Updating estimated monthly premium"
+                />
+              ) : typeof estimatedMonthlyPremium === "number" ? (
+                <strong>{formatQuotePremium(estimatedMonthlyPremium)}</strong>
+              ) : null}
+            </Typography>
+            {premiumErrorMessage && !isPremiumLoading ? (
+              <Alert
+                severity="error"
+                role="alert"
+                action={
+                  onRetryPremium ? (
+                    <Button
+                      color="inherit"
+                      size="small"
+                      onClick={() => onRetryPremium(getValues())}
+                    >
+                      Retry
+                    </Button>
+                  ) : null
+                }
+              >
+                {premiumErrorMessage}
+              </Alert>
+            ) : null}
+          </Stack>
         ) : null}
 
         {errorMessage ? (

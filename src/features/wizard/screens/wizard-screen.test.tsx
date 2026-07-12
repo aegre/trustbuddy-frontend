@@ -339,9 +339,8 @@ describe("wizard routes", () => {
     expect(
       await screen.findByRole("heading", { name: /^coverage$/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/estimated monthly premium/i)).toHaveTextContent(
-      /\$120\.50/,
-    );
+    expect(screen.getByText(/estimated monthly premium/i)).toBeInTheDocument();
+    expect(screen.getByText(/\$120\.50/)).toBeInTheDocument();
   });
 
   it("given_incompleteCoverage_when_typeChanged_then_updatesPremium", async () => {
@@ -377,16 +376,12 @@ describe("wizard routes", () => {
     expect(
       await screen.findByRole("heading", { name: /^coverage$/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/estimated monthly premium/i)).toHaveTextContent(
-      /\$100\.00/,
-    );
+    expect(screen.getByText(/\$100\.00/)).toBeInTheDocument();
 
     await user.click(screen.getByRole("radio", { name: /^standard$/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/estimated monthly premium/i)).toHaveTextContent(
-        /\$155\.25/,
-      );
+      expect(screen.getByText(/\$155\.25/)).toBeInTheDocument();
     });
     expect(patchCount).toBeGreaterThanOrEqual(1);
     expect(
