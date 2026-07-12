@@ -1,7 +1,7 @@
-/** Coverage type card label — stronger emphasis than condition options. */
+/** Coverage type card label — stronger when unselected; selected inherits card. */
 export const coverageTypeCardTitleSx = {
   fontWeight: 700,
   fontSize: "1rem",
   lineHeight: 1.4,
-  color: "text.primary",
+  color: "inherit",
 } as const;

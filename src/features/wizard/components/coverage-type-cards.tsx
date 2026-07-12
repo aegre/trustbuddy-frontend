@@ -9,6 +9,7 @@ import Typography from "@mui/material/Typography";
 import {
   hiddenControlSx,
   selectableCardActionSx,
+  selectableCardClassName,
   selectableCardSx,
 } from "@/features/wizard/components/selectable-card-styles";
 import { coverageTypeCardTitleSx } from "@/features/wizard/components/coverage-type-cards.styles";
@@ -68,7 +69,8 @@ export function CoverageTypeCards({
             <Card
               key={type}
               variant="outlined"
-              sx={selectableCardSx(selected, disabled)}
+              className={selectableCardClassName(selected, disabled)}
+              sx={selectableCardSx}
             >
               <CardActionArea
                 component="label"

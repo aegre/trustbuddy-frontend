@@ -10,6 +10,7 @@ import { conditionCardTitleSx } from "@/features/wizard/components/condition-car
 import {
   hiddenControlSx,
   selectableCardActionSx,
+  selectableCardClassName,
   selectableCardSx,
 } from "@/features/wizard/components/selectable-card-styles";
 import {
@@ -61,7 +62,8 @@ export function ConditionCards({
             <Card
               key={condition}
               variant="outlined"
-              sx={selectableCardSx(selected, disabled)}
+              className={selectableCardClassName(selected, disabled)}
+              sx={selectableCardSx}
             >
               <CardActionArea
                 component="label"
@@ -81,10 +83,7 @@ export function ConditionCards({
                     );
                   }}
                 />
-                <Typography
-                  component="span"
-                  sx={conditionCardTitleSx(selected)}
-                >
+                <Typography component="span" sx={conditionCardTitleSx}>
                   {CONDITION_LABELS[condition]}
                 </Typography>
               </CardActionArea>

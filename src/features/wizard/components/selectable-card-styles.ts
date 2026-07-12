@@ -24,28 +24,49 @@ export const selectableCardActionSx = {
   alignItems: "center",
 } as const;
 
-export function selectableCardSx(selected: boolean, disabled: boolean) {
-  return {
-    position: "relative",
-    overflow: "hidden",
-    borderStyle: "solid",
-    borderWidth: 1,
-    borderColor: selected ? "primary.main" : "divider",
-    bgcolor: selected ? "action.selected" : "background.paper",
-    boxShadow: "none",
-    opacity: disabled ? 0.55 : 1,
-    transition:
-      "border-color 120ms ease, background-color 120ms ease, opacity 120ms ease",
-    "&:hover": disabled
-      ? undefined
-      : {
-          borderColor: selected ? "primary.main" : "primary.light",
-          bgcolor: selected ? "action.selected" : "action.hover",
-        },
-    "&:has(.Mui-focusVisible)": {
-      outline: "2px solid",
-      outlineColor: "primary.main",
-      outlineOffset: 2,
-    },
-  } as const;
+/** MUI global state classes — same tokens as ToggleButton. */
+export function selectableCardClassName(
+  selected: boolean,
+  disabled: boolean,
+): string {
+  return [selected && "Mui-selected", disabled && "Mui-disabled"]
+    .filter(Boolean)
+    .join(" ");
 }
+
+/** Selected / hover / disabled chrome — mirrors MuiToggleButton theme overrides. */
+export const selectableCardSx = {
+  position: "relative",
+  overflow: "hidden",
+  "&:not(.Mui-disabled):hover": {
+    bgcolor: "action.hover",
+  },
+  "&.Mui-selected": {
+    bgcolor: "action.selected",
+    borderColor: "primary.main",
+    color: "primary.main",
+    fontWeight: 500,
+    "& .MuiTypography-root": {
+      fontWeight: 500,
+    },
+    "&:not(.Mui-disabled):hover": {
+      bgcolor: "action.selected",
+    },
+  },
+  "&.Mui-disabled": {
+    opacity: 0.5,
+    color: "text.primary",
+    borderColor: "divider",
+    bgcolor: "background.paper",
+    "&.Mui-selected": {
+      bgcolor: "action.selected",
+      borderColor: "primary.main",
+      color: "primary.main",
+    },
+  },
+  "&:has(.Mui-focusVisible)": {
+    outline: "2px solid",
+    outlineColor: "primary.main",
+    outlineOffset: 2,
+  },
+} as const;

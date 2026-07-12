@@ -111,6 +111,17 @@ export const appTheme = createTheme({
               backgroundColor: theme.palette.action.selected,
             },
           },
+          "&.Mui-disabled": {
+            opacity: 0.5,
+            color: theme.palette.text.primary,
+            borderColor: theme.palette.divider,
+            backgroundColor: theme.palette.background.paper,
+            "&.Mui-selected": {
+              backgroundColor: theme.palette.action.selected,
+              borderColor: theme.palette.primary.main,
+              color: theme.palette.primary.main,
+            },
+          },
         }),
       },
     },
