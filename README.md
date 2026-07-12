@@ -7,13 +7,20 @@ React (Vite) SPA for the Trustbuddy insurance quote flow. Pairs with [trustbuddy
 - Node.js LTS and npm
 - `make`
 - Docker + Docker Compose (for the API stack and optional frontend container)
-- Sibling clone of [trustbuddy-api](https://github.com/aegre/trustbuddy-api) next to this repo (`../trustbuddy-api`)
+- Sibling clone of [trustbuddy-api](https://github.com/aegre/trustbuddy-api) next to this repo (`../trustbuddy-api`) — use `make clone-api` if you do not have it yet
 
 ## Installation
 
 ```bash
+make clone-api          # clones ../trustbuddy-api if missing
 cp .env.example .env    # VITE_API_BASE_URL=http://localhost:8080
 make install            # npm install (+ Husky prepare)
+```
+
+Override clone location or remote if needed:
+
+```bash
+make clone-api API_REPO=../trustbuddy-api API_GIT_URL=https://github.com/aegre/trustbuddy-api.git
 ```
 
 In the API repo, also copy `.env.example` → `.env`. For browser login from Vite and/or the frontend Docker image, set:
@@ -173,9 +180,9 @@ Hard problems I hit while building, how I handled them, and what is still imperf
 
 **Challenge:** Orval needs an OpenAPI JSON, but the API is not published to a cloud Swagger host yet.
 
-**What I did:** Sync from a local sibling checkout (`../trustbuddy-api`) via `make openapi-update` after `make openapi-export` in the API repo.
+**What I did:** Sync from a local sibling checkout (`../trustbuddy-api`) via `make openapi-update` after `make openapi-export` in the API repo. Use `make clone-api` to clone the sibling if it is missing.
 
-**Still imperfect:** You must have the sibling clone and a fresh export. An ideal setup would pull the contract from a hosted Swagger/OpenAPI URL in CI and locally.
+**Still imperfect:** You still need a local API checkout and a fresh export. An ideal setup would pull the contract from a hosted Swagger/OpenAPI URL in CI and locally.
 
 ### Preserving quote identity across refresh (and wizard route guards)
 
