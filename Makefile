@@ -15,7 +15,7 @@ include .env
 export $(shell sed -n 's/=.*//p' .env)
 endif
 
-.PHONY: help install clone-api run dev build lint format format-check precommit test verify openapi-sync openapi-codegen openapi-update docker-build stack-up stack-down stack-logs stack-all-up stack-all-down stack-all-logs
+.PHONY: help install clone-api ensure-env run dev build lint format format-check precommit test verify openapi-sync openapi-codegen openapi-update docker-build stack-up stack-down stack-logs stack-all-up stack-all-down stack-all-logs
 
 help: ## Show available targets
 	@echo "Trustbuddy Frontend — available targets:"
@@ -31,6 +31,13 @@ clone-api: ## Clone trustbuddy-api sibling next to this repo ($(API_REPO))
 	else \
 		git clone "$(API_GIT_URL)" "$(API_REPO)"; \
 		echo "Cloned $(API_GIT_URL) → $(API_REPO)"; \
+	fi
+
+ensure-env: ## Create .env from .env.example when .env is missing
+	@if [ ! -f .env ]; then \
+		test -f .env.example || (echo "Missing .env.example" && exit 1); \
+		cp .env.example .env; \
+		echo "Created .env from .env.example"; \
 	fi
 
 run: ## Run Vite dev server locally
@@ -69,10 +76,10 @@ openapi-codegen: ## Generate API client/types/MSW mocks with Orval
 
 openapi-update: openapi-sync openapi-codegen ## Sync OpenAPI spec and regenerate Orval output
 
-docker-build: ## Build frontend Docker image
+docker-build: ensure-env ## Build frontend Docker image
 	docker build -t $(DOCKER_IMAGE) --build-arg VITE_API_BASE_URL=$(VITE_API_BASE_URL) .
 
-stack-up: ## Build and start frontend in Docker
+stack-up: ensure-env ## Build and start frontend in Docker
 	$(COMPOSE) up -d --build
 
 stack-down: ## Stop frontend container
