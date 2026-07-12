@@ -35,12 +35,9 @@ export function WizardScreen() {
   const StepComponent = step.Component;
   const showStepChrome = !quoteId || (!isPending && !isError);
   const readOnly = Boolean(quoteId && quote && !isQuoteEditable(quote));
-  const hideNext =
-    ((stepSlug === "personal" || stepSlug === "coverage") &&
-      (!quoteId || (!isPending && !isError && !readOnly))) ||
-    (stepSlug === "review" && Boolean(quoteId) && !isPending && !isError);
-  /** When the step owns Continue/Submit, keep Back inside the card too. */
-  const hideNav = hideNext;
+  /** Steps own Back/Continue/Next/Submit inside the card (including read-only). */
+  const hideNav = showStepChrome;
+  const hideNext = hideNav;
 
   let body: ReactNode;
   if (!quoteId) {

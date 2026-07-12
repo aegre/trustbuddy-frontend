@@ -229,6 +229,7 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
       isSubmitting={isSubmitting}
       readOnly={readOnly}
       backTo={wizardHref("personal", { quoteId })}
+      nextTo={readOnly ? wizardHref("review", { quoteId }) : undefined}
     />
   );
 }

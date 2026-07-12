@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import { useForm } from "react-hook-form";
+import { Link as RouterLink } from "react-router-dom";
 import {
   emptyPersonalDefaults,
   personalSchema,
@@ -17,6 +18,8 @@ export type PersonalFormProps = {
   errorMessage?: string | null;
   isSubmitting?: boolean;
   readOnly?: boolean;
+  /** Read-only browse: link to the next wizard step. */
+  nextTo?: string;
 };
 
 const formSx = { width: "100%" } as const;
@@ -39,6 +42,7 @@ export function PersonalForm({
   errorMessage,
   isSubmitting = false,
   readOnly = false,
+  nextTo,
 }: PersonalFormProps) {
   const disabled = isSubmitting || readOnly;
 
@@ -124,6 +128,19 @@ export function PersonalForm({
             input: { readOnly },
           }}
         />
+
+        {readOnly && nextTo ? (
+          <Box sx={actionsSx}>
+            <Button
+              component={RouterLink}
+              to={nextTo}
+              variant="contained"
+              size="large"
+            >
+              Next
+            </Button>
+          </Box>
+        ) : null}
 
         {readOnly ? null : (
           <Box sx={actionsSx}>

@@ -33,8 +33,10 @@ export type CoverageFormProps = {
   errorMessage?: string | null;
   isSubmitting?: boolean;
   readOnly?: boolean;
-  /** When set, show Back inside the card footer (preferred over layout nav). */
+  /** When set, show Back inside the card footer. */
   backTo?: string;
+  /** Read-only browse: link to the next wizard step. */
+  nextTo?: string;
 };
 
 const formSx = { width: "100%" } as const;
@@ -73,6 +75,7 @@ export function CoverageForm({
   isSubmitting = false,
   readOnly = false,
   backTo,
+  nextTo,
 }: CoverageFormProps) {
   const disabled = isSubmitting || readOnly;
   const senior = isSeniorApplicant(age);
@@ -264,7 +267,32 @@ export function CoverageForm({
           />
         ) : null}
 
-        {readOnly ? null : (
+        {readOnly ? (
+          <Box sx={actionsSx}>
+            {backTo ? (
+              <Button
+                component={RouterLink}
+                to={backTo}
+                variant="outlined"
+                size="large"
+              >
+                Back
+              </Button>
+            ) : (
+              <span />
+            )}
+            {nextTo ? (
+              <Button
+                component={RouterLink}
+                to={nextTo}
+                variant="contained"
+                size="large"
+              >
+                Next
+              </Button>
+            ) : null}
+          </Box>
+        ) : (
           <Box sx={actionsSx}>
             {backTo ? (
               <Button

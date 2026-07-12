@@ -2,6 +2,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useCallback } from "react";
@@ -17,14 +18,16 @@ import { useQuote } from "@/features/wizard/hooks/use-quote";
 import { paths } from "@/routes/paths";
 
 const containerSx = {
-  py: { xs: 6, sm: 8 },
+  py: { xs: 2, sm: 3 },
+  px: { xs: 2, sm: 3 },
   display: "flex",
   justifyContent: "center",
 } as const;
 
-const panelSx = {
+const cardSx = {
   width: "100%",
-  maxWidth: 440,
+  maxWidth: 480,
+  p: { xs: 2.5, sm: 4 },
 } as const;
 
 const iconWrapSx = {
@@ -62,7 +65,7 @@ export function SuccessScreen() {
 
   return (
     <Container component="main" maxWidth="sm" sx={containerSx}>
-      <Box sx={panelSx}>
+      <Paper elevation={0} variant="outlined" sx={cardSx}>
         <Stack spacing={3}>
           {isPending ? <PageLoading label="Loading quote" /> : null}
 
@@ -125,7 +128,7 @@ export function SuccessScreen() {
             </Box>
           ) : null}
         </Stack>
-      </Box>
+      </Paper>
     </Container>
   );
 }
