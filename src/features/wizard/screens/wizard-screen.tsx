@@ -39,8 +39,8 @@ export function WizardScreen() {
     ((stepSlug === "personal" || stepSlug === "coverage") &&
       (!quoteId || (!isPending && !isError && !readOnly))) ||
     (stepSlug === "review" && Boolean(quoteId) && !isPending && !isError);
-  const hideNav =
-    stepSlug === "review" && Boolean(quoteId) && !isPending && !isError;
+  /** When the step owns Continue/Submit, keep Back inside the card too. */
+  const hideNav = hideNext;
 
   let body: ReactNode;
   if (!quoteId) {

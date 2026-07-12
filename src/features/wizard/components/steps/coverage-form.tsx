@@ -7,6 +7,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useEffect, useRef } from "react";
 import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
+import { Link as RouterLink } from "react-router-dom";
 import { formatQuotePremium } from "@/features/quotes/utils/format-quote";
 import { ConditionCards } from "@/features/wizard/components/condition-cards";
 import { CoverageTypeCards } from "@/features/wizard/components/coverage-type-cards";
@@ -32,6 +33,8 @@ export type CoverageFormProps = {
   errorMessage?: string | null;
   isSubmitting?: boolean;
   readOnly?: boolean;
+  /** When set, show Back inside the card footer (preferred over layout nav). */
+  backTo?: string;
 };
 
 const formSx = { width: "100%" } as const;
@@ -42,6 +45,19 @@ const premiumRowSx = {
   flexWrap: "wrap",
   gap: 1,
   minHeight: 24,
+} as const;
+
+const actionsSx = {
+  display: "flex",
+  flexDirection: { xs: "column-reverse", sm: "row" },
+  flexWrap: "wrap",
+  justifyContent: "space-between",
+  alignItems: { xs: "stretch", sm: "center" },
+  gap: 1.5,
+  pt: 1,
+  "& > .MuiButton-root": {
+    width: { xs: "100%", sm: "auto" },
+  },
 } as const;
 
 export function CoverageForm({
@@ -56,6 +72,7 @@ export function CoverageForm({
   errorMessage,
   isSubmitting = false,
   readOnly = false,
+  backTo,
 }: CoverageFormProps) {
   const disabled = isSubmitting || readOnly;
   const senior = isSeniorApplicant(age);
@@ -248,7 +265,19 @@ export function CoverageForm({
         ) : null}
 
         {readOnly ? null : (
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Box sx={actionsSx}>
+            {backTo ? (
+              <Button
+                component={RouterLink}
+                to={backTo}
+                variant="outlined"
+                size="large"
+              >
+                Back
+              </Button>
+            ) : (
+              <span />
+            )}
             <Button
               type="submit"
               variant="contained"

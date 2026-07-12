@@ -21,6 +21,18 @@ export type PersonalFormProps = {
 
 const formSx = { width: "100%" } as const;
 
+const actionsSx = {
+  display: "flex",
+  flexDirection: { xs: "column-reverse", sm: "row" },
+  justifyContent: "flex-end",
+  alignItems: { xs: "stretch", sm: "center" },
+  gap: 1.5,
+  pt: 1,
+  "& > .MuiButton-root": {
+    width: { xs: "100%", sm: "auto" },
+  },
+} as const;
+
 export function PersonalForm({
   onSubmit,
   defaultValues,
@@ -114,7 +126,7 @@ export function PersonalForm({
         />
 
         {readOnly ? null : (
-          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+          <Box sx={actionsSx}>
             <Button
               type="submit"
               variant="contained"

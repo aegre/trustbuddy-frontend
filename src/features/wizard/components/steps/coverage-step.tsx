@@ -228,6 +228,7 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
       errorMessage={errorMessage}
       isSubmitting={isSubmitting}
       readOnly={readOnly}
+      backTo={wizardHref("personal", { quoteId })}
     />
   );
 }
