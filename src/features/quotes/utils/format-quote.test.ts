@@ -4,7 +4,7 @@ import {
   formatQuotePremium,
   formatQuoteStatus,
 } from "@/features/quotes/utils/format-quote";
-import { paths, wizardPersonalHref } from "@/routes/paths";
+import { paths, successHref, wizardPersonalHref } from "@/routes/paths";
 
 describe("formatQuote", () => {
   it("formats premium and status", () => {
@@ -27,5 +27,11 @@ describe("wizardPersonalHref", () => {
     expect(wizardPersonalHref("q-1")).toBe(
       `${paths.wizardPersonal}?quoteId=q-1`,
     );
+  });
+});
+
+describe("successHref", () => {
+  it("builds success confirmation href", () => {
+    expect(successHref("q-1")).toBe(`${paths.success}?quoteId=q-1`);
   });
 });

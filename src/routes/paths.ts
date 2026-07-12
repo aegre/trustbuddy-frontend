@@ -5,6 +5,7 @@ export const paths = {
   wizardBase: "/wizard",
   wizardStep: "/wizard/:stepSlug",
   wizardPersonal: "/wizard/personal",
+  success: "/success",
 } as const;
 
 export type AppPath = (typeof paths)[keyof typeof paths];
@@ -16,4 +17,10 @@ export function wizardPersonalHref(quoteId?: string): string {
   }
   const params = new URLSearchParams({ quoteId });
   return `${paths.wizardPersonal}?${params.toString()}`;
+}
+
+/** Confirmation screen after a successful quote submit. */
+export function successHref(quoteId: string): string {
+  const params = new URLSearchParams({ quoteId });
+  return `${paths.success}?${params.toString()}`;
 }

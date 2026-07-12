@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  canSubmitQuote,
   isDraftQuote,
   isQuoteEditable,
 } from "@/features/wizard/utils/quote-edit-guards";
@@ -19,5 +20,14 @@ describe("quote edit guards", () => {
     expect(isQuoteEditable({ status: "EXPIRED" })).toBe(false);
     expect(isQuoteEditable({ status: "SUBMISSION_FAILED" })).toBe(false);
     expect(isQuoteEditable({ status: undefined })).toBe(false);
+  });
+
+  it("allows submit for DRAFT and SUBMISSION_FAILED only", () => {
+    expect(canSubmitQuote({ status: "DRAFT" })).toBe(true);
+    expect(canSubmitQuote({ status: "SUBMISSION_FAILED" })).toBe(true);
+    expect(canSubmitQuote({ status: "SUBMITTED" })).toBe(false);
+    expect(canSubmitQuote({ status: "EXPIRED" })).toBe(false);
+    expect(canSubmitQuote(undefined)).toBe(false);
+    expect(canSubmitQuote(null)).toBe(false);
   });
 });
