@@ -7,7 +7,7 @@ import { useAuth } from "@/features/auth/context/use-auth";
 import { server } from "@/test/msw/server";
 
 function AuthProbe() {
-  const { isAuthenticated, isPending, login, logout } = useAuth();
+  const { isAuthenticated, isPending, username, login, logout } = useAuth();
 
   return (
     <div>
@@ -15,6 +15,7 @@ function AuthProbe() {
         {isAuthenticated ? "yes" : "no"}
       </output>
       <output data-testid="pending">{isPending ? "yes" : "no"}</output>
+      <output data-testid="username">{username ?? ""}</output>
       <button
         type="button"
         onClick={() => {
@@ -74,10 +75,51 @@ describe("AuthContext", () => {
     );
   });
 
+  it("given_validMe_when_mounted_then_restoresSession", async () => {
+    server.use(
+      http.get("*/api/v1/auth/me", () =>
+        HttpResponse.json({ username: "dev-user" }, { status: 200 }),
+      ),
+    );
+
+    render(
+      <AuthProvider>
+        <AuthProbe />
+      </AuthProvider>,
+    );
+
+    expect(screen.getByTestId("pending")).toHaveTextContent("yes");
+
+    await waitFor(() => {
+      expect(screen.getByTestId("authenticated")).toHaveTextContent("yes");
+    });
+    expect(screen.getByTestId("username")).toHaveTextContent("dev-user");
+    expect(screen.getByTestId("pending")).toHaveTextContent("no");
+  });
+
+  it("given_401Me_when_mounted_then_staysGuest", async () => {
+    server.use(
+      http.get("*/api/v1/auth/me", () =>
+        HttpResponse.json({ message: "Unauthorized" }, { status: 401 }),
+      ),
+    );
+
+    render(
+      <AuthProvider>
+        <AuthProbe />
+      </AuthProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("pending")).toHaveTextContent("no");
+    });
+    expect(screen.getByTestId("authenticated")).toHaveTextContent("no");
+  });
+
   it("given_validCredentials_when_login_then_setsAuthenticated", async () => {
     const user = userEvent.setup();
     render(
-      <AuthProvider>
+      <AuthProvider initialAuthenticated={false}>
         <AuthProbe />
       </AuthProvider>,
     );
@@ -89,6 +131,7 @@ describe("AuthContext", () => {
     await waitFor(() => {
       expect(screen.getByTestId("authenticated")).toHaveTextContent("yes");
     });
+    expect(screen.getByTestId("username")).toHaveTextContent("agent");
     expect(screen.getByTestId("pending")).toHaveTextContent("no");
   });
 
@@ -101,7 +144,7 @@ describe("AuthContext", () => {
 
     const user = userEvent.setup();
     render(
-      <AuthProvider>
+      <AuthProvider initialAuthenticated={false}>
         <LoginErrorProbe />
       </AuthProvider>,
     );
@@ -129,5 +172,6 @@ describe("AuthContext", () => {
     await waitFor(() => {
       expect(screen.getByTestId("authenticated")).toHaveTextContent("no");
     });
+    expect(screen.getByTestId("username")).toHaveTextContent("");
   });
 });

@@ -10,7 +10,7 @@ import { faker } from "@faker-js/faker";
 import { HttpResponse, delay, http } from "msw";
 import type { RequestHandlerOptions } from "msw";
 
-import type { AuthTokenResponse } from "../model";
+import type { AuthMeResponse, AuthTokenResponse } from "../model";
 
 export const getTokenResponseMock = (
   overrideResponse: Partial<Extract<AuthTokenResponse, object>> = {},
@@ -24,6 +24,16 @@ export const getTokenResponseMock = (
     undefined,
   ]),
   expiresInMs: faker.helpers.arrayElement([faker.number.int(), undefined]),
+  ...overrideResponse,
+});
+
+export const getMeResponseMock = (
+  overrideResponse: Partial<Extract<AuthMeResponse, object>> = {},
+): AuthMeResponse => ({
+  username: faker.helpers.arrayElement([
+    faker.string.alpha({ length: { min: 10, max: 20 } }),
+    undefined,
+  ]),
   ...overrideResponse,
 });
 
@@ -74,7 +84,34 @@ export const getLogoutMockHandler = (
     options,
   );
 };
+
+export const getMeMockHandler = (
+  overrideResponse?:
+    | AuthMeResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) => Promise<AuthMeResponse> | AuthMeResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    "*/api/v1/auth/me",
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      await delay(0);
+
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getMeResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
 export const getAuthenticationMock = () => [
   getTokenMockHandler(),
   getLogoutMockHandler(),
+  getMeMockHandler(),
 ];

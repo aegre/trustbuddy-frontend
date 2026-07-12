@@ -3,6 +3,7 @@
  * Import from `@/api/types` in feature code — not from generated paths.
  */
 export type {
+  AuthMeResponse,
   AuthTokenRequest,
   AuthTokenResponse,
   CreateQuoteRequest,

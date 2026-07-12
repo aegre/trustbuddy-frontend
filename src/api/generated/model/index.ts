@@ -6,6 +6,7 @@
  * OpenAPI spec version: v1
  */
 
+export * from "./authMeResponse";
 export * from "./authTokenRequest";
 export * from "./authTokenResponse";
 export * from "./createQuoteRequest";

@@ -5,19 +5,49 @@
  * Insurance quote API for Trustbuddy
  * OpenAPI spec version: v1
  */
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  DataTag,
+  DefinedInitialDataOptions,
+  DefinedUseQueryResult,
   MutationFunction,
   QueryClient,
+  QueryFunction,
+  QueryKey,
+  UndefinedInitialDataOptions,
   UseMutationOptions,
   UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { AuthTokenRequest, AuthTokenResponse } from "../model";
+import type {
+  AuthMeResponse,
+  AuthTokenRequest,
+  AuthTokenResponse,
+} from "../model";
 
 import { customFetch } from "../../mutator/custom-fetch";
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+const withQueryKey = <T extends object, K>(
+  query: T,
+  queryKey: K,
+): T & { queryKey: K } => {
+  const result = { queryKey } as T & { queryKey: K };
+  for (const key of Object.keys(query)) {
+    // The explicit queryKey always wins, matching the previous
+    // `{ ...query, queryKey }` spread where it was set last.
+    if (key === "queryKey") continue;
+    Object.defineProperty(result, key, {
+      enumerable: true,
+      configurable: true,
+      get: () => (query as Record<string, unknown>)[key],
+    });
+  }
+  return result;
+};
 
 export type tokenResponse200 = {
   data: AuthTokenResponse;
@@ -206,3 +236,131 @@ export const useLogout = <TError = unknown, TContext = unknown>(
 > => {
   return useMutation(getLogoutMutationOptions(options), queryClient);
 };
+export type meResponse200 = {
+  data: AuthMeResponse;
+  status: 200;
+};
+
+export type meResponseSuccess = meResponse200 & {
+  headers: Headers;
+};
+export type meResponse = meResponseSuccess;
+
+export const getMeUrl = () => {
+  return `/api/v1/auth/me`;
+};
+
+/**
+ * Validates the JWT from the Authorization Bearer header or the HttpOnly access-token cookie. Returns 401 when missing or invalid.
+ * @summary Return the authenticated principal
+ */
+export const me = async (options?: RequestInit): Promise<meResponse> => {
+  return customFetch<meResponse>(getMeUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getMeQueryKey = () => {
+  return [`/api/v1/auth/me`] as const;
+};
+
+export const getMeQueryOptions = <
+  TData = Awaited<ReturnType<typeof me>>,
+  TError = unknown,
+>(options?: {
+  query?: Partial<
+    UseQueryOptions<Awaited<ReturnType<typeof me>>, TError, TData>
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getMeQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof me>>> = ({ signal }) =>
+    me({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof me>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type MeQueryResult = NonNullable<Awaited<ReturnType<typeof me>>>;
+export type MeQueryError = unknown;
+
+export function useMe<TData = Awaited<ReturnType<typeof me>>, TError = unknown>(
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof me>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof me>>,
+          TError,
+          Awaited<ReturnType<typeof me>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMe<TData = Awaited<ReturnType<typeof me>>, TError = unknown>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof me>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof me>>,
+          TError,
+          Awaited<ReturnType<typeof me>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useMe<TData = Awaited<ReturnType<typeof me>>, TError = unknown>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof me>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Return the authenticated principal
+ */
+
+export function useMe<TData = Awaited<ReturnType<typeof me>>, TError = unknown>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof me>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getMeQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
