@@ -37,7 +37,7 @@ test.describe("quote submit happy path", () => {
     await expect(
       page.getByRole("heading", { name: /^coverage$/i }),
     ).toBeVisible();
-    await page.getByRole("radio", { name: /^standard$/i }).click();
+    await page.getByRole("button", { name: /^standard$/i }).click();
     await page
       .getByRole("button", { name: /takes prescription medication, no/i })
       .click();
