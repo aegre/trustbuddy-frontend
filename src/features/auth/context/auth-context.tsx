@@ -6,6 +6,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { setUnauthorizedHandler } from "@/api/auth-session";
 import {
   logout as logoutRequest,
   me,
@@ -35,6 +36,7 @@ export type AuthProviderProps = {
 /**
  * UI session flags only — JWT stays in the HttpOnly cookie.
  * On mount (unless overridden for tests), calls `/api/v1/auth/me` to detect an existing session.
+ * Clears the session when customFetch reports 401 on authenticated endpoints.
  */
 export function AuthProvider({
   children,
@@ -46,6 +48,18 @@ export function AuthProvider({
   );
   const [username, setUsername] = useState<string | null>(null);
   const [isPending, setIsPending] = useState(!skipSessionCheck);
+
+  const clearSession = useCallback(() => {
+    setIsAuthenticated(false);
+    setUsername(null);
+  }, []);
+
+  useEffect(() => {
+    setUnauthorizedHandler(clearSession);
+    return () => {
+      setUnauthorizedHandler(null);
+    };
+  }, [clearSession]);
 
   useEffect(() => {
     if (skipSessionCheck) {
@@ -63,8 +77,7 @@ export function AuthProvider({
         }
       } catch {
         if (!cancelled) {
-          setIsAuthenticated(false);
-          setUsername(null);
+          clearSession();
         }
       } finally {
         if (!cancelled) {
@@ -76,7 +89,7 @@ export function AuthProvider({
     return () => {
       cancelled = true;
     };
-  }, [skipSessionCheck]);
+  }, [clearSession, skipSessionCheck]);
 
   const login = useCallback(async (credentials: AuthTokenRequest) => {
     setIsPending(true);
@@ -94,11 +107,10 @@ export function AuthProvider({
     try {
       await logoutRequest();
     } finally {
-      setIsAuthenticated(false);
-      setUsername(null);
+      clearSession();
       setIsPending(false);
     }
-  }, []);
+  }, [clearSession]);
 
   const value = useMemo(
     () => ({ isAuthenticated, isPending, username, login, logout }),

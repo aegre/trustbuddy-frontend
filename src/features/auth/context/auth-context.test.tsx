@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
+import { listQuotes } from "@/api/generated/quotes/quotes";
 import { AuthProvider } from "@/features/auth/context/auth-context";
 import { useAuth } from "@/features/auth/context/use-auth";
 import { server } from "@/test/msw/server";
@@ -33,6 +34,16 @@ function AuthProbe() {
         }}
       >
         Logout
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          void listQuotes().catch(() => {
+            /* session cleared via unauthorized handler */
+          });
+        }}
+      >
+        Load quotes
       </button>
     </div>
   );
@@ -173,5 +184,28 @@ describe("AuthContext", () => {
       expect(screen.getByTestId("authenticated")).toHaveTextContent("no");
     });
     expect(screen.getByTestId("username")).toHaveTextContent("");
+  });
+
+  it("given_authenticated_when_apiReturns401_then_clearsSession", async () => {
+    server.use(
+      http.get("*/api/v1/quotes", () =>
+        HttpResponse.json({ message: "Unauthorized" }, { status: 401 }),
+      ),
+    );
+
+    const user = userEvent.setup();
+    render(
+      <AuthProvider initialAuthenticated>
+        <AuthProbe />
+      </AuthProvider>,
+    );
+
+    expect(screen.getByTestId("authenticated")).toHaveTextContent("yes");
+
+    await user.click(screen.getByRole("button", { name: "Load quotes" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("authenticated")).toHaveTextContent("no");
+    });
   });
 });
