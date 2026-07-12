@@ -1,15 +1,23 @@
+import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import { useCallback, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getUserFacingErrorMessage } from "@/api/types";
 import { LoginForm } from "@/features/auth/components/login-form";
 import { useAuth } from "@/features/auth/context/use-auth";
 import type { LoginFormValues } from "@/features/auth/schemas/login";
+import { TrustbuddyMark } from "@/features/common/components/trustbuddy-mark";
 import { redirectPathFromLocationState } from "@/routes/login-redirect";
 
 const containerSx = { py: 8 } as const;
 const paperSx = { p: 4 } as const;
+const brandSx = {
+  display: "flex",
+  justifyContent: "center",
+  color: "text.primary",
+} as const;
 
 export function LoginScreen() {
   const { login, isPending } = useAuth();
@@ -36,13 +44,18 @@ export function LoginScreen() {
 
   return (
     <Container component="main" maxWidth="xs" sx={containerSx}>
-      <Paper elevation={1} sx={paperSx}>
-        <LoginForm
-          onSubmit={onSubmit}
-          errorMessage={errorMessage}
-          isSubmitting={isPending}
-        />
-      </Paper>
+      <Stack spacing={3}>
+        <Box sx={brandSx}>
+          <TrustbuddyMark />
+        </Box>
+        <Paper elevation={1} sx={paperSx}>
+          <LoginForm
+            onSubmit={onSubmit}
+            errorMessage={errorMessage}
+            isSubmitting={isPending}
+          />
+        </Paper>
+      </Stack>
     </Container>
   );
 }

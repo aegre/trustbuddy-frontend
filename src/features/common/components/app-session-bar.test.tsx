@@ -8,15 +8,14 @@ import { renderWithProviders } from "@/test/render";
 import { paths } from "@/routes/paths";
 
 describe("AppSessionBar", () => {
-  it("given_authenticated_when_rendered_then_showsHomeLink", () => {
+  it("given_authenticated_when_rendered_then_showsBrandHomeLink", () => {
     renderWithProviders(<AppSessionBar />, {
       initialAuthenticated: true,
     });
 
-    expect(screen.getByRole("link", { name: /^home$/i })).toHaveAttribute(
-      "href",
-      paths.home,
-    );
+    expect(
+      screen.getByRole("link", { name: /trustbuddy home/i }),
+    ).toHaveAttribute("href", paths.home);
   });
 
   it("given_authenticated_when_logoutClicked_then_callsLogoutApi", async () => {
