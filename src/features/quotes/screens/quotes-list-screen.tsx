@@ -4,6 +4,7 @@ import Container from "@mui/material/Container";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import AddIcon from "@mui/icons-material/Add";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useCallback, useEffect } from "react";
@@ -21,10 +22,30 @@ import { paths } from "@/routes/paths";
 const containerSx = { py: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } } as const;
 const headerSx = {
   display: "flex",
-  alignItems: "center",
+  alignItems: { xs: "stretch", sm: "flex-start" },
   justifyContent: "space-between",
-  gap: 1.5,
-  flexWrap: "wrap",
+  gap: 2,
+  flexDirection: { xs: "column", sm: "row" },
+} as const;
+const headerCopySx = {
+  minWidth: 0,
+  flex: "1 1 auto",
+} as const;
+const createButtonSx = {
+  flexShrink: 0,
+  alignSelf: { xs: "stretch", sm: "flex-start" },
+  borderRadius: 999,
+  px: 2,
+  gap: 1,
+} as const;
+const createIconWrapSx = {
+  display: "grid",
+  placeItems: "center",
+  width: 28,
+  height: 28,
+  borderRadius: "50%",
+  bgcolor: "primary.contrastText",
+  color: "primary.main",
 } as const;
 const paginationSx = {
   display: "flex",
@@ -111,15 +132,26 @@ export function QuotesListScreen() {
     <Container component="main" maxWidth="lg" sx={containerSx}>
       <Stack spacing={2}>
         <Box sx={headerSx}>
-          <Typography component="h1" variant="h5">
-            Quotes
-          </Typography>
+          <Box sx={headerCopySx}>
+            <Typography component="h1" variant="h4" sx={{ fontWeight: 700 }}>
+              Your quotes
+            </Typography>
+            <Typography variant="body1" color="text.secondary" sx={{ mt: 0.5 }}>
+              Review drafts, submitted quotes, and start a new one.
+            </Typography>
+          </Box>
           <Button
             component={RouterLink}
             to={paths.wizardPersonal}
             variant="contained"
+            sx={createButtonSx}
+            startIcon={
+              <Box aria-hidden sx={createIconWrapSx}>
+                <AddIcon sx={{ fontSize: 18 }} />
+              </Box>
+            }
           >
-            New quote
+            Create new quote
           </Button>
         </Box>
 

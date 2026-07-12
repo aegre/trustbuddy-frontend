@@ -23,8 +23,9 @@ describe("QuotesListScreen", () => {
           id: "q-42",
           name: "Grace Hopper",
           email: "grace@example.com",
+          coverageType: "PREMIUM",
           status: "DRAFT",
-          estimatedMonthlyPremium: 99,
+          estimatedMonthlyPremium: 189,
         }),
       ],
     });
@@ -38,17 +39,20 @@ describe("QuotesListScreen", () => {
     renderQuotesList();
 
     expect(
-      await screen.findByRole("heading", { name: /^quotes$/i }),
+      await screen.findByRole("heading", { name: /your quotes/i }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /^new quote$/i })).toHaveAttribute(
-      "href",
-      paths.wizardPersonal,
-    );
-    expect(await screen.findByText("Grace Hopper")).toBeInTheDocument();
-    expect(screen.getByText("grace@example.com")).toBeInTheDocument();
+    expect(
+      screen.getByText(/review drafts, submitted quotes, and start a new one/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /create new quote/i }),
+    ).toHaveAttribute("href", paths.wizardPersonal);
+    expect(await screen.findByText("Premium coverage")).toBeInTheDocument();
+    expect(screen.getByText("Grace Hopper")).toBeInTheDocument();
+    expect(screen.getByText(/\/mo/i)).toBeInTheDocument();
     expect(screen.getByText("Draft")).toBeInTheDocument();
 
-    const card = screen.getByRole("link", { name: /grace hopper/i });
+    const card = screen.getByRole("link", { name: /premium coverage/i });
     expect(card).toHaveAttribute("href", wizardPersonalHref("q-42"));
   });
 
@@ -72,7 +76,12 @@ describe("QuotesListScreen", () => {
       http.get("*/api/v1/quotes", () =>
         HttpResponse.json(
           createQuotesPageFixture({
-            content: [createQuoteFixture({ name: "Only One" })],
+            content: [
+              createQuoteFixture({
+                name: "Only One",
+                coverageType: "STANDARD",
+              }),
+            ],
             totalPages: 1,
             number: 0,
           }),
@@ -83,7 +92,7 @@ describe("QuotesListScreen", () => {
 
     renderQuotesList();
 
-    expect(await screen.findByText("Only One")).toBeInTheDocument();
+    expect(await screen.findByText("Standard coverage")).toBeInTheDocument();
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
   });
 
@@ -94,6 +103,7 @@ describe("QuotesListScreen", () => {
         createQuoteFixture({
           id: "q-page-0",
           name: "Page Zero Quote",
+          coverageType: "BASIC",
         }),
       ],
       totalElements: 40,
@@ -108,6 +118,7 @@ describe("QuotesListScreen", () => {
         createQuoteFixture({
           id: "q-page-1",
           name: "Page One Quote",
+          coverageType: "PREMIUM",
         }),
       ],
       totalElements: 40,
@@ -133,15 +144,15 @@ describe("QuotesListScreen", () => {
 
     renderQuotesList();
 
-    expect(await screen.findByText("Page Zero Quote")).toBeInTheDocument();
+    expect(await screen.findByText("Basic coverage")).toBeInTheDocument();
     expect(
       screen.getByRole("navigation", { name: /pagination/i }),
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /^go to page 2$/i }));
 
-    expect(await screen.findByText("Page One Quote")).toBeInTheDocument();
-    expect(screen.queryByText("Page Zero Quote")).not.toBeInTheDocument();
+    expect(await screen.findByText("Premium coverage")).toBeInTheDocument();
+    expect(screen.queryByText("Basic coverage")).not.toBeInTheDocument();
     await waitFor(() => {
       expect(requestedPages).toContain("1");
     });
@@ -184,6 +195,7 @@ describe("QuotesListScreen", () => {
         createQuoteFixture({
           id: "q-page-0",
           name: "Page Zero Quote",
+          coverageType: "BASIC",
         }),
       ],
       totalElements: 40,
@@ -198,6 +210,7 @@ describe("QuotesListScreen", () => {
         createQuoteFixture({
           id: "q-page-1",
           name: "Page One Quote",
+          coverageType: "PREMIUM",
         }),
       ],
       totalElements: 40,
@@ -227,7 +240,7 @@ describe("QuotesListScreen", () => {
 
     renderQuotesList();
 
-    expect(await screen.findByText("Page Zero Quote")).toBeInTheDocument();
+    expect(await screen.findByText("Basic coverage")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: /^go to page 2$/i }));
 
@@ -236,10 +249,10 @@ describe("QuotesListScreen", () => {
         name: /(loading|refreshing) quotes/i,
       }),
     ).toBeInTheDocument();
-    expect(screen.queryByText("Page Zero Quote")).not.toBeInTheDocument();
+    expect(screen.queryByText("Basic coverage")).not.toBeInTheDocument();
 
     releasePage1?.();
 
-    expect(await screen.findByText("Page One Quote")).toBeInTheDocument();
+    expect(await screen.findByText("Premium coverage")).toBeInTheDocument();
   });
 });

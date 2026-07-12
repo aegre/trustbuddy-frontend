@@ -1,3 +1,4 @@
+import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardActionArea from "@mui/material/CardActionArea";
 import FormControl from "@mui/material/FormControl";
@@ -6,6 +7,7 @@ import FormLabel from "@mui/material/FormLabel";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
 import Typography from "@mui/material/Typography";
+import { CoveragePlanIconBadge } from "@/features/common/components/coverage-plan-icon";
 import {
   hiddenControlSx,
   selectableCardActionSx,
@@ -23,6 +25,19 @@ const coverageTypeGridSx = {
   display: "grid",
   gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
   gap: 1.5,
+} as const;
+
+const coverageTypeContentSx = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: 1,
+  width: "100%",
+} as const;
+
+const coverageTypeActionSx = {
+  ...selectableCardActionSx,
+  py: 2,
 } as const;
 
 export type CoverageTypeCardsProps = {
@@ -78,7 +93,7 @@ export function CoverageTypeCards({
               <CardActionArea
                 component="label"
                 disabled={disabled}
-                sx={selectableCardActionSx}
+                sx={coverageTypeActionSx}
               >
                 <Radio
                   value={type}
@@ -86,9 +101,16 @@ export function CoverageTypeCards({
                   disableRipple
                   disabled={disabled}
                 />
-                <Typography component="span" sx={coverageTypeCardTitleSx}>
-                  {COVERAGE_TYPE_LABELS[type]}
-                </Typography>
+                <Box sx={coverageTypeContentSx}>
+                  <CoveragePlanIconBadge
+                    coverageType={type}
+                    size={48}
+                    iconFontSize="small"
+                  />
+                  <Typography component="span" sx={coverageTypeCardTitleSx}>
+                    {COVERAGE_TYPE_LABELS[type]}
+                  </Typography>
+                </Box>
               </CardActionArea>
             </Card>
           );
