@@ -238,6 +238,14 @@ Work not done yet, or deliberately left out of this delivery. Fine for local/dev
 
 Config exists for later happy-path flows; not required by `make verify` yet.
 
+### Sentry (production observability)
+
+**Not integrated:** Error monitoring and related production tooling via [Sentry](https://sentry.io).
+
+**Why it matters later:** The main win is reliable **error logs** (uncaught exceptions, failed requests) with stack traces and release context. In production Sentry also covers performance monitoring, session replay, alerts, and release health—useful once the app is deployed beyond local/dev.
+
+**Deferred because:** Local development and the current quote flow do not need a hosted error pipeline yet.
+
 # Sibling repo
 
 https://github.com/aegre/trustbuddy-api
