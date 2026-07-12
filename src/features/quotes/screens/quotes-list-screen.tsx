@@ -9,7 +9,7 @@ import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import { getUserFacingErrorMessage } from "@/api/types";
 import { PageErrorAlert } from "@/features/common/components/page-error-alert";
 import { PageLoading } from "@/features/common/components/page-loading";
-import { QuotesTable } from "@/features/quotes/components/quotes-table";
+import { QuotesCards } from "@/features/quotes/components/quotes-cards";
 import {
   QUOTES_LIST_DEFAULTS,
   useQuotesList,
@@ -123,7 +123,7 @@ export function QuotesListScreen() {
           </PageErrorAlert>
         ) : null}
 
-        {!isPending && !isError ? <QuotesTable quotes={quotes} /> : null}
+        {!isPending && !isError ? <QuotesCards quotes={quotes} /> : null}
 
         {showPagination ? (
           <Box sx={paginationSx}>
