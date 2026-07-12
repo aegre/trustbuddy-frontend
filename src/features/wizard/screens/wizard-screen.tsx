@@ -25,7 +25,7 @@ export function WizardScreen() {
   const [searchParams] = useSearchParams();
   const quoteId = searchParams.get("quoteId") ?? undefined;
   const stepSlug = parseWizardStepSlug(stepSlugParam);
-  const { data: quote, isPending, isError, error, refetch } = useQuote(quoteId);
+  const { data: quote, isPending, error, refetch, isError } = useQuote(quoteId);
 
   const onRetry = useCallback(() => {
     void refetch();
@@ -46,6 +46,7 @@ export function WizardScreen() {
 
   const step = WIZARD_STEP_BY_SLUG[stepSlug];
   const StepComponent = step.Component;
+  const showStepChrome = !quoteId || (!isPending && !isError);
 
   let body: ReactNode;
   if (!quoteId) {
@@ -75,7 +76,11 @@ export function WizardScreen() {
   }
 
   return (
-    <WizardLayout stepSlug={stepSlug} quoteId={quoteId}>
+    <WizardLayout
+      stepSlug={stepSlug}
+      quoteId={quoteId}
+      showStepChrome={showStepChrome}
+    >
       {body}
     </WizardLayout>
   );

@@ -21,6 +21,7 @@ import { paths } from "@/routes/paths";
 export type WizardLayoutProps = {
   stepSlug: WizardStepSlug;
   quoteId?: string;
+  showStepChrome?: boolean;
   children: ReactNode;
 };
 
@@ -43,6 +44,7 @@ const contentSx = { py: 3 } as const;
 export function WizardLayout({
   stepSlug,
   quoteId,
+  showStepChrome = true,
   children,
 }: WizardLayoutProps) {
   const activeStep = getWizardStepIndex(stepSlug);
@@ -61,48 +63,52 @@ export function WizardLayout({
           </Button>
         </Box>
 
-        <Stepper nonLinear activeStep={activeStep} alternativeLabel>
-          {WIZARD_STEPS.map((step) => (
-            <Step
-              key={step.slug}
-              completed={activeStep > getWizardStepIndex(step.slug)}
-            >
-              <StepButton
-                component={RouterLink}
-                to={wizardHref(step.slug, { quoteId })}
+        {showStepChrome ? (
+          <Stepper nonLinear activeStep={activeStep} alternativeLabel>
+            {WIZARD_STEPS.map((step) => (
+              <Step
+                key={step.slug}
+                completed={activeStep > getWizardStepIndex(step.slug)}
               >
-                {step.label}
-              </StepButton>
-            </Step>
-          ))}
-        </Stepper>
+                <StepButton
+                  component={RouterLink}
+                  to={wizardHref(step.slug, { quoteId })}
+                >
+                  {step.label}
+                </StepButton>
+              </Step>
+            ))}
+          </Stepper>
+        ) : null}
 
         <Box sx={contentSx}>{children}</Box>
 
-        <Box sx={navSx}>
-          {previous ? (
-            <Button
-              component={RouterLink}
-              to={wizardHref(previous, { quoteId })}
-              variant="outlined"
-            >
-              Previous
-            </Button>
-          ) : (
-            <span />
-          )}
-          {next ? (
-            <Button
-              component={RouterLink}
-              to={wizardHref(next, { quoteId })}
-              variant="contained"
-            >
-              Next
-            </Button>
-          ) : (
-            <span />
-          )}
-        </Box>
+        {showStepChrome ? (
+          <Box sx={navSx}>
+            {previous ? (
+              <Button
+                component={RouterLink}
+                to={wizardHref(previous, { quoteId })}
+                variant="outlined"
+              >
+                Previous
+              </Button>
+            ) : (
+              <span />
+            )}
+            {next ? (
+              <Button
+                component={RouterLink}
+                to={wizardHref(next, { quoteId })}
+                variant="contained"
+              >
+                Next
+              </Button>
+            ) : (
+              <span />
+            )}
+          </Box>
+        ) : null}
       </Stack>
     </Container>
   );

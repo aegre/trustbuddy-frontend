@@ -149,12 +149,15 @@ describe("wizard routes", () => {
     expect(
       await screen.findByText(/could not load quote/i),
     ).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: /personal/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /^next$/i })).toBeNull();
 
     await user.click(screen.getByRole("button", { name: /^retry$/i }));
 
     expect(
       await screen.findByText(/editing retry user \(draft\)/i),
     ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /^next$/i })).toBeInTheDocument();
   });
 
   it("given_invalidStepSlug_when_loaded_then_redirectsToPersonal", async () => {
