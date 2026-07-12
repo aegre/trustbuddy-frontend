@@ -1,3 +1,5 @@
+import { createApiError } from "@/api/errors";
+
 const DEFAULT_API_BASE_URL = "http://localhost:8080";
 
 function getApiBaseUrl(): string {
@@ -47,15 +49,7 @@ export async function customFetch<T>(
   const data = await getBody(response);
 
   if (!response.ok) {
-    const error = new Error(
-      `API request failed with status ${response.status}`,
-    );
-    Object.assign(error, {
-      status: response.status,
-      data,
-      headers: response.headers,
-    });
-    throw error;
+    throw createApiError(response.status, data, response.headers);
   }
 
   return {

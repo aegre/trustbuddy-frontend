@@ -85,7 +85,7 @@ src/
 
 ## Phase 1 — Initial setup
 
-**Status:** In progress (partial). Agent docs / Docker / lint landed in #4; this PR adds stack deps, Orval codegen, and `@/` alias.
+**Status:** Phase 1 setup complete on `feat/phase-1-setup` (no PR yet). Ready for Phase 2 login work.
 
 ### Done
 
@@ -99,17 +99,15 @@ src/
 - [x] Makefile / npm `openapi-sync` / `openapi-codegen` / `openapi-update`
 - [x] `@/` path alias (Vite + TypeScript, no deprecated `baseUrl`)
 - [x] Docs updated for Orval (`AGENTS.md`, `ARCHITECTURE.md`, this plan)
+- [x] Feature folder spine: `src/features/{common,auth,quotes,wizard}`, `src/routes/`, `src/test/`
+- [x] Husky + lint-staged
+- [x] Makefile `install`, `test`, `verify`, and `dev` alias for `run`
+- [x] Vitest + Testing Library + Playwright stub; smoke test so `make verify` passes
+- [x] Wire Orval MSW handlers into `src/test/msw/`
+- [x] Shared `api` errors helper (`src/api/errors.ts`)
+- [x] GitHub Actions PR validation (`make verify` + Docker build)
 
-### Remaining (follow-up PRs)
-
-- [ ] Feature folder spine: `src/features/{common,auth,quotes,wizard}`, `src/routes/`, `src/test/` (create folders only as files appear)
-- [ ] Husky + lint-staged
-- [ ] Makefile `install`, `test`, `verify` (and align `run` with plan’s `dev` naming if desired)
-- [ ] Vitest + Testing Library + Playwright stub; empty smoke test so `make verify` passes
-- [ ] Wire Orval MSW handlers into `src/test/msw/` when tests land
-- [ ] Optional: shared `api` errors helper alongside codegen
-
-**Done when:** `make run` / `make verify` work; generated API clients committed; empty smoke test passes.
+**Done when:** `make run` / `make verify` work; generated API clients committed; empty smoke test passes. ✅
 
 ---
 
