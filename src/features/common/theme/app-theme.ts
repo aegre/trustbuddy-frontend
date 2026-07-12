@@ -30,7 +30,15 @@ export const appTheme = createTheme({
   },
   typography: {
     fontFamily: 'system-ui, "Segoe UI", Roboto, sans-serif',
+    h4: {
+      color: "#08060d",
+      fontWeight: 600,
+    },
     h5: {
+      color: "#08060d",
+      fontWeight: 600,
+    },
+    h6: {
       color: "#08060d",
       fontWeight: 600,
     },
@@ -50,11 +58,37 @@ export const appTheme = createTheme({
         },
       },
     },
+    MuiTable: {
+      defaultProps: {
+        size: "small",
+      },
+    },
+    MuiStepLabel: {
+      styleOverrides: {
+        label: ({ theme }) => ({
+          ...theme.typography.body2,
+          "&.Mui-active": {
+            fontWeight: 600,
+          },
+          "&.Mui-completed": {
+            fontWeight: 500,
+          },
+        }),
+      },
+    },
     MuiPaper: {
       styleOverrides: {
         root: {
           backgroundImage: "none",
         },
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          backgroundImage: "none",
+        }),
       },
     },
     MuiFormLabel: {

@@ -219,11 +219,11 @@ src/
 
 **Deliverables**
 
-- Polish via `features/common` theme; loading/empty/error consistency
-- Stepper/form/dashboard density; auth edge cases; basic a11y
-- README / AGENTS “run against local API” notes
+- [x] Polish via `features/common` theme; loading/empty/error consistency
+- [x] Stepper/form/dashboard density; auth edge cases; basic a11y
+- [x] README / AGENTS “run against local API” notes (`stack-all-up` for FE+API containers)
 
-**Done when:** Flow feels coherent; no new features beyond polish.
+**Done when:** Flow feels coherent; no new features beyond polish. ✅
 
 ---
 
