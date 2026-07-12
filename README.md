@@ -4,57 +4,78 @@ React (Vite) SPA for the Trustbuddy insurance quote flow. Pairs with [trustbuddy
 
 ## Prerequisites
 
-- Node.js LTS and npm
-- `make`
-- Docker + Docker Compose (for the API stack and optional frontend container)
-- Sibling clone of [trustbuddy-api](https://github.com/aegre/trustbuddy-api) next to this repo (`../trustbuddy-api`) — use `make clone-api` if you do not have it yet
+**Docker quick start (recommended):**
 
-## Installation
+- `make`
+- Docker + Docker Compose
+
+**Local Vite / host API alternatives also need:**
+
+- Node.js LTS and npm
+- Sibling clone of [trustbuddy-api](https://github.com/aegre/trustbuddy-api) at `../trustbuddy-api` — or use `make clone-api`
+- Java 17+ only if you run the API JVM on the host instead of Docker
+
+## Quick start (Docker) — easiest after clone
+
+Clone this repo, pull in the API sibling, then start **everything** in containers. Docker Make targets create `.env` from `.env.example` when missing (`make ensure-env`), so you can try the app right after cloning without hand-copying env files.
 
 ```bash
+git clone https://github.com/aegre/trustbuddy-frontend.git
+cd trustbuddy-frontend
+
 make clone-api          # clones ../trustbuddy-api if missing
-cp .env.example .env    # VITE_API_BASE_URL=http://localhost:8080
-make install            # npm install (+ Husky prepare)
+make stack-all-up       # API + Postgres/Redis/Kafka + frontend containers
+# Frontend: http://localhost:3000
+# API:      http://localhost:8080  (Swagger: /swagger-ui.html)
+# Login:    dev-user / dev-password
 ```
 
-Override clone location or remote if needed:
+`stack-all-up` runs `stack-up` in the API sibling (when present) and here; each side copies `.env.example` → `.env` if needed. The API example env already allows the SPA on `:3000` and Vite on `:5173`.
+
+```bash
+make stack-all-down     # stop both
+make stack-all-logs     # tail frontend logs (prints hint for API logs)
+```
+
+Override sibling location/URL if needed:
 
 ```bash
 make clone-api API_REPO=../trustbuddy-api API_GIT_URL=https://github.com/aegre/trustbuddy-api.git
 ```
 
-In the API repo, also copy `.env.example` → `.env`. For browser login from Vite and/or the frontend Docker image, set:
+If `../trustbuddy-api` is missing and you skip `clone-api`, `stack-all-up` warns and starts the frontend containers only (API must already be on `:8080`).
+
+## Installation (host / Vite development)
+
+For local Vite (not required for the Docker quick start above):
+
+```bash
+make clone-api          # if you do not have the sibling yet
+make ensure-env         # or: cp .env.example .env
+make install            # npm install (+ Husky prepare)
+```
+
+In the API repo, Docker/`ensure-env` will create `.env` when you start the stack. For browser login from Vite (`:5173`) and/or the frontend container (`:3000`), the API `.env` should include:
 
 ```bash
 CORS_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
 ```
 
-## Run everything in Docker
-
-With the API sibling checked out beside this repo:
-
-```bash
-make stack-all-up       # API + Postgres/Redis/Kafka (if present) + frontend
-# Frontend: http://localhost:3000
-# API:      http://localhost:8080  (Swagger: /swagger-ui.html)
-make stack-all-down     # stop both
-```
-
-If `../trustbuddy-api` is missing, `stack-all-up` warns and starts the frontend containers only.
+(That value is already the default in the API `.env.example`.)
 
 ## Run the API (Docker)
 
-From `trustbuddy-api`:
+From `trustbuddy-api` (or via `make stack-all-up` above):
 
 ```bash
-make stack-up           # API + PostgreSQL + Redis + Kafka (creates .env from .env.example if missing)
+make -C ../trustbuddy-api stack-up   # creates .env if missing
 ```
 
 Host JVM alternative (infra still in Docker):
 
 ```bash
-make infra-up
-make run-dev            # API on http://localhost:8080
+make -C ../trustbuddy-api infra-up
+make -C ../trustbuddy-api run-dev    # API on http://localhost:8080
 ```
 
 ## Run the frontend (local Vite)
@@ -65,10 +86,10 @@ Typical while iterating (API already up):
 make run                # or make dev → http://localhost:5173
 ```
 
-Frontend-only Docker:
+Frontend-only Docker (still needs API on `:8080`):
 
 ```bash
-make stack-up           # http://localhost:3000 — creates .env if missing; still needs API on :8080
+make stack-up           # http://localhost:3000 — creates .env if missing
 ```
 
 ## Dev login
