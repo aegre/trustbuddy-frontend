@@ -14,15 +14,20 @@ include .env
 export $(shell sed -n 's/=.*//p' .env)
 endif
 
-.PHONY: help run build lint format format-check precommit openapi-sync openapi-codegen openapi-update docker-build stack-up stack-down stack-logs
+.PHONY: help install run dev build lint format format-check precommit test verify openapi-sync openapi-codegen openapi-update docker-build stack-up stack-down stack-logs
 
 help: ## Show available targets
 	@echo "Trustbuddy Frontend — available targets:"
 	@echo ""
 	@grep -E '^[a-zA-Z_-]+:.*?##' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?##"}; {printf "  %-18s %s\n", $$1, $$2}'
 
+install: ## Install npm dependencies
+	$(NPM) install
+
 run: ## Run Vite dev server locally
 	$(NPM) run dev
+
+dev: run ## Alias for run
 
 build: ## Production build
 	$(NPM) run build
@@ -38,6 +43,11 @@ format-check: ## Check Prettier formatting
 
 precommit: ## Format and lint staged files (same as husky hook)
 	$(NPM) run precommit
+
+test: ## Run unit tests (Vitest)
+	$(NPM) run test
+
+verify: build lint format-check test ## Build, lint, format check, and unit tests
 
 openapi-sync: ## Copy OpenAPI spec from trustbuddy-api
 	@test -f $(API_OPENAPI_SPEC) || (echo "Missing $(API_OPENAPI_SPEC). Run make openapi-export in trustbuddy-api first." && exit 1)

@@ -101,10 +101,10 @@ src/
 - [x] Docs updated for Orval (`AGENTS.md`, `ARCHITECTURE.md`, this plan)
 - [x] Feature folder spine: `src/features/{common,auth,quotes,wizard}`, `src/routes/`, `src/test/`
 - [x] Husky + lint-staged
+- [x] Makefile `install`, `test`, `verify`, and `dev` alias for `run`
 
 ### Remaining (follow-up)
 
-- [ ] Makefile `install`, `test`, `verify` (and align `run` with plan’s `dev` naming if desired)
 - [ ] Vitest + Testing Library + Playwright stub; empty smoke test so `make verify` passes
 - [ ] Wire Orval MSW handlers into `src/test/msw/` when tests land
 - [ ] Optional: shared `api` errors helper alongside codegen
