@@ -1,13 +1,18 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { HttpResponse, http } from "msw";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { describe, expect, it } from "vitest";
 import { AppProviders } from "@/features/common/providers/app-providers";
-import { QuotesHomePlaceholder } from "@/features/quotes/screens/quotes-home-placeholder";
+import { createTestQueryClient } from "@/features/common/query/query-client";
+import { createQuotesPageFixture } from "@/test/factories";
+import { server } from "@/test/msw/server";
 import { GuestOutlet } from "@/routes/guest-outlet";
 import { LoginRoute } from "@/routes/login-route";
 import { paths } from "@/routes/paths";
 import { ProtectedOutlet } from "@/routes/protected-outlet";
+import { QuotesListRoute } from "@/routes/quotes-list-route";
+import { WizardPersonalRoute } from "@/routes/wizard-personal-route";
 
 function renderAppAt(
   initialEntry: string,
@@ -21,14 +26,20 @@ function renderAppAt(
       },
       {
         element: <ProtectedOutlet />,
-        children: [{ path: paths.home, element: <QuotesHomePlaceholder /> }],
+        children: [
+          { path: paths.home, element: <QuotesListRoute /> },
+          { path: paths.wizardPersonal, element: <WizardPersonalRoute /> },
+        ],
       },
     ],
     { initialEntries: [initialEntry] },
   );
 
   render(
-    <AppProviders initialAuthenticated={options?.initialAuthenticated}>
+    <AppProviders
+      initialAuthenticated={options?.initialAuthenticated}
+      queryClient={createTestQueryClient()}
+    >
       <RouterProvider router={router} />
     </AppProviders>,
   );
@@ -45,7 +56,15 @@ describe("auth routes", () => {
     ).toBeInTheDocument();
   });
 
-  it("given_authenticated_when_visitsHome_then_showsQuotesPlaceholder", async () => {
+  it("given_authenticated_when_visitsHome_then_showsQuotesList", async () => {
+    server.use(
+      http.get("*/api/v1/quotes", () =>
+        HttpResponse.json(createQuotesPageFixture({ content: [] }), {
+          status: 200,
+        }),
+      ),
+    );
+
     renderAppAt(paths.home, { initialAuthenticated: true });
 
     expect(
@@ -54,6 +73,14 @@ describe("auth routes", () => {
   });
 
   it("given_authenticated_when_visitsLogin_then_redirectsHome", async () => {
+    server.use(
+      http.get("*/api/v1/quotes", () =>
+        HttpResponse.json(createQuotesPageFixture({ content: [] }), {
+          status: 200,
+        }),
+      ),
+    );
+
     renderAppAt(paths.login, { initialAuthenticated: true });
 
     expect(
@@ -62,6 +89,14 @@ describe("auth routes", () => {
   });
 
   it("given_guest_when_logsIn_then_reachesProtectedHome", async () => {
+    server.use(
+      http.get("*/api/v1/quotes", () =>
+        HttpResponse.json(createQuotesPageFixture({ content: [] }), {
+          status: 200,
+        }),
+      ),
+    );
+
     const user = userEvent.setup();
     renderAppAt(paths.login);
 

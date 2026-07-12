@@ -1,9 +1,10 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { QuotesHomePlaceholder } from "@/features/quotes/screens/quotes-home-placeholder";
 import { GuestOutlet } from "@/routes/guest-outlet";
 import { LoginRoute } from "@/routes/login-route";
 import { paths } from "@/routes/paths";
 import { ProtectedOutlet } from "@/routes/protected-outlet";
+import { QuotesListRoute } from "@/routes/quotes-list-route";
+import { WizardPersonalRoute } from "@/routes/wizard-personal-route";
 
 export const router = createBrowserRouter([
   {
@@ -20,7 +21,11 @@ export const router = createBrowserRouter([
     children: [
       {
         path: paths.home,
-        element: <QuotesHomePlaceholder />,
+        element: <QuotesListRoute />,
+      },
+      {
+        path: paths.wizardPersonal,
+        element: <WizardPersonalRoute />,
       },
     ],
   },

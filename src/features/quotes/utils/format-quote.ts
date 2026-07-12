@@ -1,0 +1,35 @@
+import type { QuoteResponse } from "@/api/types";
+
+const dateFormatter = new Intl.DateTimeFormat(undefined, {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
+export function formatQuoteDate(value: string | undefined): string {
+  if (!value) {
+    return "—";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+  return dateFormatter.format(date);
+}
+
+export function formatQuotePremium(
+  value: QuoteResponse["estimatedMonthlyPremium"],
+): string {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "—";
+  }
+  return currencyFormatter.format(value);
+}
+
+export function formatQuoteStatus(status: QuoteResponse["status"]): string {
+  return status ?? "—";
+}

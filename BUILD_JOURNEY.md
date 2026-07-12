@@ -136,9 +136,9 @@ src/
 **Deliverables** (under `features/quotes/`)
 
 - [x] List + Query hook via Orval `useListQuotes` (`useQuotesList` wrapper; fixed page/size)
-- [ ] table/list UI (columns: name, email, status, premium, dates; empty/loading/error)
-- [ ] CTA → `/wizard/personal` (new); row → `/wizard/personal?quoteId=`
-- [ ] MSW list fixture + component test (hook tests + factories done)
+- [x] table/list UI (columns: name, email, status, premium, dates; empty/loading/error)
+- [x] CTA → `/wizard/personal` (new); row → `/wizard/personal?quoteId=` (stub screen until Phase 4)
+- [x] MSW list fixture + component test (hook + screen tests + factories)
 
 **Done when:** Logged-in user sees quotes from API (or MSW in tests).
 
