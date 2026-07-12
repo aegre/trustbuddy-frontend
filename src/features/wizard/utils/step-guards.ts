@@ -1,9 +1,15 @@
+import type { QuoteResponse } from "@/api/types";
+import {
+  createCoverageSchema,
+  type ConditionValue,
+  type CoverageFormValues,
+  type CoverageTypeValue,
+} from "@/features/wizard/schemas/coverage";
 import {
   isWizardStepSlug,
   WIZARD_STEP_SLUGS,
   type WizardStepSlug,
 } from "@/features/wizard/types/wizard-steps";
-import type { QuoteResponse } from "@/api/types";
 
 export function parseWizardStepSlug(
   value: string | undefined,
@@ -41,30 +47,33 @@ export type WizardStepAccessContext = {
   quote?: QuoteResponse | null;
 };
 
-/** True once coverage health answers exist (coverageType is defaulted at create). */
+function toCoverageFormValues(quote: QuoteResponse): CoverageFormValues {
+  return {
+    coverageType: (quote.coverageType ?? "") as CoverageTypeValue | "",
+    takesPrescriptionMedication: quote.takesPrescriptionMedication ?? undefined,
+    usesTobacco: quote.usesTobacco ?? undefined,
+    needsSpouseCoverage: quote.needsSpouseCoverage ?? undefined,
+    hasPreexistingConditions: quote.hasPreexistingConditions ?? undefined,
+    conditions: (quote.conditions ?? []) as ConditionValue[],
+  };
+}
+
+/** Coverage step is complete when quote data satisfies the coverage Yup schema. */
 export function hasCompletedCoverageStep(
   quote: QuoteResponse | null | undefined,
 ): boolean {
   if (quote == null) {
     return false;
   }
-  const healthAnswered =
-    quote.takesPrescriptionMedication != null &&
-    quote.usesTobacco != null &&
-    quote.needsSpouseCoverage != null;
-  if (!healthAnswered) {
-    return false;
-  }
-  if (typeof quote.age === "number" && quote.age > 65) {
-    return quote.hasPreexistingConditions != null;
-  }
-  return true;
+  return createCoverageSchema(quote.age).isValidSync(
+    toCoverageFormValues(quote),
+  );
 }
 
 /**
  * Which stepper steps can be opened.
  * Personal is always available; coverage needs a quote id;
- * review needs coverage health fields saved (not just default coverageType).
+ * review needs coverage Yup validation to pass on the quote payload.
  */
 export function isWizardStepAccessible(
   slug: WizardStepSlug,
