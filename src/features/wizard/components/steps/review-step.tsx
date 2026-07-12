@@ -15,6 +15,7 @@ import { getUserFacingErrorMessage } from "@/api/types";
 import { QUOTES_LIST_DEFAULTS } from "@/features/quotes/hooks/use-quotes-list";
 import { formatQuotePremium } from "@/features/quotes/utils/format-quote";
 import type { WizardStepProps } from "@/features/wizard/types/wizard-steps";
+import { canSubmitQuote } from "@/features/wizard/utils/quote-edit-guards";
 import { successHref } from "@/routes/paths";
 
 const sectionSx = { mt: 1 } as const;
@@ -40,13 +41,14 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function ReviewStep({ quoteId, quote, readOnly }: WizardStepProps) {
+export function ReviewStep({ quoteId, quote }: WizardStepProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const submitQuote = useSubmitQuote();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const canSubmit = Boolean(quoteId && quote && !readOnly);
+  const canSubmit = Boolean(quoteId && canSubmitQuote(quote));
+  const isRetry = quote?.status === "SUBMISSION_FAILED";
   const isSubmitting = submitQuote.isPending;
 
   const invalidateQuoteQueries = useCallback(
@@ -154,7 +156,11 @@ export function ReviewStep({ quoteId, quote, readOnly }: WizardStepProps) {
           }}
           sx={{ alignSelf: "flex-start" }}
         >
-          {isSubmitting ? "Submitting…" : "Submit quote"}
+          {isSubmitting
+            ? "Submitting…"
+            : isRetry
+              ? "Retry submit"
+              : "Submit quote"}
         </Button>
       ) : null}
     </Stack>
