@@ -32,6 +32,18 @@ describe("PersonalForm", () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
+  it("given_emptyName_when_blurred_then_showsValidationError", async () => {
+    const user = userEvent.setup();
+    renderPersonalForm();
+
+    const nameField = screen.getByLabelText("Full name");
+    await user.click(nameField);
+    await user.tab();
+
+    expect(await screen.findByText("Name is required")).toBeInTheDocument();
+    expect(screen.queryByText("Email is required")).not.toBeInTheDocument();
+  });
+
   it("given_validValues_when_submitted_then_callsOnSubmit", async () => {
     const user = userEvent.setup();
     const { onSubmit } = renderPersonalForm();

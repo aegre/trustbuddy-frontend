@@ -91,7 +91,7 @@ export function CoverageForm({
     formState: { errors },
   } = useForm<CoverageFormValues>({
     resolver: yupResolver(schema) as Resolver<CoverageFormValues>,
-    mode: "onSubmit",
+    mode: "onBlur",
     reValidateMode: "onChange",
     defaultValues: { ...emptyCoverageDefaults, ...defaultValues },
   });
@@ -175,6 +175,7 @@ export function CoverageForm({
               name={field.name}
               value={(field.value ?? "") as CoverageTypeValue | ""}
               onChange={field.onChange}
+              onBlur={field.onBlur}
               disabled={disabled}
               error={Boolean(errors.coverageType)}
               helperText={errors.coverageType?.message}
@@ -191,6 +192,7 @@ export function CoverageForm({
               labelId="takes-prescription-label"
               value={field.value}
               onChange={field.onChange}
+              onBlur={field.onBlur}
               disabled={disabled}
               error={Boolean(errors.takesPrescriptionMedication)}
               helperText={errors.takesPrescriptionMedication?.message}
@@ -207,6 +209,7 @@ export function CoverageForm({
               labelId="uses-tobacco-label"
               value={field.value}
               onChange={field.onChange}
+              onBlur={field.onBlur}
               disabled={disabled}
               error={Boolean(errors.usesTobacco)}
               helperText={errors.usesTobacco?.message}
@@ -223,6 +226,7 @@ export function CoverageForm({
               labelId="needs-spouse-label"
               value={field.value}
               onChange={field.onChange}
+              onBlur={field.onBlur}
               disabled={disabled}
               error={Boolean(errors.needsSpouseCoverage)}
               helperText={errors.needsSpouseCoverage?.message}
@@ -240,6 +244,7 @@ export function CoverageForm({
                 labelId="preexisting-label"
                 value={field.value}
                 onChange={field.onChange}
+                onBlur={field.onBlur}
                 disabled={disabled}
                 error={Boolean(errors.hasPreexistingConditions)}
                 helperText={errors.hasPreexistingConditions?.message}
@@ -256,6 +261,7 @@ export function CoverageForm({
               <ConditionCards
                 value={(field.value ?? []) as ConditionValue[]}
                 onChange={field.onChange}
+                onBlur={field.onBlur}
                 disabled={disabled}
                 error={Boolean(errors.conditions)}
                 helperText={errors.conditions?.message}

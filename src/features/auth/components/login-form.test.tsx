@@ -30,6 +30,17 @@ describe("LoginForm", () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
+  it("given_emptyUsername_when_blurred_then_showsValidationError", async () => {
+    const user = userEvent.setup();
+    renderLoginForm();
+
+    await user.click(screen.getByLabelText("Username"));
+    await user.tab();
+
+    expect(await screen.findByText("Username is required")).toBeInTheDocument();
+    expect(screen.queryByText("Password is required")).not.toBeInTheDocument();
+  });
+
   it("given_validCredentials_when_submitted_then_callsOnSubmit", async () => {
     const user = userEvent.setup();
     const { onSubmit } = renderLoginForm();

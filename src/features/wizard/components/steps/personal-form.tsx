@@ -52,7 +52,7 @@ export function PersonalForm({
     formState: { errors },
   } = useForm<PersonalFormValues>({
     resolver: yupResolver(personalSchema),
-    mode: "onSubmit",
+    mode: "onBlur",
     reValidateMode: "onChange",
     defaultValues: { ...emptyPersonalDefaults, ...defaultValues },
   });

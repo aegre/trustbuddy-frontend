@@ -29,6 +29,7 @@ const conditionsGridSx = {
 export type ConditionCardsProps = {
   value: ConditionValue[];
   onChange: (value: ConditionValue[]) => void;
+  onBlur?: () => void;
   disabled?: boolean;
   error?: boolean;
   helperText?: string;
@@ -39,6 +40,7 @@ export type ConditionCardsProps = {
 export function ConditionCards({
   value,
   onChange,
+  onBlur,
   disabled = false,
   error = false,
   helperText,
@@ -51,6 +53,7 @@ export function ConditionCards({
       fullWidth
       error={error}
       disabled={disabled}
+      onBlur={onBlur}
     >
       <FormLabel id={labelId} component="legend">
         {label}

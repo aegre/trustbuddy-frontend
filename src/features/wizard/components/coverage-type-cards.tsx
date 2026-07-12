@@ -28,6 +28,7 @@ const coverageTypeGridSx = {
 export type CoverageTypeCardsProps = {
   value: CoverageTypeValue | "";
   onChange: (value: CoverageTypeValue) => void;
+  onBlur?: () => void;
   disabled?: boolean;
   error?: boolean;
   helperText?: string;
@@ -39,6 +40,7 @@ export type CoverageTypeCardsProps = {
 export function CoverageTypeCards({
   value,
   onChange,
+  onBlur,
   disabled = false,
   error = false,
   helperText,
@@ -60,6 +62,7 @@ export function CoverageTypeCards({
         aria-labelledby={labelId}
         name={name}
         value={value}
+        onBlur={onBlur}
         onChange={(event) => onChange(event.target.value as CoverageTypeValue)}
         sx={coverageTypeGridSx}
       >
