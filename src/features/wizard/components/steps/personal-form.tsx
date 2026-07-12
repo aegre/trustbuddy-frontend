@@ -5,7 +5,6 @@ import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import {
   emptyPersonalDefaults,
@@ -22,10 +21,6 @@ export type PersonalFormProps = {
 };
 
 const formSx = { width: "100%" } as const;
-const readOnlyInputSlotProps = { input: { readOnly: true } } as const;
-const editableInputSlotProps = { input: { readOnly: false } } as const;
-const ageHtmlInputProps = { min: 1, max: 120 } as const;
-const zipHtmlInputProps = { inputMode: "numeric" as const, maxLength: 5 };
 
 export function PersonalForm({
   onSubmit,
@@ -35,25 +30,6 @@ export function PersonalForm({
   readOnly = false,
 }: PersonalFormProps) {
   const disabled = isSubmitting || readOnly;
-  const inputSlotProps = readOnly
-    ? readOnlyInputSlotProps
-    : editableInputSlotProps;
-
-  const ageSlotProps = useMemo(
-    () => ({
-      htmlInput: ageHtmlInputProps,
-      ...inputSlotProps,
-    }),
-    [inputSlotProps],
-  );
-
-  const zipSlotProps = useMemo(
-    () => ({
-      htmlInput: zipHtmlInputProps,
-      ...inputSlotProps,
-    }),
-    [inputSlotProps],
-  );
 
   const {
     register,
@@ -94,7 +70,7 @@ export function PersonalForm({
           helperText={errors.name?.message}
           disabled={disabled}
           fullWidth
-          slotProps={inputSlotProps}
+          slotProps={{ input: { readOnly } }}
         />
 
         <TextField
@@ -107,7 +83,7 @@ export function PersonalForm({
           helperText={errors.email?.message}
           disabled={disabled}
           fullWidth
-          slotProps={inputSlotProps}
+          slotProps={{ input: { readOnly } }}
         />
 
         <TextField
@@ -120,7 +96,10 @@ export function PersonalForm({
           helperText={errors.age?.message}
           disabled={disabled}
           fullWidth
-          slotProps={ageSlotProps}
+          slotProps={{
+            htmlInput: { min: 1, max: 120 },
+            input: { readOnly },
+          }}
         />
 
         <TextField
@@ -133,7 +112,10 @@ export function PersonalForm({
           helperText={errors.zipCode?.message}
           disabled={disabled}
           fullWidth
-          slotProps={zipSlotProps}
+          slotProps={{
+            htmlInput: { inputMode: "numeric", maxLength: 5 },
+            input: { readOnly },
+          }}
         />
 
         {readOnly ? null : (
