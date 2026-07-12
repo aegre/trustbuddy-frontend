@@ -208,10 +208,10 @@ src/
 
 **Deliverables**
 
-- Wire `page` / `size` (optional sort) to `PageQuoteResponse`
-- MUI pagination; Query keys include page params; tests
+- [x] Wire `page` / `size` (optional sort) to `PageQuoteResponse`
+- [x] MUI pagination; Query keys include page params; tests
 
-**Done when:** Large lists paginate correctly.
+**Done when:** Large lists paginate correctly. ✅
 
 ---
 

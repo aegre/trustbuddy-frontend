@@ -8,7 +8,6 @@ import {
   useUpdatePersonalInfo,
 } from "@/api/generated/quotes/quotes";
 import { getUserFacingErrorMessage } from "@/api/types";
-import { QUOTES_LIST_DEFAULTS } from "@/features/quotes/hooks/use-quotes-list";
 import { PersonalForm } from "@/features/wizard/components/steps/personal-form";
 import type { PersonalFormValues } from "@/features/wizard/schemas/personal";
 import type { WizardStepProps } from "@/features/wizard/types/wizard-steps";
@@ -41,11 +40,7 @@ export function PersonalStep({ quoteId, quote, readOnly }: WizardStepProps) {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: getGetQuoteQueryKey(id) }),
         queryClient.invalidateQueries({
-          queryKey: getListQuotesQueryKey({
-            page: QUOTES_LIST_DEFAULTS.page,
-            size: QUOTES_LIST_DEFAULTS.size,
-            sort: QUOTES_LIST_DEFAULTS.sort,
-          }),
+          queryKey: getListQuotesQueryKey(),
         }),
       ]);
     },
