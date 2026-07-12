@@ -33,3 +33,6 @@ openapi/openapi.json
 *.njsproj
 *.sln
 *.sw?
+
+# PR screenshots — upload in GitHub UI instead of committing
+docs/pr/

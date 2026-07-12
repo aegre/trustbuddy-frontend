@@ -12,7 +12,7 @@
 
 # Screenshots
 
-<!-- Replace: add before/after screenshots or screen recordings for UI changes -->
+<!-- Upload screenshots in the GitHub PR UI (drag/paste). Do not commit image files under docs/pr/. -->
 
 |            |                              |
 | ---------- | ---------------------------- |
