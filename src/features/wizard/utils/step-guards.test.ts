@@ -41,7 +41,7 @@ describe("step guards", () => {
     expect(getNextWizardStep("review")).toBeNull();
   });
 
-  it("gates stepper access by quote id and coverage health answers", () => {
+  it("gates review with coverage Yup schema completion", () => {
     expect(isWizardStepAccessible("personal", {})).toBe(true);
     expect(isWizardStepAccessible("coverage", {})).toBe(false);
     expect(isWizardStepAccessible("review", {})).toBe(false);
@@ -50,6 +50,7 @@ describe("step guards", () => {
     expect(
       isWizardStepAccessible("review", {
         quoteId: "q-1",
+        // API defaults coverageType to STANDARD; health answers still missing.
         quote: { coverageType: "STANDARD" },
       }),
     ).toBe(false);
@@ -73,6 +74,8 @@ describe("step guards", () => {
           takesPrescriptionMedication: false,
           usesTobacco: false,
           needsSpouseCoverage: false,
+          hasPreexistingConditions: true,
+          conditions: [],
         },
       }),
     ).toBe(false);
@@ -85,7 +88,8 @@ describe("step guards", () => {
           takesPrescriptionMedication: false,
           usesTobacco: false,
           needsSpouseCoverage: false,
-          hasPreexistingConditions: false,
+          hasPreexistingConditions: true,
+          conditions: ["DIABETES"],
         },
       }),
     ).toBe(true);
