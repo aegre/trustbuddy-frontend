@@ -4,6 +4,7 @@ import { LoginRoute } from "@/routes/login-route";
 import { paths } from "@/routes/paths";
 import { ProtectedOutlet } from "@/routes/protected-outlet";
 import { QuotesListRoute } from "@/routes/quotes-list-route";
+import { SuccessRoute } from "@/routes/success-route";
 import { WizardRoute } from "@/routes/wizard-route";
 
 export const router = createBrowserRouter([
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
       {
         path: paths.wizardStep,
         element: <WizardRoute />,
+      },
+      {
+        path: paths.success,
+        element: <SuccessRoute />,
       },
     ],
   },
