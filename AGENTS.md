@@ -14,7 +14,7 @@ Vite + React 19 + TypeScript (CSR). Pairs with [trustbuddy-api](https://github.c
 | Auth session    | HttpOnly cookie via `POST /api/v1/auth/token`; session check via `GET /api/v1/auth/me` on load; logout via `POST /api/v1/auth/logout`; requests use `credentials: 'include'` |
 | API             | Orval-generated React Query clients + MSW mocks → `customFetch` (cookie credentials) → trustbuddy-api                                                                        |
 | Formatting      | Prettier (`make format` / `make format-check`)                                                                                                                               |
-| Linting         | Oxlint — React, jsx-a11y, react-perf (`make lint`)                                                                                                                           |
+| Linting         | Oxlint — React, jsx-a11y (`make lint`); react-perf prop-identity rules off (see React memoization)                                                                           |
 
 ## Folder layout
 
@@ -66,7 +66,7 @@ Each feature module uses subfolders as they gain files (no empty placeholders):
   - `types.ts` re-exports aliases over Orval models (e.g. `AuthTokenRequest`, `QuoteResponse`) plus `ApiError` helpers from `@/api/errors`.
   - Form Yup schemas stay hand-written in `features/*/schemas/` but should align with request DTO shapes.
 - **Never** store the JWT in `localStorage` or `sessionStorage`.
-- **React memoization** — do not add `useMemo` / `useCallback` or hoist tiny prop objects “for performance” by default. Modern React handles small object creation fine. Optimize only when there is evidence: a library memoizes on prop identity, React DevTools shows excess rerenders, or profiling shows a measurable win. Otherwise the indirection is cognitive overhead (e.g. MUI `slotProps` objects can stay inline).
+- **React memoization** — do not add `useMemo` / `useCallback` or hoist tiny prop objects “for performance” by default. Modern React handles small object creation fine. Optimize only when there is evidence: a library memoizes on prop identity, React DevTools shows excess rerenders, or profiling shows a measurable win. Otherwise the indirection is cognitive overhead (e.g. MUI `slotProps` objects can stay inline). Oxlint’s `react-perf` plugin (jsx-no-new-*-as-prop) is disabled for the same reason.
 
 ## Do not commit
 
