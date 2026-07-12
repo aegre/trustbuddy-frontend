@@ -113,12 +113,15 @@ src/
 
 ## Phase 2 — Login screen
 
+**Status:** In progress on `feat/phase-2-login-screen`.
+
 **Deliverables** (under `features/auth/`)
 
-- `client/auth.ts` → token + logout
-- Yup `schemas/` + login form/screen; `AuthContext` for session UI state
-- Thin `routes/` for `/login` + protected outlet
-- MSW auth handlers; Vitest form + login flow; Playwright login happy path
+- [x] Orval `token` / `logout` wired via `AuthContext` (imperative clients; generated `useToken`/`useLogout` are queries)
+- [x] Yup `schemas/` + login form/screen (submit callback)
+- [x] `AuthContext` for session UI state (`isAuthenticated` / `isPending` / `login` / `logout`)
+- [x] Thin `routes/` for `/login` + protected outlet (+ mount `AuthProvider`)
+- [ ] Vitest form + login flow; Playwright login happy path
 
 **API:** `POST /api/v1/auth/token`, `POST /api/v1/auth/logout`
 
