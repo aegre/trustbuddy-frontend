@@ -10,7 +10,6 @@ export * from "./authTokenRequest";
 export * from "./authTokenResponse";
 export * from "./createQuoteRequest";
 export * from "./listQuotesParams";
-export * from "./pageable";
 export * from "./pageableObject";
 export * from "./pageQuoteResponse";
 export * from "./quoteResponse";

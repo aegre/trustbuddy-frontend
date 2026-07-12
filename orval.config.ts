@@ -17,10 +17,6 @@ export default defineConfig({
           path: "./src/api/mutator/custom-fetch.ts",
           name: "customFetch",
         },
-        query: {
-          useQuery: true,
-          useMutation: true,
-        },
       },
       mock: {
         generators: [

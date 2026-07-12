@@ -62,10 +62,19 @@ export type listQuotesResponseSuccess = listQuotesResponse200 & {
 };
 export type listQuotesResponse = listQuotesResponseSuccess;
 
-export const getListQuotesUrl = (params: ListQuotesParams) => {
+export const getListQuotesUrl = (params?: ListQuotesParams) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
+    const explodeParameters = ["sort"];
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? "null" : String(v));
+      });
+      return;
+    }
+
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? "null" : String(value));
     }
@@ -83,7 +92,7 @@ export const getListQuotesUrl = (params: ListQuotesParams) => {
  * @summary List quotes with pagination
  */
 export const listQuotes = async (
-  params: ListQuotesParams,
+  params?: ListQuotesParams,
   options?: RequestInit,
 ): Promise<listQuotesResponse> => {
   return customFetch<listQuotesResponse>(getListQuotesUrl(params), {
@@ -92,72 +101,132 @@ export const listQuotes = async (
   });
 };
 
-export const getListQuotesMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof listQuotes>>,
-    TError,
-    { params: ListQuotesParams },
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof listQuotes>>,
-  TError,
-  { params: ListQuotesParams },
-  TContext
-> => {
-  const mutationKey = ["listQuotes"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof listQuotes>>,
-    { params: ListQuotesParams }
-  > = (props) => {
-    const { params } = props ?? {};
-
-    return listQuotes(params, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
+export const getListQuotesQueryKey = (params?: ListQuotesParams) => {
+  return [`/api/v1/quotes`, ...(params ? [params] : [])] as const;
 };
 
-export type ListQuotesMutationResult = NonNullable<
+export const getListQuotesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listQuotes>>,
+  TError = unknown,
+>(
+  params?: ListQuotesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listQuotes>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListQuotesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listQuotes>>> = ({
+    signal,
+  }) => listQuotes(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listQuotes>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListQuotesQueryResult = NonNullable<
   Awaited<ReturnType<typeof listQuotes>>
 >;
+export type ListQuotesQueryError = unknown;
 
-export type ListQuotesMutationError = unknown;
-
-/**
- * @summary List quotes with pagination
- */
-export const useListQuotes = <TError = unknown, TContext = unknown>(
+export function useListQuotes<
+  TData = Awaited<ReturnType<typeof listQuotes>>,
+  TError = unknown,
+>(
+  params: undefined | ListQuotesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listQuotes>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listQuotes>>,
+          TError,
+          Awaited<ReturnType<typeof listQuotes>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListQuotes<
+  TData = Awaited<ReturnType<typeof listQuotes>>,
+  TError = unknown,
+>(
+  params?: ListQuotesParams,
   options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof listQuotes>>,
-      TError,
-      { params: ListQuotesParams },
-      TContext
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listQuotes>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listQuotes>>,
+          TError,
+          Awaited<ReturnType<typeof listQuotes>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useListQuotes<
+  TData = Awaited<ReturnType<typeof listQuotes>>,
+  TError = unknown,
+>(
+  params?: ListQuotesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listQuotes>>, TError, TData>
     >;
     request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof listQuotes>>,
-  TError,
-  { params: ListQuotesParams },
-  TContext
-> => {
-  return useMutation(getListQuotesMutationOptions(options), queryClient);
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary List quotes with pagination
+ */
+
+export function useListQuotes<
+  TData = Awaited<ReturnType<typeof listQuotes>>,
+  TError = unknown,
+>(
+  params?: ListQuotesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listQuotes>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getListQuotesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 export type createQuoteResponse200 = {
   data: QuoteResponse;
   status: 200;
@@ -188,135 +257,72 @@ export const createQuote = async (
   });
 };
 
-export const getCreateQuoteQueryKey = (
-  createQuoteRequest?: CreateQuoteRequest,
-) => {
-  return ["POST", `/api/v1/quotes`, createQuoteRequest] as const;
-};
-
-export const getCreateQuoteQueryOptions = <
-  TData = Awaited<ReturnType<typeof createQuote>>,
+export const getCreateQuoteMutationOptions = <
   TError = unknown,
->(
-  createQuoteRequest: CreateQuoteRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof createQuote>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ?? getCreateQuoteQueryKey(createQuoteRequest);
-
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof createQuote>>> = ({
-    signal,
-  }) => createQuote(createQuoteRequest, { signal, ...requestOptions });
-
-  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createQuote>>,
     TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+    { data: CreateQuoteRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createQuote>>,
+  TError,
+  { data: CreateQuoteRequest },
+  TContext
+> => {
+  const mutationKey = ["createQuote"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createQuote>>,
+    { data: CreateQuoteRequest }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createQuote(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
 };
 
-export type CreateQuoteQueryResult = NonNullable<
+export type CreateQuoteMutationResult = NonNullable<
   Awaited<ReturnType<typeof createQuote>>
 >;
-export type CreateQuoteQueryError = unknown;
+export type CreateQuoteMutationBody = CreateQuoteRequest;
+export type CreateQuoteMutationError = unknown;
 
-export function useCreateQuote<
-  TData = Awaited<ReturnType<typeof createQuote>>,
-  TError = unknown,
->(
-  createQuoteRequest: CreateQuoteRequest,
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof createQuote>>, TError, TData>
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof createQuote>>,
-          TError,
-          Awaited<ReturnType<typeof createQuote>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useCreateQuote<
-  TData = Awaited<ReturnType<typeof createQuote>>,
-  TError = unknown,
->(
-  createQuoteRequest: CreateQuoteRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof createQuote>>, TError, TData>
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof createQuote>>,
-          TError,
-          Awaited<ReturnType<typeof createQuote>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useCreateQuote<
-  TData = Awaited<ReturnType<typeof createQuote>>,
-  TError = unknown,
->(
-  createQuoteRequest: CreateQuoteRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof createQuote>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
 /**
  * @summary Create a draft quote from personal information
  */
-
-export function useCreateQuote<
-  TData = Awaited<ReturnType<typeof createQuote>>,
-  TError = unknown,
->(
-  createQuoteRequest: CreateQuoteRequest,
+export const useCreateQuote = <TError = unknown, TContext = unknown>(
   options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof createQuote>>, TError, TData>
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createQuote>>,
+      TError,
+      { data: CreateQuoteRequest },
+      TContext
     >;
     request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getCreateQuoteQueryOptions(createQuoteRequest, options);
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
+): UseMutationResult<
+  Awaited<ReturnType<typeof createQuote>>,
+  TError,
+  { data: CreateQuoteRequest },
+  TContext
+> => {
+  return useMutation(getCreateQuoteMutationOptions(options), queryClient);
+};
 export type submitQuoteResponse200 = {
   data: QuoteResponse;
   status: 200;
@@ -344,317 +350,72 @@ export const submitQuote = async (
   });
 };
 
-export const getSubmitQuoteQueryKey = (id: string) => {
-  return ["POST", `/api/v1/quotes/${id}/submit`] as const;
-};
-
-export const getSubmitQuoteQueryOptions = <
-  TData = Awaited<ReturnType<typeof submitQuote>>,
+export const getSubmitQuoteMutationOptions = <
   TError = unknown,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof submitQuote>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey = queryOptions?.queryKey ?? getSubmitQuoteQueryKey(id);
-
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof submitQuote>>> = ({
-    signal,
-  }) => submitQuote(id, { signal, ...requestOptions });
-
-  return {
-    queryKey,
-    queryFn,
-    enabled: id !== null && id !== undefined,
-    ...queryOptions,
-  } as UseQueryOptions<
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof submitQuote>>,
     TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof submitQuote>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["submitQuote"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof submitQuote>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return submitQuote(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
 };
 
-export type SubmitQuoteQueryResult = NonNullable<
+export type SubmitQuoteMutationResult = NonNullable<
   Awaited<ReturnType<typeof submitQuote>>
 >;
-export type SubmitQuoteQueryError = unknown;
 
-export function useSubmitQuote<
-  TData = Awaited<ReturnType<typeof submitQuote>>,
-  TError = unknown,
->(
-  id: string,
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof submitQuote>>, TError, TData>
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof submitQuote>>,
-          TError,
-          Awaited<ReturnType<typeof submitQuote>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useSubmitQuote<
-  TData = Awaited<ReturnType<typeof submitQuote>>,
-  TError = unknown,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof submitQuote>>, TError, TData>
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof submitQuote>>,
-          TError,
-          Awaited<ReturnType<typeof submitQuote>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useSubmitQuote<
-  TData = Awaited<ReturnType<typeof submitQuote>>,
-  TError = unknown,
->(
-  id: string,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof submitQuote>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
+export type SubmitQuoteMutationError = unknown;
+
 /**
  * @summary Submit a completed quote to the external insurer gateway
  */
-
-export function useSubmitQuote<
-  TData = Awaited<ReturnType<typeof submitQuote>>,
-  TError = unknown,
->(
-  id: string,
+export const useSubmitQuote = <TError = unknown, TContext = unknown>(
   options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof submitQuote>>, TError, TData>
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof submitQuote>>,
+      TError,
+      { id: string },
+      TContext
     >;
     request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getSubmitQuoteQueryOptions(id, options);
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-export type updateCoverageResponse200 = {
-  data: QuoteResponse;
-  status: 200;
+): UseMutationResult<
+  Awaited<ReturnType<typeof submitQuote>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getSubmitQuoteMutationOptions(options), queryClient);
 };
-
-export type updateCoverageResponseSuccess = updateCoverageResponse200 & {
-  headers: Headers;
-};
-export type updateCoverageResponse = updateCoverageResponseSuccess;
-
-export const getUpdateCoverageUrl = (id: string) => {
-  return `/api/v1/quotes/${id}/coverage`;
-};
-
-/**
- * @summary Partially update coverage type and supplemental health answers
- */
-export const updateCoverage = async (
-  id: string,
-  updateCoverageRequest: UpdateCoverageRequest,
-  options?: RequestInit,
-): Promise<updateCoverageResponse> => {
-  return customFetch<updateCoverageResponse>(getUpdateCoverageUrl(id), {
-    ...options,
-    method: "PATCH",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    body: JSON.stringify(updateCoverageRequest),
-  });
-};
-
-export const getUpdateCoverageQueryKey = (
-  id: string,
-  updateCoverageRequest?: UpdateCoverageRequest,
-) => {
-  return [
-    "PATCH",
-    `/api/v1/quotes/${id}/coverage`,
-    updateCoverageRequest,
-  ] as const;
-};
-
-export const getUpdateCoverageQueryOptions = <
-  TData = Awaited<ReturnType<typeof updateCoverage>>,
-  TError = unknown,
->(
-  id: string,
-  updateCoverageRequest: UpdateCoverageRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof updateCoverage>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ??
-    getUpdateCoverageQueryKey(id, updateCoverageRequest);
-
-  const queryFn: QueryFunction<Awaited<ReturnType<typeof updateCoverage>>> = ({
-    signal,
-  }) =>
-    updateCoverage(id, updateCoverageRequest, { signal, ...requestOptions });
-
-  return {
-    queryKey,
-    queryFn,
-    enabled: id !== null && id !== undefined,
-    ...queryOptions,
-  } as UseQueryOptions<
-    Awaited<ReturnType<typeof updateCoverage>>,
-    TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-};
-
-export type UpdateCoverageQueryResult = NonNullable<
-  Awaited<ReturnType<typeof updateCoverage>>
->;
-export type UpdateCoverageQueryError = unknown;
-
-export function useUpdateCoverage<
-  TData = Awaited<ReturnType<typeof updateCoverage>>,
-  TError = unknown,
->(
-  id: string,
-  updateCoverageRequest: UpdateCoverageRequest,
-  options: {
-    query: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof updateCoverage>>, TError, TData>
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof updateCoverage>>,
-          TError,
-          Awaited<ReturnType<typeof updateCoverage>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useUpdateCoverage<
-  TData = Awaited<ReturnType<typeof updateCoverage>>,
-  TError = unknown,
->(
-  id: string,
-  updateCoverageRequest: UpdateCoverageRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof updateCoverage>>, TError, TData>
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof updateCoverage>>,
-          TError,
-          Awaited<ReturnType<typeof updateCoverage>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useUpdateCoverage<
-  TData = Awaited<ReturnType<typeof updateCoverage>>,
-  TError = unknown,
->(
-  id: string,
-  updateCoverageRequest: UpdateCoverageRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof updateCoverage>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-/**
- * @summary Partially update coverage type and supplemental health answers
- */
-
-export function useUpdateCoverage<
-  TData = Awaited<ReturnType<typeof updateCoverage>>,
-  TError = unknown,
->(
-  id: string,
-  updateCoverageRequest: UpdateCoverageRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<Awaited<ReturnType<typeof updateCoverage>>, TError, TData>
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getUpdateCoverageQueryOptions(
-    id,
-    updateCoverageRequest,
-    options,
-  );
-
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
 export type getQuoteResponse200 = {
   data: QuoteResponse;
   status: 200;
@@ -682,72 +443,135 @@ export const getQuote = async (
   });
 };
 
-export const getGetQuoteMutationOptions = <
-  TError = unknown,
-  TContext = unknown,
->(options?: {
-  mutation?: UseMutationOptions<
-    Awaited<ReturnType<typeof getQuote>>,
-    TError,
-    { id: string },
-    TContext
-  >;
-  request?: SecondParameter<typeof customFetch>;
-}): UseMutationOptions<
-  Awaited<ReturnType<typeof getQuote>>,
-  TError,
-  { id: string },
-  TContext
-> => {
-  const mutationKey = ["getQuote"];
-  const { mutation: mutationOptions, request: requestOptions } = options
-    ? options.mutation &&
-      "mutationKey" in options.mutation &&
-      options.mutation.mutationKey
-      ? options
-      : { ...options, mutation: { ...options.mutation, mutationKey } }
-    : { mutation: { mutationKey }, request: undefined };
-
-  const mutationFn: MutationFunction<
-    Awaited<ReturnType<typeof getQuote>>,
-    { id: string }
-  > = (props) => {
-    const { id } = props ?? {};
-
-    return getQuote(id, requestOptions);
-  };
-
-  return { mutationFn, ...mutationOptions };
+export const getGetQuoteQueryKey = (id: string) => {
+  return [`/api/v1/quotes/${id}`] as const;
 };
 
-export type GetQuoteMutationResult = NonNullable<
+export const getGetQuoteQueryOptions = <
+  TData = Awaited<ReturnType<typeof getQuote>>,
+  TError = unknown,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getQuote>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetQuoteQueryKey(id);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getQuote>>> = ({
+    signal,
+  }) => getQuote(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: id !== null && id !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getQuote>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetQuoteQueryResult = NonNullable<
   Awaited<ReturnType<typeof getQuote>>
 >;
+export type GetQuoteQueryError = unknown;
 
-export type GetQuoteMutationError = unknown;
-
-/**
- * @summary Get a quote by id
- */
-export const useGetQuote = <TError = unknown, TContext = unknown>(
+export function useGetQuote<
+  TData = Awaited<ReturnType<typeof getQuote>>,
+  TError = unknown,
+>(
+  id: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getQuote>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getQuote>>,
+          TError,
+          Awaited<ReturnType<typeof getQuote>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetQuote<
+  TData = Awaited<ReturnType<typeof getQuote>>,
+  TError = unknown,
+>(
+  id: string,
   options?: {
-    mutation?: UseMutationOptions<
-      Awaited<ReturnType<typeof getQuote>>,
-      TError,
-      { id: string },
-      TContext
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getQuote>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getQuote>>,
+          TError,
+          Awaited<ReturnType<typeof getQuote>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetQuote<
+  TData = Awaited<ReturnType<typeof getQuote>>,
+  TError = unknown,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getQuote>>, TError, TData>
     >;
     request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
-): UseMutationResult<
-  Awaited<ReturnType<typeof getQuote>>,
-  TError,
-  { id: string },
-  TContext
-> => {
-  return useMutation(getGetQuoteMutationOptions(options), queryClient);
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
 };
+/**
+ * @summary Get a quote by id
+ */
+
+export function useGetQuote<
+  TData = Awaited<ReturnType<typeof getQuote>>,
+  TError = unknown,
+>(
+  id: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getQuote>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetQuoteQueryOptions(id, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 export type updatePersonalInfoResponse200 = {
   data: QuoteResponse;
   status: 200;
@@ -779,171 +603,168 @@ export const updatePersonalInfo = async (
   });
 };
 
-export const getUpdatePersonalInfoQueryKey = (
-  id: string,
-  updatePersonalInfoRequest?: UpdatePersonalInfoRequest,
-) => {
-  return ["PATCH", `/api/v1/quotes/${id}`, updatePersonalInfoRequest] as const;
-};
-
-export const getUpdatePersonalInfoQueryOptions = <
-  TData = Awaited<ReturnType<typeof updatePersonalInfo>>,
+export const getUpdatePersonalInfoMutationOptions = <
   TError = unknown,
->(
-  id: string,
-  updatePersonalInfoRequest: UpdatePersonalInfoRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof updatePersonalInfo>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-) => {
-  const { query: queryOptions, request: requestOptions } = options ?? {};
-
-  const queryKey =
-    queryOptions?.queryKey ??
-    getUpdatePersonalInfoQueryKey(id, updatePersonalInfoRequest);
-
-  const queryFn: QueryFunction<
-    Awaited<ReturnType<typeof updatePersonalInfo>>
-  > = ({ signal }) =>
-    updatePersonalInfo(id, updatePersonalInfoRequest, {
-      signal,
-      ...requestOptions,
-    });
-
-  return {
-    queryKey,
-    queryFn,
-    enabled: id !== null && id !== undefined,
-    ...queryOptions,
-  } as UseQueryOptions<
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updatePersonalInfo>>,
     TError,
-    TData
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+    { id: string; data: UpdatePersonalInfoRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updatePersonalInfo>>,
+  TError,
+  { id: string; data: UpdatePersonalInfoRequest },
+  TContext
+> => {
+  const mutationKey = ["updatePersonalInfo"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updatePersonalInfo>>,
+    { id: string; data: UpdatePersonalInfoRequest }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updatePersonalInfo(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
 };
 
-export type UpdatePersonalInfoQueryResult = NonNullable<
+export type UpdatePersonalInfoMutationResult = NonNullable<
   Awaited<ReturnType<typeof updatePersonalInfo>>
 >;
-export type UpdatePersonalInfoQueryError = unknown;
+export type UpdatePersonalInfoMutationBody = UpdatePersonalInfoRequest;
+export type UpdatePersonalInfoMutationError = unknown;
 
-export function useUpdatePersonalInfo<
-  TData = Awaited<ReturnType<typeof updatePersonalInfo>>,
-  TError = unknown,
->(
-  id: string,
-  updatePersonalInfoRequest: UpdatePersonalInfoRequest,
-  options: {
-    query: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof updatePersonalInfo>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof updatePersonalInfo>>,
-          TError,
-          Awaited<ReturnType<typeof updatePersonalInfo>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): DefinedUseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useUpdatePersonalInfo<
-  TData = Awaited<ReturnType<typeof updatePersonalInfo>>,
-  TError = unknown,
->(
-  id: string,
-  updatePersonalInfoRequest: UpdatePersonalInfoRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof updatePersonalInfo>>,
-        TError,
-        TData
-      >
-    > &
-      Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof updatePersonalInfo>>,
-          TError,
-          Awaited<ReturnType<typeof updatePersonalInfo>>
-        >,
-        "initialData"
-      >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
-export function useUpdatePersonalInfo<
-  TData = Awaited<ReturnType<typeof updatePersonalInfo>>,
-  TError = unknown,
->(
-  id: string,
-  updatePersonalInfoRequest: UpdatePersonalInfoRequest,
-  options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof updatePersonalInfo>>,
-        TError,
-        TData
-      >
-    >;
-    request?: SecondParameter<typeof customFetch>;
-  },
-  queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-};
 /**
  * @summary Update personal information on a draft quote
  */
-
-export function useUpdatePersonalInfo<
-  TData = Awaited<ReturnType<typeof updatePersonalInfo>>,
-  TError = unknown,
->(
-  id: string,
-  updatePersonalInfoRequest: UpdatePersonalInfoRequest,
+export const useUpdatePersonalInfo = <TError = unknown, TContext = unknown>(
   options?: {
-    query?: Partial<
-      UseQueryOptions<
-        Awaited<ReturnType<typeof updatePersonalInfo>>,
-        TError,
-        TData
-      >
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updatePersonalInfo>>,
+      TError,
+      { id: string; data: UpdatePersonalInfoRequest },
+      TContext
     >;
     request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
-): UseQueryResult<TData, TError> & {
-  queryKey: DataTag<QueryKey, TData, TError>;
-} {
-  const queryOptions = getUpdatePersonalInfoQueryOptions(
-    id,
-    updatePersonalInfoRequest,
-    options,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updatePersonalInfo>>,
+  TError,
+  { id: string; data: UpdatePersonalInfoRequest },
+  TContext
+> => {
+  return useMutation(
+    getUpdatePersonalInfoMutationOptions(options),
+    queryClient,
   );
+};
+export type updateCoverageResponse200 = {
+  data: QuoteResponse;
+  status: 200;
+};
 
-  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
-    TData,
-    TError
-  > & { queryKey: DataTag<QueryKey, TData, TError> };
+export type updateCoverageResponseSuccess = updateCoverageResponse200 & {
+  headers: Headers;
+};
+export type updateCoverageResponse = updateCoverageResponseSuccess;
 
-  return withQueryKey(query, queryOptions.queryKey);
-}
+export const getUpdateCoverageUrl = (id: string) => {
+  return `/api/v1/quotes/${id}/coverage`;
+};
+
+/**
+ * @summary Partially update coverage type and supplemental health answers
+ */
+export const updateCoverage = async (
+  id: string,
+  updateCoverageRequest: UpdateCoverageRequest,
+  options?: RequestInit,
+): Promise<updateCoverageResponse> => {
+  return customFetch<updateCoverageResponse>(getUpdateCoverageUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateCoverageRequest),
+  });
+};
+
+export const getUpdateCoverageMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateCoverage>>,
+    TError,
+    { id: string; data: UpdateCoverageRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateCoverage>>,
+  TError,
+  { id: string; data: UpdateCoverageRequest },
+  TContext
+> => {
+  const mutationKey = ["updateCoverage"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateCoverage>>,
+    { id: string; data: UpdateCoverageRequest }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateCoverage(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateCoverageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateCoverage>>
+>;
+export type UpdateCoverageMutationBody = UpdateCoverageRequest;
+export type UpdateCoverageMutationError = unknown;
+
+/**
+ * @summary Partially update coverage type and supplemental health answers
+ */
+export const useUpdateCoverage = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateCoverage>>,
+      TError,
+      { id: string; data: UpdateCoverageRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateCoverage>>,
+  TError,
+  { id: string; data: UpdateCoverageRequest },
+  TContext
+> => {
+  return useMutation(getUpdateCoverageMutationOptions(options), queryClient);
+};

@@ -131,12 +131,14 @@ src/
 
 ## Phase 3 — Dashboard / list of quotes
 
+**Status:** In progress on `feat/phase-3-quotes-list`.
+
 **Deliverables** (under `features/quotes/`)
 
-- `client/` list + Query hook; table/list UI (fixed page/size for now)
-- Columns: name, email, status, premium, dates; empty/loading/error
-- CTA → `/wizard/personal` (new); row → `/wizard/personal?quoteId=`
-- MSW list fixture + component test
+- [x] List + Query hook via Orval `useListQuotes` (`useQuotesList` wrapper; fixed page/size)
+- [x] table/list UI (columns: name, email, status, premium, dates; empty/loading/error)
+- [x] CTA → `/wizard/personal` (new); row → `/wizard/personal?quoteId=` (stub screen until Phase 4)
+- [x] MSW list fixture + component test (hook + screen tests + factories)
 
 **Done when:** Logged-in user sees quotes from API (or MSW in tests).
 
