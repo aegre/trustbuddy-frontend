@@ -1,4 +1,8 @@
 import { createApiError } from "@/api/errors";
+import {
+  notifyUnauthorized,
+  shouldNotifyUnauthorized,
+} from "@/api/auth-session";
 
 const DEFAULT_API_BASE_URL = "http://localhost:8080";
 
@@ -32,6 +36,7 @@ async function getBody(response: Response): Promise<unknown> {
 /**
  * Orval mutator: browser fetch with credentials for HttpOnly cookie auth.
  * Returns Orval's `{ data, status, headers }` envelope.
+ * On 401 (except login/logout), notifies AuthProvider to clear the UI session.
  */
 export async function customFetch<T>(
   url: string,
@@ -49,6 +54,9 @@ export async function customFetch<T>(
   const data = await getBody(response);
 
   if (!response.ok) {
+    if (response.status === 401 && shouldNotifyUnauthorized(url)) {
+      notifyUnauthorized();
+    }
     throw createApiError(response.status, data, response.headers);
   }
 
