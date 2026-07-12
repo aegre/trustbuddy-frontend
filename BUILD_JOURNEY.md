@@ -117,10 +117,10 @@ src/
 
 **Deliverables** (under `features/auth/`)
 
-- [ ] `client` / Orval token + logout wiring
-- [x] Yup `schemas/` + login form/screen (submit callback; AuthContext next)
-- [ ] `AuthContext` for session UI state
-- [ ] Thin `routes/` for `/login` + protected outlet
+- [x] Orval `token` / `logout` wired via `AuthContext` (imperative clients; generated `useToken`/`useLogout` are queries)
+- [x] Yup `schemas/` + login form/screen (submit callback)
+- [x] `AuthContext` for session UI state (`isAuthenticated` / `isPending` / `login` / `logout`)
+- [ ] Thin `routes/` for `/login` + protected outlet (+ mount `AuthProvider`)
 - [ ] Vitest form + login flow; Playwright login happy path
 
 **API:** `POST /api/v1/auth/token`, `POST /api/v1/auth/logout`
