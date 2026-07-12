@@ -43,6 +43,7 @@ export const appTheme = createTheme({
       styleOverrides: {
         contained: {
           boxShadow: "none",
+          fontWeight: 600,
           "&:hover": {
             boxShadow: "none",
           },
@@ -53,6 +54,75 @@ export const appTheme = createTheme({
       styleOverrides: {
         root: {
           backgroundImage: "none",
+        },
+      },
+    },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          color: theme.palette.text.secondary,
+          fontSize: theme.typography.body2.fontSize,
+          fontWeight: 500,
+          lineHeight: 1.4,
+          "&.Mui-focused": {
+            color: theme.palette.text.secondary,
+          },
+        }),
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          backgroundColor: theme.palette.background.paper,
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderColor: theme.palette.divider,
+            borderWidth: 1,
+          },
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: theme.palette.primary.light,
+          },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: theme.palette.primary.main,
+            borderWidth: 1,
+          },
+        }),
+      },
+    },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          backgroundColor: theme.palette.background.paper,
+          borderColor: theme.palette.divider,
+          borderWidth: 1,
+          fontWeight: 500,
+          fontSize: theme.typography.body2.fontSize,
+          lineHeight: 1.4,
+          textTransform: "none",
+          color: theme.palette.text.primary,
+          "&:hover": {
+            backgroundColor: theme.palette.action.hover,
+          },
+          "&.Mui-selected": {
+            backgroundColor: theme.palette.action.selected,
+            borderColor: theme.palette.primary.main,
+            color: theme.palette.primary.main,
+            fontWeight: 500,
+            "&:hover": {
+              backgroundColor: theme.palette.action.selected,
+            },
+          },
+        }),
+      },
+    },
+    MuiToggleButtonGroup: {
+      styleOverrides: {
+        root: ({ theme }) => ({
+          backgroundColor: theme.palette.background.paper,
+        }),
+        grouped: {
+          "&:not(:first-of-type)": {
+            marginLeft: 0,
+          },
         },
       },
     },
