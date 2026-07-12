@@ -2,7 +2,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useEffect, useRef } from "react";
@@ -11,6 +10,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { formatQuotePremium } from "@/features/quotes/utils/format-quote";
 import { ConditionCards } from "@/features/wizard/components/condition-cards";
 import { CoverageTypeCards } from "@/features/wizard/components/coverage-type-cards";
+import { PremiumSkeleton } from "@/features/wizard/components/premium-skeleton";
 import { YesNoToggle } from "@/features/wizard/components/yes-no-toggle";
 import {
   createCoverageSchema,
@@ -134,10 +134,7 @@ export function CoverageForm({
             <Typography component="div" variant="body1" sx={premiumRowSx}>
               <span>Estimated monthly premium:</span>
               {isPremiumLoading ? (
-                <CircularProgress
-                  size={16}
-                  aria-label="Updating estimated monthly premium"
-                />
+                <PremiumSkeleton />
               ) : typeof estimatedMonthlyPremium === "number" ? (
                 <strong>{formatQuotePremium(estimatedMonthlyPremium)}</strong>
               ) : null}

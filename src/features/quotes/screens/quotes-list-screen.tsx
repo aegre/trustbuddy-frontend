@@ -10,8 +10,8 @@ import { useCallback, useEffect } from "react";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import { getUserFacingErrorMessage } from "@/api/types";
 import { PageErrorAlert } from "@/features/common/components/page-error-alert";
-import { PageLoading } from "@/features/common/components/page-loading";
 import { QuotesCards } from "@/features/quotes/components/quotes-cards";
+import { QuotesListSkeleton } from "@/features/quotes/components/quotes-list-skeleton";
 import {
   QUOTES_LIST_DEFAULTS,
   useQuotesList,
@@ -121,7 +121,7 @@ export function QuotesListScreen() {
           </Button>
         </Box>
 
-        {isPending ? <PageLoading label="Loading quotes" /> : null}
+        {isPending ? <QuotesListSkeleton /> : null}
 
         {isError ? (
           <PageErrorAlert onRetry={onRetry}>

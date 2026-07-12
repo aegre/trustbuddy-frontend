@@ -113,7 +113,7 @@ describe("CoverageForm", () => {
     expect(screen.getByText(/\$120\.50/)).toBeInTheDocument();
   });
 
-  it("given_premiumLoading_when_rendered_then_showsSpinnerInsteadOfCost", () => {
+  it("given_premiumLoading_when_rendered_then_showsShimmerInsteadOfCost", () => {
     renderCoverageForm({
       estimatedMonthlyPremium: 120.5,
       isPremiumLoading: true,

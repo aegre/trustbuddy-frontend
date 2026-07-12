@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { PageLoading } from "@/features/common/components/page-loading";
+import { WizardPageSkeleton } from "@/features/wizard/components/wizard-page-skeleton";
 
 const WizardScreen = lazy(async () => {
   const module = await import("@/features/wizard/screens/wizard-screen");
@@ -8,7 +8,7 @@ const WizardScreen = lazy(async () => {
 
 export function WizardRoute() {
   return (
-    <Suspense fallback={<PageLoading label="Loading wizard" />}>
+    <Suspense fallback={<WizardPageSkeleton />}>
       <WizardScreen />
     </Suspense>
   );
