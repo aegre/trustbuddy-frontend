@@ -57,7 +57,9 @@ describe("SuccessScreen", () => {
     expect(
       await screen.findByText(/thanks, ada lovelace/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/status:\s*submitted/i)).toBeInTheDocument();
+    expect(screen.getByText(/estimated monthly premium/i)).toBeInTheDocument();
+    expect(screen.getByText(/\$175\.50/)).toBeInTheDocument();
+    expect(screen.getByText("SUBMITTED")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /back to quotes/i }),
     ).toHaveAttribute("href", paths.home);

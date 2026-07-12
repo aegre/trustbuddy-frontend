@@ -1,6 +1,8 @@
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
@@ -19,11 +21,60 @@ import {
 import { useQuote } from "@/features/wizard/hooks/use-quote";
 import { paths } from "@/routes/paths";
 
-const containerSx = { py: 4 } as const;
+const containerSx = {
+  py: { xs: 6, sm: 8 },
+  display: "flex",
+  justifyContent: "center",
+} as const;
+
+const panelSx = {
+  width: "100%",
+  maxWidth: 440,
+} as const;
+
 const loadingSx = {
   display: "flex",
   justifyContent: "center",
   py: 6,
+} as const;
+
+const iconWrapSx = {
+  display: "flex",
+  justifyContent: "center",
+  color: "success.main",
+} as const;
+
+const headerSx = {
+  textAlign: "center",
+} as const;
+
+const introSx = { mt: 1 } as const;
+
+const premiumBannerSx = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: 0.5,
+  px: 2,
+  py: 2.5,
+  borderRadius: 1,
+  border: 1,
+  borderColor: "divider",
+  bgcolor: "background.paper",
+  textAlign: "center",
+} as const;
+
+const metaRowSx = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 2,
+} as const;
+
+const actionsSx = {
+  display: "flex",
+  justifyContent: "center",
+  pt: 1,
 } as const;
 
 export function SuccessScreen() {
@@ -48,52 +99,95 @@ export function SuccessScreen() {
     return <Navigate to={paths.home} replace />;
   }
 
+  const statusLabel = formatQuoteStatus(quote?.status);
+  const premium = formatQuotePremium(quote?.estimatedMonthlyPremium);
+
   return (
     <Container component="main" maxWidth="sm" sx={containerSx}>
-      <Stack spacing={3}>
-        <Typography component="h1" variant="h5">
-          Quote submitted
-        </Typography>
+      <Box sx={panelSx}>
+        <Stack spacing={3}>
+          {isPending ? (
+            <Box sx={loadingSx}>
+              <output aria-label="Loading quote">
+                <CircularProgress />
+              </output>
+            </Box>
+          ) : null}
 
-        {isPending ? (
-          <Box sx={loadingSx}>
-            <output aria-label="Loading quote">
-              <CircularProgress />
-            </output>
-          </Box>
-        ) : null}
+          {isError ? (
+            <Alert severity="error" action={errorAction}>
+              {getUserFacingErrorMessage(error, "Could not load quote")}
+            </Alert>
+          ) : null}
 
-        {isError ? (
-          <Alert severity="error" action={errorAction}>
-            {getUserFacingErrorMessage(error, "Could not load quote")}
-          </Alert>
-        ) : null}
+          {!isPending && !isError && quote ? (
+            <>
+              <Box sx={iconWrapSx} aria-hidden>
+                <CheckCircleOutlineIcon sx={{ fontSize: 48 }} />
+              </Box>
 
-        {!isPending && !isError && quote ? (
-          <Stack spacing={1.5}>
-            <Typography>
-              Thanks{quote.name ? `, ${quote.name}` : ""}. Your quote has been
-              submitted.
-            </Typography>
-            <Typography color="text.secondary">
-              Status: {formatQuoteStatus(quote.status)}
-            </Typography>
-            <Typography color="text.secondary">
-              Estimated monthly premium:{" "}
-              {formatQuotePremium(quote.estimatedMonthlyPremium)}
-            </Typography>
-          </Stack>
-        ) : null}
+              <Box sx={headerSx}>
+                <Typography component="h1" variant="h5">
+                  Quote submitted
+                </Typography>
+                <Typography color="text.secondary" sx={introSx}>
+                  Thanks{quote.name ? `, ${quote.name}` : ""}. Your quote has
+                  been submitted.
+                </Typography>
+              </Box>
 
-        <Button
-          component={RouterLink}
-          to={paths.home}
-          variant="contained"
-          sx={{ alignSelf: "flex-start" }}
-        >
-          Back to quotes
-        </Button>
-      </Stack>
+              <Box sx={premiumBannerSx}>
+                <Typography
+                  color="text.secondary"
+                  variant="body2"
+                  fontWeight={500}
+                >
+                  Estimated monthly premium
+                </Typography>
+                <Typography component="p" variant="h4" sx={{ m: 0 }}>
+                  {premium}
+                </Typography>
+              </Box>
+
+              <Box sx={metaRowSx}>
+                <Typography color="text.secondary" variant="body2">
+                  Status
+                </Typography>
+                <Chip
+                  label={statusLabel}
+                  size="small"
+                  color="success"
+                  variant="outlined"
+                />
+              </Box>
+
+              <Box sx={actionsSx}>
+                <Button
+                  component={RouterLink}
+                  to={paths.home}
+                  variant="contained"
+                  size="large"
+                >
+                  Back to quotes
+                </Button>
+              </Box>
+            </>
+          ) : null}
+
+          {(isPending || isError) && !quote ? (
+            <Box sx={actionsSx}>
+              <Button
+                component={RouterLink}
+                to={paths.home}
+                variant="contained"
+                size="large"
+              >
+                Back to quotes
+              </Button>
+            </Box>
+          ) : null}
+        </Stack>
+      </Box>
     </Container>
   );
 }
