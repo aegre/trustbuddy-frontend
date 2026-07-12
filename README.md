@@ -22,7 +22,7 @@ The first thing is to keep the ui as minimal as possible, functionality over loo
 
 I can foresee 9 main steps, with intermediate steps for optimizations and tuning.
 
-1. Initial setup dependencies/linter/agent rules/makefile 
+1. Initial setup dependencies/linter/agent rules/makefile
 2. Login Screen with request
 3. Dashboard/list of quotes
 4. Wizard setup
@@ -35,7 +35,6 @@ I can foresee 9 main steps, with intermediate steps for optimizations and tuning
 ## Technical extras
 
 We are also using OpenAPI from the api project so this way we can generate api types easily, we just need a way to sync the generated schema from swagger. Dockerizing a project like this is not a big deal, we can just serve the static files or run react inside the container. I'll go with the second approach. For testing: Vitest + MSW for unit/component tests, Playwright for E2E.
-
 
 # AI Driven Development
 
