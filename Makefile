@@ -5,6 +5,7 @@ DOCKER_IMAGE := trustbuddy-frontend:local
 COMPOSE := docker compose
 VITE_API_BASE_URL ?= http://localhost:8080
 API_REPO ?= ../trustbuddy-api
+API_GIT_URL ?= https://github.com/aegre/trustbuddy-api.git
 OPENAPI_SPEC := openapi/openapi.json
 API_OPENAPI_SPEC := $(API_REPO)/openapi/openapi.json
 
@@ -14,7 +15,7 @@ include .env
 export $(shell sed -n 's/=.*//p' .env)
 endif
 
-.PHONY: help install run dev build lint format format-check precommit test verify openapi-sync openapi-codegen openapi-update docker-build stack-up stack-down stack-logs stack-all-up stack-all-down stack-all-logs
+.PHONY: help install clone-api run dev build lint format format-check precommit test verify openapi-sync openapi-codegen openapi-update docker-build stack-up stack-down stack-logs stack-all-up stack-all-down stack-all-logs
 
 help: ## Show available targets
 	@echo "Trustbuddy Frontend — available targets:"
@@ -23,6 +24,14 @@ help: ## Show available targets
 
 install: ## Install npm dependencies
 	$(NPM) install
+
+clone-api: ## Clone trustbuddy-api sibling next to this repo ($(API_REPO))
+	@if [ -d "$(API_REPO)/.git" ] || [ -f "$(API_REPO)/Makefile" ]; then \
+		echo "Sibling already present at $(API_REPO)"; \
+	else \
+		git clone "$(API_GIT_URL)" "$(API_REPO)"; \
+		echo "Cloned $(API_GIT_URL) → $(API_REPO)"; \
+	fi
 
 run: ## Run Vite dev server locally
 	$(NPM) run dev
