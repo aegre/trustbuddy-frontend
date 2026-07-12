@@ -103,9 +103,11 @@ export function CoverageForm({
       sx={formSx}
     >
       <Stack spacing={3}>
-        <Typography component="h2" variant="h6">
-          Coverage
-        </Typography>
+        {errorMessage ? (
+          <Alert severity="error" role="alert">
+            {errorMessage}
+          </Alert>
+        ) : null}
 
         {showPremiumRow ? (
           <Stack spacing={1}>

@@ -4,7 +4,6 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
 import { useForm } from "react-hook-form";
 import {
   emptyPersonalDefaults,
@@ -50,10 +49,6 @@ export function PersonalForm({
       sx={formSx}
     >
       <Stack spacing={3}>
-        <Typography component="h2" variant="h6">
-          Personal information
-        </Typography>
-
         {errorMessage ? (
           <Alert severity="error" role="alert">
             {errorMessage}

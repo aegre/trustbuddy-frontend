@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
+import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Step from "@mui/material/Step";
 import StepButton from "@mui/material/StepButton";
@@ -27,6 +28,8 @@ export type WizardLayoutProps = {
   showStepChrome?: boolean;
   /** When true, hide the layout Next link (step owns continue, e.g. personal form). */
   hideNext?: boolean;
+  /** When true, hide the layout Back/Next row (step owns footer actions). */
+  hideNav?: boolean;
   children: ReactNode;
 };
 
@@ -37,7 +40,8 @@ const navSx = {
   gap: 2,
   pt: 1,
 } as const;
-const contentSx = { py: 2 } as const;
+const paperSx = { p: { xs: 2.5, sm: 3.5 } } as const;
+const stepMetaSx = { mb: 0.5 } as const;
 
 export function WizardLayout({
   stepSlug,
@@ -45,20 +49,21 @@ export function WizardLayout({
   quote,
   showStepChrome = true,
   hideNext = false,
+  hideNav = false,
   children,
 }: WizardLayoutProps) {
   const activeStep = getWizardStepIndex(stepSlug);
   const previous = getPreviousWizardStep(stepSlug);
   const next = hideNext ? null : getNextWizardStep(stepSlug);
   const accessContext = { quoteId, quote };
+  const stepDefinition = WIZARD_STEPS[activeStep];
+  const stepNumber = activeStep + 1;
+  const stepCount = WIZARD_STEPS.length;
+  const showNav = showStepChrome && !hideNav;
 
   return (
     <Container component="main" maxWidth="md" sx={containerSx}>
       <Stack spacing={2}>
-        <Typography component="h1" variant="h5">
-          Quote wizard
-        </Typography>
-
         {showStepChrome ? (
           <Stepper nonLinear activeStep={activeStep} alternativeLabel>
             {WIZARD_STEPS.map((step) => {
@@ -88,9 +93,33 @@ export function WizardLayout({
           </Stepper>
         ) : null}
 
-        <Box sx={contentSx}>{children}</Box>
+        <Paper elevation={0} variant="outlined" sx={paperSx}>
+          <Box sx={stepMetaSx}>
+            <Typography
+              color="primary"
+              variant="body2"
+              sx={{ fontWeight: 600 }}
+            >
+              Step {stepNumber} of {stepCount}
+            </Typography>
+            <Typography component="h1" variant="h5">
+              {stepDefinition?.label ?? "Quote wizard"}
+            </Typography>
+            {stepDefinition?.description ? (
+              <Typography
+                color="text.secondary"
+                variant="body2"
+                sx={{ mt: 0.5 }}
+              >
+                {stepDefinition.description}
+              </Typography>
+            ) : null}
+          </Box>
 
-        {showStepChrome ? (
+          <Box sx={{ pt: 2 }}>{children}</Box>
+        </Paper>
+
+        {showNav ? (
           <Box sx={navSx}>
             {previous ? (
               <Button
@@ -98,7 +127,7 @@ export function WizardLayout({
                 to={wizardHref(previous, { quoteId })}
                 variant="outlined"
               >
-                Previous
+                Back
               </Button>
             ) : (
               <span />

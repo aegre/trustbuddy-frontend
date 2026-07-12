@@ -39,6 +39,8 @@ export function WizardScreen() {
     ((stepSlug === "personal" || stepSlug === "coverage") &&
       (!quoteId || (!isPending && !isError && !readOnly))) ||
     (stepSlug === "review" && Boolean(quoteId) && !isPending && !isError);
+  const hideNav =
+    stepSlug === "review" && Boolean(quoteId) && !isPending && !isError;
 
   let body: ReactNode;
   if (!quoteId) {
@@ -67,6 +69,7 @@ export function WizardScreen() {
       quote={quote}
       showStepChrome={showStepChrome}
       hideNext={hideNext}
+      hideNav={hideNav}
     >
       {body}
     </WizardLayout>

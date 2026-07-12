@@ -47,9 +47,11 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
   const quoteIdRef = useRef(quoteId);
   const ageRef = useRef(quote?.age);
   const readOnlyRef = useRef(readOnly);
+  const isSubmittingRef = useRef(false);
   quoteIdRef.current = quoteId;
   ageRef.current = quote?.age;
   readOnlyRef.current = readOnly;
+  isSubmittingRef.current = isSubmitting;
 
   const updateCoverageMutation = useUpdateCoverage();
 
@@ -119,6 +121,9 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
         setIsPremiumLoading(false);
       } catch (error) {
         if (isAbortError(error)) {
+          return;
+        }
+        if (isSubmittingRef.current) {
           return;
         }
         setIsPremiumLoading(false);

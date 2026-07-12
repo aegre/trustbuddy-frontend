@@ -49,24 +49,24 @@ describe("wizard routes", () => {
     renderWizardAt(paths.wizardPersonal);
 
     expect(
-      await screen.findByRole("heading", { name: /quote wizard/i }),
+      await screen.findByRole("heading", { name: /^personal$/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /personal information/i }),
+      screen.getByRole("heading", { name: /^personal$/i }),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Full name")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /^continue$/i }),
     ).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /^next$/i })).toBeNull();
-    expect(screen.queryByRole("link", { name: /^previous$/i })).toBeNull();
+    expect(screen.queryByRole("link", { name: /^back$/i })).toBeNull();
   });
 
   it("given_coverageWithoutQuoteId_when_loaded_then_redirectsToPersonal", async () => {
     const { router } = renderWizardAt(`${paths.wizardBase}/coverage`);
 
     expect(
-      await screen.findByRole("heading", { name: /personal information/i }),
+      await screen.findByRole("heading", { name: /^personal$/i }),
     ).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(paths.wizardPersonal);
     expect(router.state.location.search).toBe("");
@@ -148,7 +148,7 @@ describe("wizard routes", () => {
     expect(
       screen.getByRole("button", { name: /^continue$/i }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /^previous$/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /^back$/i })).toHaveAttribute(
       "href",
       `${paths.wizardPersonal}?quoteId=q-9`,
     );
@@ -160,7 +160,7 @@ describe("wizard routes", () => {
     renderWizardAt(paths.wizardPersonal);
 
     expect(
-      await screen.findByRole("heading", { name: /personal information/i }),
+      await screen.findByRole("heading", { name: /^personal$/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("tab", { name: /^personal$/i }),
@@ -211,7 +211,7 @@ describe("wizard routes", () => {
     renderWizardAt(`${paths.wizardBase}/not-a-step?quoteId=q-1`);
 
     expect(
-      await screen.findByRole("heading", { name: /personal information/i }),
+      await screen.findByRole("heading", { name: /^personal$/i }),
     ).toBeInTheDocument();
     expect(await screen.findByLabelText("Full name")).toHaveValue(
       "Redirect User",
@@ -222,7 +222,7 @@ describe("wizard routes", () => {
     renderWizardAt(paths.wizardBase);
 
     expect(
-      await screen.findByRole("heading", { name: /personal information/i }),
+      await screen.findByRole("heading", { name: /^personal$/i }),
     ).toBeInTheDocument();
   });
 
@@ -350,7 +350,7 @@ describe("wizard routes", () => {
     expect(router.state.location.pathname).toBe(paths.wizardPersonal);
     expect(router.state.location.search).toBe("?quoteId=q-conflict");
     expect(
-      screen.getByRole("heading", { name: /personal information/i }),
+      screen.getByRole("heading", { name: /^personal$/i }),
     ).toBeInTheDocument();
   });
 
@@ -365,10 +365,12 @@ describe("wizard routes", () => {
     renderWizardAt(`${paths.wizardBase}/coverage?quoteId=q-cov`);
 
     expect(
-      await screen.findByRole("heading", { name: /^coverage$/i }),
+      await screen.findByText(/estimated monthly premium/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/estimated monthly premium/i)).toBeInTheDocument();
     expect(screen.getByText(/\$120\.50/)).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /^coverage$/i }),
+    ).toBeInTheDocument();
   });
 
   it("given_incompleteCoverage_when_typeChanged_then_updatesPremium", async () => {
@@ -401,10 +403,7 @@ describe("wizard routes", () => {
     const user = userEvent.setup();
     renderWizardAt(`${paths.wizardBase}/coverage?quoteId=q-cov-live`);
 
-    expect(
-      await screen.findByRole("heading", { name: /^coverage$/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/\$100\.00/)).toBeInTheDocument();
+    expect(await screen.findByText(/\$100\.00/)).toBeInTheDocument();
 
     await user.click(screen.getByRole("radio", { name: /^standard$/i }));
 
@@ -452,7 +451,7 @@ describe("wizard routes", () => {
     );
 
     expect(
-      await screen.findByRole("heading", { name: /^coverage$/i }),
+      await screen.findByRole("radiogroup", { name: /coverage type/i }),
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole("radio", { name: /^standard$/i }));
@@ -470,7 +469,7 @@ describe("wizard routes", () => {
     await user.click(screen.getByRole("button", { name: /^continue$/i }));
 
     expect(
-      await screen.findByRole("heading", { name: /review & submit/i }),
+      await screen.findByRole("heading", { name: /review your quote/i }),
     ).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(`${paths.wizardBase}/review`);
     expect(router.state.location.search).toBe("?quoteId=q-cov");
@@ -515,7 +514,7 @@ describe("wizard routes", () => {
     );
 
     expect(
-      await screen.findByRole("heading", { name: /^coverage$/i }),
+      await screen.findByRole("radiogroup", { name: /coverage type/i }),
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole("radio", { name: /^premium$/i }));
@@ -535,7 +534,7 @@ describe("wizard routes", () => {
     await user.click(screen.getByRole("button", { name: /^continue$/i }));
 
     expect(
-      await screen.findByRole("heading", { name: /review & submit/i }),
+      await screen.findByRole("heading", { name: /review your quote/i }),
     ).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(`${paths.wizardBase}/review`);
     expect(patchedBody).toMatchObject({
@@ -567,7 +566,7 @@ describe("wizard routes", () => {
     );
 
     expect(
-      await screen.findByRole("heading", { name: /^coverage$/i }),
+      await screen.findByRole("radiogroup", { name: /coverage type/i }),
     ).toBeInTheDocument();
 
     await user.click(screen.getByRole("radio", { name: /^basic$/i }));
@@ -582,9 +581,9 @@ describe("wizard routes", () => {
     );
     await user.click(screen.getByRole("button", { name: /^continue$/i }));
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Quote was updated elsewhere",
-    );
+    expect(
+      await screen.findAllByText("Quote was updated elsewhere"),
+    ).not.toHaveLength(0);
     expect(router.state.location.pathname).toBe(`${paths.wizardBase}/coverage`);
     expect(router.state.location.search).toBe("?quoteId=q-cov-conflict");
   });
@@ -624,7 +623,7 @@ describe("wizard routes", () => {
     );
 
     expect(
-      await screen.findByRole("heading", { name: /review & submit/i }),
+      await screen.findByRole("heading", { name: /review your quote/i }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /^submit quote$/i }),
@@ -632,7 +631,9 @@ describe("wizard routes", () => {
     await user.click(screen.getByRole("button", { name: /^submit quote$/i }));
 
     expect(
-      await screen.findByRole("heading", { name: /quote submitted/i }),
+      await screen.findByRole("heading", {
+        name: /your quote has been submitted/i,
+      }),
     ).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(paths.success);
     expect(router.state.location.search).toBe("?quoteId=q-submit");
@@ -704,7 +705,9 @@ describe("wizard routes", () => {
     await user.click(screen.getByRole("button", { name: /^retry submit$/i }));
 
     expect(
-      await screen.findByRole("heading", { name: /quote submitted/i }),
+      await screen.findByRole("heading", {
+        name: /your quote has been submitted/i,
+      }),
     ).toBeInTheDocument();
     expect(router.state.location.pathname).toBe(paths.success);
   });
