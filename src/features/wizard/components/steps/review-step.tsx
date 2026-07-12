@@ -218,7 +218,11 @@ export function ReviewStep({ quoteId, quote }: WizardStepProps) {
         </Typography>
       </div>
 
-      {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
+      {errorMessage ? (
+        <Alert severity="error" role="alert">
+          {errorMessage}
+        </Alert>
+      ) : null}
 
       <Box sx={premiumBannerSx}>
         <Typography

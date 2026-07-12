@@ -31,7 +31,7 @@ export type WizardLayoutProps = {
   children: ReactNode;
 };
 
-const containerSx = { py: 4 } as const;
+const containerSx = { py: 3 } as const;
 const headerSx = {
   display: "flex",
   alignItems: "center",
@@ -43,9 +43,9 @@ const navSx = {
   display: "flex",
   justifyContent: "space-between",
   gap: 2,
-  pt: 2,
+  pt: 1,
 } as const;
-const contentSx = { py: 3 } as const;
+const contentSx = { py: 2 } as const;
 
 export function WizardLayout({
   stepSlug,
@@ -62,7 +62,7 @@ export function WizardLayout({
 
   return (
     <Container component="main" maxWidth="md" sx={containerSx}>
-      <Stack spacing={3}>
+      <Stack spacing={2}>
         <Box sx={headerSx}>
           <Typography component="h1" variant="h5">
             Quote wizard

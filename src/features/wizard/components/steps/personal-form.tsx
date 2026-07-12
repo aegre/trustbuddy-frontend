@@ -119,14 +119,16 @@ export function PersonalForm({
         />
 
         {readOnly ? null : (
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={isSubmitting}
-            fullWidth
-          >
-            {isSubmitting ? "Saving…" : "Continue"}
-          </Button>
+          <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Saving…" : "Continue"}
+            </Button>
+          </Box>
         )}
       </Stack>
     </Box>
