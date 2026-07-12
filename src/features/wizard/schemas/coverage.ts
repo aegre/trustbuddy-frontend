@@ -55,12 +55,18 @@ export function createCoverageSchema(age?: number) {
   });
 }
 
-export type CoverageFormValues = yup.InferType<
-  ReturnType<typeof createCoverageSchema>
->;
+/** Explicit form values — Yup InferType diverges for age-conditional fields. */
+export type CoverageFormValues = {
+  coverageType: CoverageTypeValue | "";
+  takesPrescriptionMedication: boolean;
+  usesTobacco: boolean;
+  needsSpouseCoverage: boolean;
+  hasPreexistingConditions?: boolean;
+  conditions: ConditionValue[];
+};
 
 export const emptyCoverageDefaults: CoverageFormValues = {
-  coverageType: "" as CoverageTypeValue,
+  coverageType: "",
   takesPrescriptionMedication: false,
   usesTobacco: false,
   needsSpouseCoverage: false,

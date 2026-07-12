@@ -49,7 +49,7 @@ export function WizardScreen() {
   const showStepChrome = !quoteId || (!isPending && !isError);
   const readOnly = Boolean(quoteId && quote && !isQuoteEditable(quote));
   const hideNext =
-    stepSlug === "personal" &&
+    (stepSlug === "personal" || stepSlug === "coverage") &&
     (!quoteId || (!isPending && !isError && !readOnly));
 
   let body: ReactNode;

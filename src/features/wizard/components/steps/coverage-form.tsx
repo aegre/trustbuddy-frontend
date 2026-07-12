@@ -15,7 +15,7 @@ import RadioGroup from "@mui/material/RadioGroup";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { formatQuotePremium } from "@/features/quotes/utils/format-quote";
 import {
   CONDITION_LABELS,
@@ -60,7 +60,7 @@ export function CoverageForm({
     handleSubmit,
     formState: { errors },
   } = useForm<CoverageFormValues>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schema) as Resolver<CoverageFormValues>,
     mode: "onSubmit",
     reValidateMode: "onChange",
     defaultValues: { ...emptyCoverageDefaults, ...defaultValues },

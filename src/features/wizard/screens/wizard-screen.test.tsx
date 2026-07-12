@@ -130,17 +130,15 @@ describe("wizard routes", () => {
     expect(
       await screen.findByRole("heading", { name: /^coverage$/i }),
     ).toBeInTheDocument();
+    expect(screen.getByLabelText("Coverage type")).toBeInTheDocument();
     expect(
-      await screen.findByText(/coverage for ada lovelace/i),
+      screen.getByRole("button", { name: /^continue$/i }),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /^previous$/i })).toHaveAttribute(
       "href",
       `${paths.wizardPersonal}?quoteId=q-9`,
     );
-    expect(screen.getByRole("link", { name: /^next$/i })).toHaveAttribute(
-      "href",
-      `${paths.wizardBase}/review?quoteId=q-9`,
-    );
+    expect(screen.queryByRole("link", { name: /^next$/i })).toBeNull();
   });
 
   it("given_quoteLoadError_when_retry_then_loadsQuote", async () => {
