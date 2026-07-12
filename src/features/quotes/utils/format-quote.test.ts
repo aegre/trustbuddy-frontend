@@ -3,6 +3,7 @@ import {
   formatQuoteDate,
   formatQuotePremium,
   formatQuoteStatus,
+  quoteStatusChipColor,
 } from "@/features/quotes/utils/format-quote";
 import { paths, successHref, wizardPersonalHref } from "@/routes/paths";
 
@@ -12,6 +13,14 @@ describe("formatQuote", () => {
     expect(formatQuotePremium(undefined)).toBe("—");
     expect(formatQuoteStatus("DRAFT")).toBe("DRAFT");
     expect(formatQuoteStatus(undefined)).toBe("—");
+  });
+
+  it("maps status to chip colors", () => {
+    expect(quoteStatusChipColor("DRAFT")).toBe("info");
+    expect(quoteStatusChipColor("SUBMITTED")).toBe("success");
+    expect(quoteStatusChipColor("SUBMISSION_FAILED")).toBe("error");
+    expect(quoteStatusChipColor("EXPIRED")).toBe("warning");
+    expect(quoteStatusChipColor(undefined)).toBe("default");
   });
 
   it("formats dates or em dash", () => {

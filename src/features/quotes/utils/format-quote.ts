@@ -33,3 +33,24 @@ export function formatQuotePremium(
 export function formatQuoteStatus(status: QuoteResponse["status"]): string {
   return status ?? "—";
 }
+
+export type QuoteStatusChipColor =
+  "default" | "info" | "success" | "warning" | "error";
+
+/** MUI Chip color for quote lifecycle status. */
+export function quoteStatusChipColor(
+  status: QuoteResponse["status"],
+): QuoteStatusChipColor {
+  switch (status) {
+    case "DRAFT":
+      return "info";
+    case "SUBMITTED":
+      return "success";
+    case "SUBMISSION_FAILED":
+      return "error";
+    case "EXPIRED":
+      return "warning";
+    default:
+      return "default";
+  }
+}
