@@ -8,6 +8,7 @@ import { server } from "@/test/msw/server";
 import { renderAppRouter } from "@/test/render";
 import { paths } from "@/routes/paths";
 import { ProtectedOutlet } from "@/routes/protected-outlet";
+import { SuccessRoute } from "@/routes/success-route";
 import { WizardRoute } from "@/routes/wizard-route";
 
 const wizardRoutes = [
@@ -19,6 +20,7 @@ const wizardRoutes = [
         element: <Navigate to={paths.wizardPersonal} replace />,
       },
       { path: paths.wizardStep, element: <WizardRoute /> },
+      { path: paths.success, element: <SuccessRoute /> },
       { path: paths.home, element: <div>Quotes home</div> },
     ],
   },
@@ -569,5 +571,143 @@ describe("wizard routes", () => {
     );
     expect(router.state.location.pathname).toBe(`${paths.wizardBase}/coverage`);
     expect(router.state.location.search).toBe("?quoteId=q-cov-conflict");
+  });
+
+  it("given_draftQuote_when_submitted_then_navigatesToSuccess", async () => {
+    let status: "DRAFT" | "SUBMITTED" = "DRAFT";
+    const base = {
+      id: "q-submit",
+      name: "Ada Lovelace",
+      email: "ada@example.com",
+      age: 36,
+      zipCode: "06600",
+      coverageType: "STANDARD" as const,
+      takesPrescriptionMedication: false,
+      usesTobacco: false,
+      needsSpouseCoverage: false,
+      estimatedMonthlyPremium: 150,
+    };
+    server.use(
+      http.get("*/api/v1/quotes/:id", () =>
+        HttpResponse.json(createQuoteFixture({ ...base, status }), {
+          status: 200,
+        }),
+      ),
+      http.post("*/api/v1/quotes/:id/submit", () => {
+        status = "SUBMITTED";
+        return HttpResponse.json(
+          createQuoteFixture({ ...base, status: "SUBMITTED" }),
+          { status: 200 },
+        );
+      }),
+    );
+
+    const user = userEvent.setup();
+    const { router } = renderWizardAt(
+      `${paths.wizardBase}/review?quoteId=q-submit`,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: /review & submit/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /^submit quote$/i }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /^submit quote$/i }));
+
+    expect(
+      await screen.findByRole("heading", { name: /quote submitted/i }),
+    ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(paths.success);
+    expect(router.state.location.search).toBe("?quoteId=q-submit");
+  });
+
+  it("given_409_when_submitted_then_showsAlertAndStays", async () => {
+    mockQuote({
+      id: "q-submit-conflict",
+      name: "Conflict Ada",
+      status: "DRAFT",
+      coverageType: "BASIC",
+      estimatedMonthlyPremium: 80,
+    });
+    server.use(
+      http.post("*/api/v1/quotes/:id/submit", () =>
+        HttpResponse.json(
+          { message: "Quote was updated elsewhere" },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    const user = userEvent.setup();
+    const { router } = renderWizardAt(
+      `${paths.wizardBase}/review?quoteId=q-submit-conflict`,
+    );
+
+    expect(
+      await screen.findByRole("button", { name: /^submit quote$/i }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /^submit quote$/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Quote was updated elsewhere",
+    );
+    expect(router.state.location.pathname).toBe(`${paths.wizardBase}/review`);
+    expect(router.state.location.search).toBe("?quoteId=q-submit-conflict");
+  });
+
+  it("given_submissionFailed_when_retrySubmit_then_navigatesToSuccess", async () => {
+    let status: "SUBMISSION_FAILED" | "SUBMITTED" = "SUBMISSION_FAILED";
+    const base = {
+      id: "q-failed",
+      name: "Retry Ada",
+      coverageType: "PREMIUM" as const,
+      estimatedMonthlyPremium: 220,
+    };
+    server.use(
+      http.get("*/api/v1/quotes/:id", () =>
+        HttpResponse.json(createQuoteFixture({ ...base, status }), {
+          status: 200,
+        }),
+      ),
+      http.post("*/api/v1/quotes/:id/submit", () => {
+        status = "SUBMITTED";
+        return HttpResponse.json(
+          createQuoteFixture({ ...base, status: "SUBMITTED" }),
+          { status: 200 },
+        );
+      }),
+    );
+
+    const user = userEvent.setup();
+    const { router } = renderWizardAt(
+      `${paths.wizardBase}/review?quoteId=q-failed`,
+    );
+
+    expect(await screen.findByText(/submission failed/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /^retry submit$/i }));
+
+    expect(
+      await screen.findByRole("heading", { name: /quote submitted/i }),
+    ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(paths.success);
+  });
+
+  it("given_submittedQuote_when_reviewLoaded_then_hidesSubmit", async () => {
+    mockQuote({
+      id: "q-done",
+      name: "Done Ada",
+      status: "SUBMITTED",
+      coverageType: "STANDARD",
+      estimatedMonthlyPremium: 100,
+    });
+    renderWizardAt(`${paths.wizardBase}/review?quoteId=q-done`);
+
+    expect(
+      await screen.findByRole("heading", { name: /review & submit/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /submit/i }),
+    ).not.toBeInTheDocument();
   });
 });
