@@ -1,7 +1,11 @@
+import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
+import CircularProgress from "@mui/material/CircularProgress";
+import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useQueryClient } from "@tanstack/react-query";
@@ -26,10 +30,16 @@ const introSx = { mt: 0.5 } as const;
 
 const sectionHeaderSx = {
   display: "flex",
-  alignItems: "baseline",
+  alignItems: "center",
   justifyContent: "space-between",
   gap: 2,
   mb: 1.5,
+} as const;
+
+const sectionTitleSx = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: 1,
 } as const;
 
 const definitionListSx = {
@@ -55,24 +65,33 @@ const detailSx = {
   wordBreak: "break-word",
 } as const;
 
+const cardSx = {
+  p: 2.5,
+  borderRadius: 2,
+} as const;
+
 const premiumBannerSx = {
   display: "flex",
-  flexWrap: "wrap",
-  alignItems: "baseline",
-  justifyContent: "space-between",
-  gap: 1,
-  px: 2,
-  py: 1.75,
-  borderRadius: 1,
-  border: 1,
-  borderColor: "divider",
-  bgcolor: "background.paper",
+  flexDirection: "column",
+  alignItems: "flex-start",
+  gap: 0.5,
+  px: 2.5,
+  py: 2.5,
+  borderRadius: 2,
+  bgcolor: "action.selected",
+} as const;
+
+const summaryGridSx = {
+  display: "grid",
+  gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+  gap: 2,
 } as const;
 
 const actionsSx = {
   display: "flex",
   flexWrap: "wrap",
-  justifyContent: "flex-end",
+  justifyContent: "space-between",
+  alignItems: "center",
   gap: 1.5,
   pt: 1,
 } as const;
@@ -110,26 +129,45 @@ function SummaryField({ label, value }: { label: string; value: string }) {
 
 function ReviewSection({
   title,
+  icon,
   editTo,
   children,
 }: {
   title: string;
+  icon: ReactNode;
   editTo?: string;
   children: ReactNode;
 }) {
   return (
-    <Box>
+    <Paper variant="outlined" elevation={0} sx={cardSx}>
       <Box sx={sectionHeaderSx}>
-        <Typography component="h3" variant="subtitle1" sx={{ fontWeight: 600 }}>
-          {title}
-        </Typography>
+        <Box sx={sectionTitleSx}>
+          <Box
+            sx={{
+              color: "primary.main",
+              display: "inline-flex",
+              alignItems: "center",
+            }}
+            aria-hidden
+          >
+            {icon}
+          </Box>
+          <Typography
+            component="h3"
+            variant="subtitle1"
+            sx={{ fontWeight: 600 }}
+          >
+            {title}
+          </Typography>
+        </Box>
         {editTo ? (
           <Button
             component={RouterLink}
             to={editTo}
             size="small"
             variant="text"
-            sx={{ minWidth: 0, px: 0.5 }}
+            startIcon={<EditOutlinedIcon fontSize="small" />}
+            sx={{ minWidth: 0 }}
           >
             Edit
           </Button>
@@ -138,7 +176,7 @@ function ReviewSection({
       <Box component="dl" sx={definitionListSx}>
         {children}
       </Box>
-    </Box>
+    </Paper>
   );
 }
 
@@ -202,9 +240,9 @@ export function ReviewStep({ quoteId, quote }: WizardStepProps) {
   const coverageType = quote?.coverageType
     ? formatEnumLabel(quote.coverageType)
     : "—";
-  const heading = canSubmit ? "Review & submit" : "Review";
+  const heading = canSubmit ? "Review your quote" : "Review";
   const intro = canSubmit
-    ? `Confirm details for ${quote?.name ?? "this quote"} before submitting.`
+    ? "Please review your information and quote details before submitting."
     : `Summary for ${quote?.name ?? "this quote"}.`;
 
   return (
@@ -224,80 +262,118 @@ export function ReviewStep({ quoteId, quote }: WizardStepProps) {
         </Alert>
       ) : null}
 
-      <Box sx={premiumBannerSx}>
-        <Typography
-          color="text.secondary"
-          variant="body2"
-          sx={{ fontWeight: 500 }}
-        >
-          Estimated monthly premium
-        </Typography>
-        <Typography component="p" variant="h5" sx={{ m: 0 }}>
-          {premium}
-        </Typography>
+      <Box sx={summaryGridSx}>
+        <Stack spacing={2}>
+          <ReviewSection
+            title="Personal information"
+            icon={<PersonOutlinedIcon fontSize="small" />}
+            editTo={
+              canEditDetails && quoteId
+                ? wizardHref("personal", { quoteId })
+                : undefined
+            }
+          >
+            <SummaryField label="Name" value={quote?.name ?? "—"} />
+            <SummaryField label="Email" value={quote?.email ?? "—"} />
+            <SummaryField
+              label="Age"
+              value={quote?.age != null ? String(quote.age) : "—"}
+            />
+            <SummaryField label="ZIP code" value={quote?.zipCode ?? "—"} />
+          </ReviewSection>
+
+          <ReviewSection
+            title="Coverage"
+            icon={<ShieldOutlinedIcon fontSize="small" />}
+            editTo={
+              canEditDetails && quoteId
+                ? wizardHref("coverage", { quoteId })
+                : undefined
+            }
+          >
+            <SummaryField label="Plan" value={coverageType} />
+            <SummaryField
+              label="Prescription medication"
+              value={formatYesNo(quote?.takesPrescriptionMedication)}
+            />
+            <SummaryField
+              label="Tobacco use"
+              value={formatYesNo(quote?.usesTobacco)}
+            />
+            <SummaryField
+              label="Spouse coverage"
+              value={formatYesNo(quote?.needsSpouseCoverage)}
+            />
+            {quote?.hasPreexistingConditions != null ? (
+              <>
+                <SummaryField
+                  label="Pre-existing conditions"
+                  value={formatYesNo(quote.hasPreexistingConditions)}
+                />
+                <Typography component="dt" sx={termSx}>
+                  Conditions
+                </Typography>
+                <ConditionsDetail conditions={quote.conditions ?? []} />
+              </>
+            ) : null}
+          </ReviewSection>
+        </Stack>
+
+        <Paper variant="outlined" elevation={0} sx={cardSx}>
+          <Typography
+            component="h3"
+            variant="subtitle1"
+            sx={{ fontWeight: 600, mb: 1.5 }}
+          >
+            Cost
+          </Typography>
+          <Box sx={premiumBannerSx}>
+            <Typography
+              color="text.secondary"
+              variant="body2"
+              sx={{ fontWeight: 500 }}
+            >
+              Estimated monthly premium
+            </Typography>
+            <Typography
+              component="p"
+              variant="h5"
+              color="primary"
+              sx={{ m: 0 }}
+            >
+              {premium}
+            </Typography>
+            <Typography color="text.secondary" variant="caption">
+              Prices are estimated and may vary based on final underwriting.
+            </Typography>
+          </Box>
+        </Paper>
       </Box>
 
-      <ReviewSection
-        title="Personal"
-        editTo={
-          canEditDetails && quoteId
-            ? wizardHref("personal", { quoteId })
-            : undefined
-        }
-      >
-        <SummaryField label="Name" value={quote?.name ?? "—"} />
-        <SummaryField label="Email" value={quote?.email ?? "—"} />
-        <SummaryField
-          label="Age"
-          value={quote?.age != null ? String(quote.age) : "—"}
-        />
-        <SummaryField label="ZIP code" value={quote?.zipCode ?? "—"} />
-      </ReviewSection>
-
-      <Divider />
-
-      <ReviewSection
-        title="Coverage"
-        editTo={
-          canEditDetails && quoteId
-            ? wizardHref("coverage", { quoteId })
-            : undefined
-        }
-      >
-        <SummaryField label="Type" value={coverageType} />
-        <SummaryField
-          label="Prescription medication"
-          value={formatYesNo(quote?.takesPrescriptionMedication)}
-        />
-        <SummaryField
-          label="Tobacco use"
-          value={formatYesNo(quote?.usesTobacco)}
-        />
-        <SummaryField
-          label="Spouse coverage"
-          value={formatYesNo(quote?.needsSpouseCoverage)}
-        />
-        {quote?.hasPreexistingConditions != null ? (
-          <>
-            <SummaryField
-              label="Pre-existing conditions"
-              value={formatYesNo(quote.hasPreexistingConditions)}
-            />
-            <Typography component="dt" sx={termSx}>
-              Conditions
-            </Typography>
-            <ConditionsDetail conditions={quote.conditions ?? []} />
-          </>
-        ) : null}
-      </ReviewSection>
-
-      {canSubmit ? (
-        <Box sx={actionsSx}>
+      <Box sx={actionsSx}>
+        {quoteId ? (
+          <Button
+            component={RouterLink}
+            to={wizardHref("coverage", { quoteId })}
+            variant="outlined"
+            size="large"
+          >
+            Back
+          </Button>
+        ) : (
+          <span />
+        )}
+        {canSubmit ? (
           <Button
             type="button"
             variant="contained"
             size="large"
             disabled={isSubmitting}
+            startIcon={
+              isSubmitting ? (
+                <CircularProgress color="inherit" size={16} />
+              ) : null
+            }
             onClick={() => {
               void onSubmit();
             }}
@@ -308,8 +384,8 @@ export function ReviewStep({ quoteId, quote }: WizardStepProps) {
                 ? "Retry submit"
                 : "Submit quote"}
           </Button>
-        </Box>
-      ) : null}
+        ) : null}
+      </Box>
     </Stack>
   );
 }
