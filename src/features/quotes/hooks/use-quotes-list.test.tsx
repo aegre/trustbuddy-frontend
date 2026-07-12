@@ -73,4 +73,34 @@ describe("useQuotesList", () => {
       expect(result.current.isError).toBe(true);
     });
   });
+
+  it("given_customPageParam_when_fetched_then_forwardsPageToRequest", async () => {
+    let requestedPage: string | null = null;
+    server.use(
+      http.get("*/api/v1/quotes", ({ request }) => {
+        const url = new URL(request.url);
+        requestedPage = url.searchParams.get("page");
+        return HttpResponse.json(
+          createQuotesPageFixture({
+            number: 2,
+            totalPages: 4,
+            first: false,
+            last: false,
+          }),
+          { status: 200 },
+        );
+      }),
+    );
+
+    const { result } = renderHookWithProviders(() =>
+      useQuotesList({ params: { page: 2 } }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+
+    expect(requestedPage).toBe("2");
+    expect(result.current.data?.number).toBe(2);
+  });
 });

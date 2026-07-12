@@ -5,7 +5,7 @@ import {
 } from "@/api/generated/quotes/quotes";
 import type { ListQuotesParams, PageQuoteResponse } from "@/api/types";
 
-/** Fixed list paging for Phase 3 (pagination UI later). */
+/** Default list paging (size/sort fixed; page comes from the dashboard URL). */
 export const QUOTES_LIST_DEFAULTS: Required<
   Pick<ListQuotesParams, "page" | "size">
 > & { sort: string[] } = {

@@ -9,7 +9,6 @@ import {
   useUpdateCoverage,
 } from "@/api/generated/quotes/quotes";
 import { getUserFacingErrorMessage } from "@/api/types";
-import { QUOTES_LIST_DEFAULTS } from "@/features/quotes/hooks/use-quotes-list";
 import { CoverageForm } from "@/features/wizard/components/steps/coverage-form";
 import {
   isSeniorApplicant,
@@ -80,11 +79,7 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: getGetQuoteQueryKey(id) }),
         queryClient.invalidateQueries({
-          queryKey: getListQuotesQueryKey({
-            page: QUOTES_LIST_DEFAULTS.page,
-            size: QUOTES_LIST_DEFAULTS.size,
-            sort: QUOTES_LIST_DEFAULTS.sort,
-          }),
+          queryKey: getListQuotesQueryKey(),
         }),
       ]);
     },

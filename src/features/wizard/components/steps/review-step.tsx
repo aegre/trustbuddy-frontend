@@ -13,7 +13,6 @@ import {
   useSubmitQuote,
 } from "@/api/generated/quotes/quotes";
 import { getUserFacingErrorMessage, type QuoteResponse } from "@/api/types";
-import { QUOTES_LIST_DEFAULTS } from "@/features/quotes/hooks/use-quotes-list";
 import { formatQuotePremium } from "@/features/quotes/utils/format-quote";
 import type { WizardStepProps } from "@/features/wizard/types/wizard-steps";
 import {
@@ -176,11 +175,7 @@ export function ReviewStep({ quoteId, quote }: WizardStepProps) {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: getGetQuoteQueryKey(id) }),
         queryClient.invalidateQueries({
-          queryKey: getListQuotesQueryKey({
-            page: QUOTES_LIST_DEFAULTS.page,
-            size: QUOTES_LIST_DEFAULTS.size,
-            sort: QUOTES_LIST_DEFAULTS.sort,
-          }),
+          queryKey: getListQuotesQueryKey(),
         }),
       ]);
     },
