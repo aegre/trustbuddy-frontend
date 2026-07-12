@@ -323,4 +323,167 @@ describe("wizard routes", () => {
       screen.getByRole("heading", { name: /personal information/i }),
     ).toBeInTheDocument();
   });
+
+  it("given_draftQuote_when_coverageLoaded_then_showsPremium", async () => {
+    mockQuote({
+      id: "q-cov",
+      name: "Ada Lovelace",
+      age: 36,
+      status: "DRAFT",
+      estimatedMonthlyPremium: 120.5,
+    });
+    renderWizardAt(`${paths.wizardBase}/coverage?quoteId=q-cov`);
+
+    expect(
+      await screen.findByRole("heading", { name: /^coverage$/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/estimated monthly premium/i)).toHaveTextContent(
+      /\$120\.50/,
+    );
+  });
+
+  it("given_draftQuote_when_coverageSaved_then_patchesAndAdvancesToReview", async () => {
+    mockQuote({
+      id: "q-cov",
+      name: "Ada Lovelace",
+      age: 36,
+      status: "DRAFT",
+      estimatedMonthlyPremium: 100,
+    });
+    let patchedBody: Record<string, unknown> | undefined;
+    server.use(
+      http.patch(
+        "*/api/v1/quotes/:id/coverage",
+        async ({ params, request }) => {
+          patchedBody = (await request.json()) as Record<string, unknown>;
+          return HttpResponse.json(
+            createQuoteFixture({
+              id: String(params.id),
+              name: "Ada Lovelace",
+              age: 36,
+              status: "DRAFT",
+              coverageType: "STANDARD",
+              estimatedMonthlyPremium: 199.99,
+            }),
+            { status: 200 },
+          );
+        },
+      ),
+    );
+
+    const user = userEvent.setup();
+    const { router } = renderWizardAt(
+      `${paths.wizardBase}/coverage?quoteId=q-cov`,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: /^coverage$/i }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByLabelText("Coverage type"));
+    await user.click(screen.getByRole("option", { name: /standard/i }));
+    await user.click(screen.getByLabelText("Uses tobacco"));
+    await user.click(screen.getByRole("button", { name: /^continue$/i }));
+
+    expect(
+      await screen.findByRole("heading", { name: /review & submit/i }),
+    ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(`${paths.wizardBase}/review`);
+    expect(router.state.location.search).toBe("?quoteId=q-cov");
+    expect(patchedBody).toMatchObject({
+      coverageType: "STANDARD",
+      usesTobacco: true,
+      takesPrescriptionMedication: false,
+      needsSpouseCoverage: false,
+    });
+    expect(patchedBody).not.toHaveProperty("hasPreexistingConditions");
+  });
+
+  it("given_seniorDraft_when_coverageSaved_then_sendsConditions", async () => {
+    mockQuote({
+      id: "q-senior",
+      name: "Senior Ada",
+      age: 70,
+      status: "DRAFT",
+    });
+    let patchedBody: Record<string, unknown> | undefined;
+    server.use(
+      http.patch(
+        "*/api/v1/quotes/:id/coverage",
+        async ({ params, request }) => {
+          patchedBody = (await request.json()) as Record<string, unknown>;
+          return HttpResponse.json(
+            createQuoteFixture({
+              id: String(params.id),
+              age: 70,
+              status: "DRAFT",
+              estimatedMonthlyPremium: 250,
+            }),
+            { status: 200 },
+          );
+        },
+      ),
+    );
+
+    const user = userEvent.setup();
+    const { router } = renderWizardAt(
+      `${paths.wizardBase}/coverage?quoteId=q-senior`,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: /^coverage$/i }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByLabelText("Coverage type"));
+    await user.click(screen.getByRole("option", { name: /premium/i }));
+    await user.click(screen.getByRole("radio", { name: /^yes$/i }));
+    await user.click(screen.getByLabelText("Diabetes"));
+    await user.click(screen.getByRole("button", { name: /^continue$/i }));
+
+    expect(
+      await screen.findByRole("heading", { name: /review & submit/i }),
+    ).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe(`${paths.wizardBase}/review`);
+    expect(patchedBody).toMatchObject({
+      coverageType: "PREMIUM",
+      hasPreexistingConditions: true,
+      conditions: ["DIABETES"],
+    });
+  });
+
+  it("given_409_when_coverageSaved_then_showsAlertAndStays", async () => {
+    mockQuote({
+      id: "q-cov-conflict",
+      name: "Conflict User",
+      age: 40,
+      status: "DRAFT",
+    });
+    server.use(
+      http.patch("*/api/v1/quotes/:id/coverage", () =>
+        HttpResponse.json(
+          { message: "Quote was updated elsewhere" },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    const user = userEvent.setup();
+    const { router } = renderWizardAt(
+      `${paths.wizardBase}/coverage?quoteId=q-cov-conflict`,
+    );
+
+    expect(
+      await screen.findByRole("heading", { name: /^coverage$/i }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByLabelText("Coverage type"));
+    await user.click(screen.getByRole("option", { name: /basic/i }));
+    await user.click(screen.getByRole("button", { name: /^continue$/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Quote was updated elsewhere",
+    );
+    expect(router.state.location.pathname).toBe(`${paths.wizardBase}/coverage`);
+    expect(router.state.location.search).toBe("?quoteId=q-cov-conflict");
+  });
 });
