@@ -41,10 +41,30 @@ export type WizardStepAccessContext = {
   quote?: QuoteResponse | null;
 };
 
+/** True once coverage health answers exist (coverageType is defaulted at create). */
+export function hasCompletedCoverageStep(
+  quote: QuoteResponse | null | undefined,
+): boolean {
+  if (quote == null) {
+    return false;
+  }
+  const healthAnswered =
+    quote.takesPrescriptionMedication != null &&
+    quote.usesTobacco != null &&
+    quote.needsSpouseCoverage != null;
+  if (!healthAnswered) {
+    return false;
+  }
+  if (typeof quote.age === "number" && quote.age > 65) {
+    return quote.hasPreexistingConditions != null;
+  }
+  return true;
+}
+
 /**
  * Which stepper steps can be opened.
  * Personal is always available; coverage needs a quote id;
- * review needs coverage already saved on the quote.
+ * review needs coverage health fields saved (not just default coverageType).
  */
 export function isWizardStepAccessible(
   slug: WizardStepSlug,
@@ -59,5 +79,5 @@ export function isWizardStepAccessible(
   if (slug === "coverage") {
     return true;
   }
-  return Boolean(context.quote?.coverageType);
+  return hasCompletedCoverageStep(context.quote);
 }
