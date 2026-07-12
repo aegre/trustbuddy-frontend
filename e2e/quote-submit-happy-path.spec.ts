@@ -15,8 +15,8 @@ test.describe("quote submit happy path", () => {
     const email = `e2e.${suffix}@example.com`;
 
     await page.goto("/login");
-    await page.getByLabel("Username").fill("dev-user");
-    await page.getByLabel("Password").fill("dev-password");
+    await page.getByRole("textbox", { name: "Username" }).fill("dev-user");
+    await page.getByRole("textbox", { name: "Password" }).fill("dev-password");
     await page.getByRole("button", { name: /sign in/i }).click();
 
     await expect(
