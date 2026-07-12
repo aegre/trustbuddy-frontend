@@ -41,17 +41,52 @@ describe("step guards", () => {
     expect(getNextWizardStep("review")).toBeNull();
   });
 
-  it("gates stepper access by quote id and coverage", () => {
+  it("gates stepper access by quote id and coverage health answers", () => {
     expect(isWizardStepAccessible("personal", {})).toBe(true);
     expect(isWizardStepAccessible("coverage", {})).toBe(false);
     expect(isWizardStepAccessible("review", {})).toBe(false);
 
     expect(isWizardStepAccessible("coverage", { quoteId: "q-1" })).toBe(true);
-    expect(isWizardStepAccessible("review", { quoteId: "q-1" })).toBe(false);
     expect(
       isWizardStepAccessible("review", {
         quoteId: "q-1",
         quote: { coverageType: "STANDARD" },
+      }),
+    ).toBe(false);
+    expect(
+      isWizardStepAccessible("review", {
+        quoteId: "q-1",
+        quote: {
+          coverageType: "STANDARD",
+          takesPrescriptionMedication: false,
+          usesTobacco: false,
+          needsSpouseCoverage: false,
+        },
+      }),
+    ).toBe(true);
+    expect(
+      isWizardStepAccessible("review", {
+        quoteId: "q-1",
+        quote: {
+          age: 70,
+          coverageType: "STANDARD",
+          takesPrescriptionMedication: false,
+          usesTobacco: false,
+          needsSpouseCoverage: false,
+        },
+      }),
+    ).toBe(false);
+    expect(
+      isWizardStepAccessible("review", {
+        quoteId: "q-1",
+        quote: {
+          age: 70,
+          coverageType: "STANDARD",
+          takesPrescriptionMedication: false,
+          usesTobacco: false,
+          needsSpouseCoverage: false,
+          hasPreexistingConditions: false,
+        },
       }),
     ).toBe(true);
   });
