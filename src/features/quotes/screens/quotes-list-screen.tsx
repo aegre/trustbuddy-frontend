@@ -4,6 +4,7 @@ import Container from "@mui/material/Container";
 import Pagination from "@mui/material/Pagination";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import AddIcon from "@mui/icons-material/Add";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useCallback, useEffect } from "react";
@@ -33,6 +34,18 @@ const headerCopySx = {
 const createButtonSx = {
   flexShrink: 0,
   alignSelf: { xs: "stretch", sm: "flex-start" },
+  borderRadius: 999,
+  px: 2,
+  gap: 1,
+} as const;
+const createIconWrapSx = {
+  display: "grid",
+  placeItems: "center",
+  width: 28,
+  height: 28,
+  borderRadius: "50%",
+  bgcolor: "primary.contrastText",
+  color: "primary.main",
 } as const;
 const paginationSx = {
   display: "flex",
@@ -132,8 +145,13 @@ export function QuotesListScreen() {
             to={paths.wizardPersonal}
             variant="contained"
             sx={createButtonSx}
+            startIcon={
+              <Box aria-hidden sx={createIconWrapSx}>
+                <AddIcon sx={{ fontSize: 18 }} />
+              </Box>
+            }
           >
-            + Create new quote
+            Create new quote
           </Button>
         </Box>
 

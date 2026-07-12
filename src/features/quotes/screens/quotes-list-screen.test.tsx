@@ -45,12 +45,12 @@ describe("QuotesListScreen", () => {
       screen.getByText(/review drafts, submitted quotes, and start a new one/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /\+ create new quote/i }),
+      screen.getByRole("link", { name: /create new quote/i }),
     ).toHaveAttribute("href", paths.wizardPersonal);
     expect(await screen.findByText("Premium coverage")).toBeInTheDocument();
-    expect(screen.getByText(/· Q-42/i)).toBeInTheDocument();
-    expect(screen.getByText("Draft")).toBeInTheDocument();
+    expect(screen.getByText("Grace Hopper")).toBeInTheDocument();
     expect(screen.getByText(/\/mo/i)).toBeInTheDocument();
+    expect(screen.getByText("Draft")).toBeInTheDocument();
 
     const card = screen.getByRole("link", { name: /premium coverage/i });
     expect(card).toHaveAttribute("href", wizardPersonalHref("q-42"));

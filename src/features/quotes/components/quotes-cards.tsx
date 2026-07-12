@@ -1,3 +1,4 @@
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
@@ -5,6 +6,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Link as RouterLink } from "react-router-dom";
 import type { QuoteResponse } from "@/api/types";
+import { CoveragePlanIconBadge } from "@/features/common/components/coverage-plan-icon";
 import {
   formatQuoteCoverageTitle,
   formatQuoteCreatedDate,
@@ -28,7 +30,6 @@ const listSx = {
 const cardSx = {
   display: "flex",
   alignItems: "center",
-  justifyContent: "space-between",
   gap: { xs: 1.5, sm: 2 },
   p: { xs: 2, sm: 2.5 },
   borderRadius: 3,
@@ -37,18 +38,13 @@ const cardSx = {
   "&:hover": { bgcolor: "action.hover" },
 } as const;
 
+const iconBadgeSx = {
+  display: { xs: "none", sm: "grid" },
+} as const;
+
 const metaSx = {
   minWidth: 0,
   flex: "1 1 auto",
-} as const;
-
-const titleRowSx = {
-  display: "flex",
-  alignItems: "baseline",
-  flexWrap: "wrap",
-  columnGap: 1,
-  rowGap: 0.25,
-  minWidth: 0,
 } as const;
 
 const titleSx = {
@@ -57,15 +53,19 @@ const titleSx = {
   overflowWrap: "anywhere",
 } as const;
 
-const refSx = {
-  whiteSpace: "nowrap",
-} as const;
-
 const trailingSx = {
   display: "flex",
   alignItems: "center",
   gap: { xs: 1, sm: 1.5 },
   flexShrink: 0,
+  ml: "auto",
+} as const;
+
+const priceBlockSx = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "flex-end",
+  gap: 0.75,
 } as const;
 
 const premiumSx = {
@@ -86,9 +86,14 @@ const premiumSuffixSx = {
 } as const;
 
 const chipSx = {
-  flexShrink: 0,
   borderRadius: 999,
   fontWeight: 600,
+  height: 24,
+} as const;
+
+const chevronSx = {
+  color: "text.secondary",
+  fontSize: { xs: 22, sm: 24 },
 } as const;
 
 export function QuotesCards({ quotes }: QuotesCardsProps) {
@@ -108,7 +113,11 @@ export function QuotesCards({ quotes }: QuotesCardsProps) {
       sx={listSx}
     >
       {quotes.map((quote) => {
-        const title = formatQuoteCoverageTitle(quote.coverageType, quote.name);
+        const coverageTitle = formatQuoteCoverageTitle(
+          quote.coverageType,
+          quote.name,
+        );
+        const applicantName = quote.name?.trim() || "—";
         const ref = formatQuoteRef(quote.id);
         const status = formatQuoteStatus(quote.status);
         const premium = formatQuotePremiumAmount(quote.estimatedMonthlyPremium);
@@ -124,50 +133,55 @@ export function QuotesCards({ quotes }: QuotesCardsProps) {
               to={wizardPersonalHref(quote.id)}
               elevation={0}
               variant="outlined"
-              aria-label={`${title}, ${ref}, ${status}, ${premium} per month`}
+              aria-label={`${coverageTitle}, ${applicantName}, ${ref}, ${status}, ${premium} per month`}
               sx={cardSx}
             >
+              <CoveragePlanIconBadge
+                coverageType={quote.coverageType}
+                sx={iconBadgeSx}
+              />
+
               <Box sx={metaSx}>
-                <Box sx={titleRowSx}>
-                  <Typography component="h2" variant="subtitle1" sx={titleSx}>
-                    {title}
-                  </Typography>
-                  <Typography
-                    component="span"
-                    variant="body2"
-                    color="text.secondary"
-                    sx={refSx}
-                  >
-                    · {ref}
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
+                <Typography component="h2" variant="subtitle1" sx={titleSx}>
+                  {coverageTitle}
+                </Typography>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ overflowWrap: "anywhere" }}
+                >
+                  {applicantName}
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
                   Created {created}
                 </Typography>
               </Box>
 
               <Box sx={trailingSx}>
-                <Typography component="p" sx={premiumSx}>
-                  <Box component="span" sx={premiumAmountSx}>
-                    {premium}
-                  </Box>
-                  {premium !== "—" ? (
-                    <Typography
-                      component="span"
-                      variant="body2"
-                      color="text.secondary"
-                      sx={premiumSuffixSx}
-                    >
-                      /mo
-                    </Typography>
-                  ) : null}
-                </Typography>
-                <Chip
-                  label={status}
-                  size="small"
-                  color={quoteStatusChipColor(quote.status)}
-                  sx={chipSx}
-                />
+                <Box sx={priceBlockSx}>
+                  <Typography component="p" sx={premiumSx}>
+                    <Box component="span" sx={premiumAmountSx}>
+                      {premium}
+                    </Box>
+                    {premium !== "—" ? (
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        color="text.secondary"
+                        sx={premiumSuffixSx}
+                      >
+                        /mo
+                      </Typography>
+                    ) : null}
+                  </Typography>
+                  <Chip
+                    label={status}
+                    size="small"
+                    color={quoteStatusChipColor(quote.status)}
+                    sx={chipSx}
+                  />
+                </Box>
+                <ChevronRightIcon aria-hidden sx={chevronSx} />
               </Box>
             </Paper>
           </Box>
