@@ -19,7 +19,6 @@ import {
   isWizardStepAccessible,
 } from "@/features/wizard/utils/step-guards";
 import { wizardHref } from "@/features/wizard/utils/wizard-href";
-import { paths } from "@/routes/paths";
 
 export type WizardLayoutProps = {
   stepSlug: WizardStepSlug;
@@ -32,13 +31,6 @@ export type WizardLayoutProps = {
 };
 
 const containerSx = { py: 3 } as const;
-const headerSx = {
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  gap: 2,
-  flexWrap: "wrap",
-} as const;
 const navSx = {
   display: "flex",
   justifyContent: "space-between",
@@ -63,14 +55,9 @@ export function WizardLayout({
   return (
     <Container component="main" maxWidth="md" sx={containerSx}>
       <Stack spacing={2}>
-        <Box sx={headerSx}>
-          <Typography component="h1" variant="h5">
-            Quote wizard
-          </Typography>
-          <Button component={RouterLink} to={paths.home} variant="text">
-            Back to quotes
-          </Button>
-        </Box>
+        <Typography component="h1" variant="h5">
+          Quote wizard
+        </Typography>
 
         {showStepChrome ? (
           <Stepper nonLinear activeStep={activeStep} alternativeLabel>
