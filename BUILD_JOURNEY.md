@@ -102,10 +102,10 @@ src/
 - [x] Feature folder spine: `src/features/{common,auth,quotes,wizard}`, `src/routes/`, `src/test/`
 - [x] Husky + lint-staged
 - [x] Makefile `install`, `test`, `verify`, and `dev` alias for `run`
+- [x] Vitest + Testing Library + Playwright stub; smoke test so `make verify` passes
 
 ### Remaining (follow-up)
 
-- [ ] Vitest + Testing Library + Playwright stub; empty smoke test so `make verify` passes
 - [ ] Wire Orval MSW handlers into `src/test/msw/` when tests land
 - [ ] Optional: shared `api` errors helper alongside codegen
 
