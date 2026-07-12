@@ -152,9 +152,9 @@ src/
 
 - [x] Step registry + stepper layout; routes `/wizard/:stepSlug`
 - [x] `utils/step-guards`, `utils/wizard-href`
-- [ ] Quote loaded via Query `['quote', quoteId]`; UI-only context if needed
+- [x] Quote loaded via Orval `useGetQuote` (`useQuote` wrapper; skip fetch when no `quoteId`)
 - [x] Stub step components; code-split wizard routes
-- [ ] DRAFT-only edit guards
+- [ ] DRAFT-only edit guards; UI-only context if needed
 
 **Done when:** Step navigation + chrome work without real forms.
 

@@ -1,14 +1,41 @@
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useCallback, useMemo, type ReactNode } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
+import { getUserFacingErrorMessage } from "@/api/types";
+import { useQuote } from "@/features/wizard/hooks/use-quote";
 import { WizardLayout } from "@/features/wizard/layouts/wizard-layout";
 import { WIZARD_STEP_BY_SLUG } from "@/features/wizard/types/wizard-step-registry";
 import { parseWizardStepSlug } from "@/features/wizard/utils/step-guards";
 import { wizardHref } from "@/features/wizard/utils/wizard-href";
+
+const loadingSx = {
+  display: "flex",
+  justifyContent: "center",
+  py: 6,
+} as const;
 
 export function WizardScreen() {
   const { stepSlug: stepSlugParam } = useParams<{ stepSlug: string }>();
   const [searchParams] = useSearchParams();
   const quoteId = searchParams.get("quoteId") ?? undefined;
   const stepSlug = parseWizardStepSlug(stepSlugParam);
+  const { data: quote, isPending, isError, error, refetch } = useQuote(quoteId);
+
+  const onRetry = useCallback(() => {
+    void refetch();
+  }, [refetch]);
+
+  const errorAction = useMemo(
+    () => (
+      <Button color="inherit" size="small" onClick={onRetry}>
+        Retry
+      </Button>
+    ),
+    [onRetry],
+  );
 
   if (!stepSlug) {
     return <Navigate to={wizardHref("personal", { quoteId })} replace />;
@@ -17,9 +44,30 @@ export function WizardScreen() {
   const step = WIZARD_STEP_BY_SLUG[stepSlug];
   const StepComponent = step.Component;
 
+  let body: ReactNode;
+  if (!quoteId) {
+    body = <StepComponent />;
+  } else if (isPending) {
+    body = (
+      <Box sx={loadingSx}>
+        <output aria-label="Loading quote">
+          <CircularProgress />
+        </output>
+      </Box>
+    );
+  } else if (isError) {
+    body = (
+      <Alert severity="error" action={errorAction}>
+        {getUserFacingErrorMessage(error, "Could not load quote")}
+      </Alert>
+    );
+  } else {
+    body = <StepComponent quoteId={quoteId} quote={quote} />;
+  }
+
   return (
     <WizardLayout stepSlug={stepSlug} quoteId={quoteId}>
-      <StepComponent quoteId={quoteId} />
+      {body}
     </WizardLayout>
   );
 }
