@@ -1,8 +1,9 @@
 import { test, expect } from "@playwright/test";
 
 /**
- * Stub E2E — replace with login/wizard flows in later phases.
- * Skipped so `npx playwright test` does not require a running app yet.
+ * Lightweight smoke — skipped so default `npx playwright test` without a stack
+ * still exits cleanly. Prefer `e2e/quote-submit-happy-path.spec.ts` for the
+ * full login → submit flow (requires local FE + API).
  */
 test.describe("smoke (stub)", () => {
   test.skip("app loads", async ({ page }) => {
