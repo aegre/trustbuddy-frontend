@@ -10,8 +10,8 @@ import { useCallback, useEffect } from "react";
 import { Link as RouterLink, useSearchParams } from "react-router-dom";
 import { getUserFacingErrorMessage } from "@/api/types";
 import { PageErrorAlert } from "@/features/common/components/page-error-alert";
-import { PageLoading } from "@/features/common/components/page-loading";
 import { QuotesCards } from "@/features/quotes/components/quotes-cards";
+import { QuotesListSkeleton } from "@/features/quotes/components/quotes-list-skeleton";
 import {
   QUOTES_LIST_DEFAULTS,
   useQuotesList,
@@ -103,7 +103,9 @@ export function QuotesListScreen() {
 
   const quotes = data?.content ?? EMPTY_QUOTES;
   const totalPages = data?.totalPages ?? 0;
-  const showPagination = !isPending && !isError && totalPages > 1;
+  const showListSkeleton = isFetching && !isError;
+  const showCards = !isFetching && !isError;
+  const showPagination = Boolean(data) && !isError && totalPages > 1;
 
   return (
     <Container component="main" maxWidth="lg" sx={containerSx}>
@@ -121,7 +123,11 @@ export function QuotesListScreen() {
           </Button>
         </Box>
 
-        {isPending ? <PageLoading label="Loading quotes" /> : null}
+        {showListSkeleton ? (
+          <QuotesListSkeleton
+            label={isPending ? "Loading quotes" : "Refreshing quotes"}
+          />
+        ) : null}
 
         {isError ? (
           <PageErrorAlert onRetry={onRetry}>
@@ -129,7 +135,7 @@ export function QuotesListScreen() {
           </PageErrorAlert>
         ) : null}
 
-        {!isPending && !isError ? <QuotesCards quotes={quotes} /> : null}
+        {showCards ? <QuotesCards quotes={quotes} /> : null}
 
         {showPagination ? (
           <Box sx={paginationSx}>
@@ -145,12 +151,6 @@ export function QuotesListScreen() {
               showLastButton={!isCompact}
             />
           </Box>
-        ) : null}
-
-        {isFetching && !isPending ? (
-          <Typography variant="caption" color="text.secondary">
-            Refreshing…
-          </Typography>
         ) : null}
       </Stack>
     </Container>

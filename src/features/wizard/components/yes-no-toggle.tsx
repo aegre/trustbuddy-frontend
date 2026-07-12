@@ -8,6 +8,7 @@ export type YesNoToggleProps = {
   label: string;
   value?: boolean | null;
   onChange: (value: boolean) => void;
+  onBlur?: () => void;
   disabled?: boolean;
   error?: boolean;
   helperText?: string;
@@ -28,6 +29,7 @@ export function YesNoToggle({
   label,
   value,
   onChange,
+  onBlur,
   disabled = false,
   error = false,
   helperText,
@@ -45,6 +47,7 @@ export function YesNoToggle({
         sx={toggleGroupSx}
         aria-labelledby={id}
         value={toToggleValue(value)}
+        onBlur={onBlur}
         onChange={(_, next: "yes" | "no" | null) => {
           if (next !== null) {
             onChange(next === "yes");

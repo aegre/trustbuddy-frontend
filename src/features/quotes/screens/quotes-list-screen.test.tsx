@@ -176,4 +176,70 @@ describe("QuotesListScreen", () => {
       screen.getByRole("status", { name: /loading quotes/i }),
     ).toBeInTheDocument();
   });
+
+  it("given_multiPageList_when_pageTwoClicked_then_showsRefreshingShimmer", async () => {
+    const user = userEvent.setup();
+    const page0 = createQuotesPageFixture({
+      content: [
+        createQuoteFixture({
+          id: "q-page-0",
+          name: "Page Zero Quote",
+        }),
+      ],
+      totalElements: 40,
+      totalPages: 3,
+      size: 20,
+      number: 0,
+      first: true,
+      last: false,
+    });
+    const page1 = createQuotesPageFixture({
+      content: [
+        createQuoteFixture({
+          id: "q-page-1",
+          name: "Page One Quote",
+        }),
+      ],
+      totalElements: 40,
+      totalPages: 3,
+      size: 20,
+      number: 1,
+      first: false,
+      last: false,
+    });
+
+    let releasePage1: (() => void) | undefined;
+    const page1Gate = new Promise<void>((resolve) => {
+      releasePage1 = resolve;
+    });
+
+    server.use(
+      http.get("*/api/v1/quotes", async ({ request }) => {
+        const url = new URL(request.url);
+        const page = url.searchParams.get("page") ?? "0";
+        if (page === "1") {
+          await page1Gate;
+          return HttpResponse.json(page1, { status: 200 });
+        }
+        return HttpResponse.json(page0, { status: 200 });
+      }),
+    );
+
+    renderQuotesList();
+
+    expect(await screen.findByText("Page Zero Quote")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^go to page 2$/i }));
+
+    expect(
+      await screen.findByRole("status", {
+        name: /(loading|refreshing) quotes/i,
+      }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Page Zero Quote")).not.toBeInTheDocument();
+
+    releasePage1?.();
+
+    expect(await screen.findByText("Page One Quote")).toBeInTheDocument();
+  });
 });

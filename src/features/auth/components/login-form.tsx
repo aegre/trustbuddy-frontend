@@ -45,7 +45,7 @@ export function LoginForm({
     formState: { errors },
   } = useForm<LoginFormValues>({
     resolver: yupResolver(loginSchema),
-    mode: "onSubmit",
+    mode: "onBlur",
     reValidateMode: "onChange",
     defaultValues: { username: "", password: "" },
   });

@@ -3,8 +3,8 @@ import { useCallback, type ReactNode } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { getUserFacingErrorMessage } from "@/api/types";
 import { PageErrorAlert } from "@/features/common/components/page-error-alert";
-import { PageLoading } from "@/features/common/components/page-loading";
 import { QuoteNotEditableAlert } from "@/features/wizard/components/quote-not-editable-alert";
+import { WizardPageSkeleton } from "@/features/wizard/components/wizard-page-skeleton";
 import { useQuote } from "@/features/wizard/hooks/use-quote";
 import { WizardLayout } from "@/features/wizard/layouts/wizard-layout";
 import { WIZARD_STEP_BY_SLUG } from "@/features/wizard/types/wizard-step-registry";
@@ -31,9 +31,13 @@ export function WizardScreen() {
     return <Navigate to={wizardHref("personal")} replace />;
   }
 
+  if (quoteId && isPending) {
+    return <WizardPageSkeleton label="Loading quote" />;
+  }
+
   const step = WIZARD_STEP_BY_SLUG[stepSlug];
   const StepComponent = step.Component;
-  const showStepChrome = !quoteId || (!isPending && !isError);
+  const showStepChrome = !quoteId || !isError;
   const readOnly = Boolean(quoteId && quote && !isQuoteEditable(quote));
   /** Steps own Back/Continue/Next/Submit inside the card (including read-only). */
   const hideNav = showStepChrome;
@@ -42,8 +46,6 @@ export function WizardScreen() {
   let body: ReactNode;
   if (!quoteId) {
     body = <StepComponent />;
-  } else if (isPending) {
-    body = <PageLoading label="Loading quote" />;
   } else if (isError) {
     body = (
       <PageErrorAlert onRetry={onRetry}>

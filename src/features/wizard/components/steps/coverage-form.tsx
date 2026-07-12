@@ -2,7 +2,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useEffect, useRef } from "react";
@@ -11,6 +10,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { formatQuotePremium } from "@/features/quotes/utils/format-quote";
 import { ConditionCards } from "@/features/wizard/components/condition-cards";
 import { CoverageTypeCards } from "@/features/wizard/components/coverage-type-cards";
+import { PremiumSkeleton } from "@/features/wizard/components/premium-skeleton";
 import { YesNoToggle } from "@/features/wizard/components/yes-no-toggle";
 import {
   createCoverageSchema,
@@ -91,7 +91,7 @@ export function CoverageForm({
     formState: { errors },
   } = useForm<CoverageFormValues>({
     resolver: yupResolver(schema) as Resolver<CoverageFormValues>,
-    mode: "onSubmit",
+    mode: "onBlur",
     reValidateMode: "onChange",
     defaultValues: { ...emptyCoverageDefaults, ...defaultValues },
   });
@@ -134,10 +134,7 @@ export function CoverageForm({
             <Typography component="div" variant="body1" sx={premiumRowSx}>
               <span>Estimated monthly premium:</span>
               {isPremiumLoading ? (
-                <CircularProgress
-                  size={16}
-                  aria-label="Updating estimated monthly premium"
-                />
+                <PremiumSkeleton />
               ) : typeof estimatedMonthlyPremium === "number" ? (
                 <strong>{formatQuotePremium(estimatedMonthlyPremium)}</strong>
               ) : null}
@@ -178,6 +175,7 @@ export function CoverageForm({
               name={field.name}
               value={(field.value ?? "") as CoverageTypeValue | ""}
               onChange={field.onChange}
+              onBlur={field.onBlur}
               disabled={disabled}
               error={Boolean(errors.coverageType)}
               helperText={errors.coverageType?.message}
@@ -194,6 +192,7 @@ export function CoverageForm({
               labelId="takes-prescription-label"
               value={field.value}
               onChange={field.onChange}
+              onBlur={field.onBlur}
               disabled={disabled}
               error={Boolean(errors.takesPrescriptionMedication)}
               helperText={errors.takesPrescriptionMedication?.message}
@@ -210,6 +209,7 @@ export function CoverageForm({
               labelId="uses-tobacco-label"
               value={field.value}
               onChange={field.onChange}
+              onBlur={field.onBlur}
               disabled={disabled}
               error={Boolean(errors.usesTobacco)}
               helperText={errors.usesTobacco?.message}
@@ -226,6 +226,7 @@ export function CoverageForm({
               labelId="needs-spouse-label"
               value={field.value}
               onChange={field.onChange}
+              onBlur={field.onBlur}
               disabled={disabled}
               error={Boolean(errors.needsSpouseCoverage)}
               helperText={errors.needsSpouseCoverage?.message}
@@ -243,6 +244,7 @@ export function CoverageForm({
                 labelId="preexisting-label"
                 value={field.value}
                 onChange={field.onChange}
+                onBlur={field.onBlur}
                 disabled={disabled}
                 error={Boolean(errors.hasPreexistingConditions)}
                 helperText={errors.hasPreexistingConditions?.message}
@@ -259,6 +261,7 @@ export function CoverageForm({
               <ConditionCards
                 value={(field.value ?? []) as ConditionValue[]}
                 onChange={field.onChange}
+                onBlur={field.onBlur}
                 disabled={disabled}
                 error={Boolean(errors.conditions)}
                 helperText={errors.conditions?.message}
