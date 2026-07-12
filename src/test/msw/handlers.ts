@@ -1,7 +1,11 @@
+import { getAuthenticationMock } from "@/api/generated/authentication/authentication.msw";
+import { getQuotesMock } from "@/api/generated/quotes/quotes.msw";
 import type { RequestHandler } from "msw";
 
 /**
- * App MSW handler list for Vitest.
- * Compose Orval `*.msw.ts` handlers here when the test harness lands.
+ * App MSW handler list for Vitest — composed from Orval-generated mocks.
  */
-export const handlers: RequestHandler[] = [];
+export const handlers: RequestHandler[] = [
+  ...getAuthenticationMock(),
+  ...getQuotesMock(),
+];
