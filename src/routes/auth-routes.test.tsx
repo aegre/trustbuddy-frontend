@@ -2,6 +2,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
+import { Navigate } from "react-router-dom";
 import { createQuotesPageFixture } from "@/test/factories";
 import { server } from "@/test/msw/server";
 import { renderAppRouter } from "@/test/render";
@@ -10,7 +11,7 @@ import { LoginRoute } from "@/routes/login-route";
 import { paths } from "@/routes/paths";
 import { ProtectedOutlet } from "@/routes/protected-outlet";
 import { QuotesListRoute } from "@/routes/quotes-list-route";
-import { WizardPersonalRoute } from "@/routes/wizard-personal-route";
+import { WizardRoute } from "@/routes/wizard-route";
 
 const appRoutes = [
   {
@@ -21,7 +22,11 @@ const appRoutes = [
     element: <ProtectedOutlet />,
     children: [
       { path: paths.home, element: <QuotesListRoute /> },
-      { path: paths.wizardPersonal, element: <WizardPersonalRoute /> },
+      {
+        path: paths.wizardBase,
+        element: <Navigate to={paths.wizardPersonal} replace />,
+      },
+      { path: paths.wizardStep, element: <WizardRoute /> },
     ],
   },
 ];

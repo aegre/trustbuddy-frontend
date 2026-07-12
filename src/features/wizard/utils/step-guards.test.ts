@@ -1,0 +1,42 @@
+import { describe, expect, it } from "vitest";
+import {
+  getNextWizardStep,
+  getPreviousWizardStep,
+  getWizardStepIndex,
+  parseWizardStepSlug,
+} from "@/features/wizard/utils/step-guards";
+import { WIZARD_STEPS } from "@/features/wizard/types/wizard-step-registry";
+import { isWizardStepSlug } from "@/features/wizard/types/wizard-steps";
+
+describe("wizard step registry", () => {
+  it("registers personal, coverage, and review in order", () => {
+    expect(WIZARD_STEPS.map((step) => step.slug)).toEqual([
+      "personal",
+      "coverage",
+      "review",
+    ]);
+  });
+});
+
+describe("step guards", () => {
+  it("parses known slugs and rejects unknown", () => {
+    expect(parseWizardStepSlug("personal")).toBe("personal");
+    expect(parseWizardStepSlug("coverage")).toBe("coverage");
+    expect(parseWizardStepSlug("review")).toBe("review");
+    expect(parseWizardStepSlug("unknown")).toBeNull();
+    expect(parseWizardStepSlug(undefined)).toBeNull();
+    expect(isWizardStepSlug("personal")).toBe(true);
+    expect(isWizardStepSlug("nope")).toBe(false);
+  });
+
+  it("resolves indexes and adjacent steps", () => {
+    expect(getWizardStepIndex("personal")).toBe(0);
+    expect(getWizardStepIndex("coverage")).toBe(1);
+    expect(getWizardStepIndex("review")).toBe(2);
+
+    expect(getPreviousWizardStep("personal")).toBeNull();
+    expect(getPreviousWizardStep("coverage")).toBe("personal");
+    expect(getNextWizardStep("coverage")).toBe("review");
+    expect(getNextWizardStep("review")).toBeNull();
+  });
+});
