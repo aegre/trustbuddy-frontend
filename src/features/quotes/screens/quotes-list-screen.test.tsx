@@ -74,7 +74,9 @@ describe("QuotesListScreen", () => {
 
     renderQuotesList();
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("Boom");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Could not load quotes",
+    );
     expect(screen.getByRole("button", { name: /retry/i })).toBeInTheDocument();
   });
 

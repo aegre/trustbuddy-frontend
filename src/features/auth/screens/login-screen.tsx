@@ -2,7 +2,7 @@ import Container from "@mui/material/Container";
 import Paper from "@mui/material/Paper";
 import { useCallback, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getApiErrorMessage } from "@/api/types";
+import { getUserFacingErrorMessage } from "@/api/types";
 import { LoginForm } from "@/features/auth/components/login-form";
 import { useAuth } from "@/features/auth/context/use-auth";
 import type { LoginFormValues } from "@/features/auth/schemas/login";
@@ -37,7 +37,9 @@ export function LoginScreen() {
         await login(values);
         navigate(redirectFromLocationState(location.state), { replace: true });
       } catch (error) {
-        setErrorMessage(getApiErrorMessage(error, "Invalid credentials"));
+        setErrorMessage(
+          getUserFacingErrorMessage(error, "Invalid credentials"),
+        );
       }
     },
     [login, location.state, navigate],
