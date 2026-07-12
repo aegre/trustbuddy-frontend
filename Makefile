@@ -14,7 +14,7 @@ include .env
 export $(shell sed -n 's/=.*//p' .env)
 endif
 
-.PHONY: help run build lint format format-check openapi-sync openapi-codegen openapi-update docker-build stack-up stack-down stack-logs
+.PHONY: help run build lint format format-check precommit openapi-sync openapi-codegen openapi-update docker-build stack-up stack-down stack-logs
 
 help: ## Show available targets
 	@echo "Trustbuddy Frontend — available targets:"
@@ -35,6 +35,9 @@ format: ## Format with Prettier
 
 format-check: ## Check Prettier formatting
 	$(NPM) run format:check
+
+precommit: ## Format and lint staged files (same as husky hook)
+	$(NPM) run precommit
 
 openapi-sync: ## Copy OpenAPI spec from trustbuddy-api
 	@test -f $(API_OPENAPI_SPEC) || (echo "Missing $(API_OPENAPI_SPEC). Run make openapi-export in trustbuddy-api first." && exit 1)

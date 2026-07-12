@@ -57,7 +57,7 @@ Each feature module uses subfolders as they gain files (no empty placeholders):
 - Use `@/` path alias (`src/*`).
 - Validate forms with Yup schemas in `features/*/schemas/`; wire via `yupResolver`.
 - Run `make verify` before finishing once the Makefile exists (compile + lint + format check + unit tests).
-- After `npm install`, Husky should install the pre-commit hook via `prepare` (when added). Use `make precommit` to format and lint **staged files only** (same as the hook).
+- After `npm install`, Husky installs the pre-commit hook via `prepare`. Use `make precommit` to format and lint **staged files only** (same as the hook).
 - **Testing** — Vitest + MSW. Prefer Orval-generated handlers from `src/api/generated/**/*.msw.ts` in `src/test/msw/`; do **not** mock API responses in the running app.
 - Local API: frontend `make run` / `npm run dev` + trustbuddy-api `make run-dev`.
 - OpenAPI contract: `make openapi-update` syncs `../trustbuddy-api/openapi/openapi.json` → `openapi/openapi.json` (gitignored) and regenerates Orval clients/models/MSW via `orval.config.ts`. Use `make openapi-sync` or `make openapi-codegen` alone when needed. Refresh the API export first with `make openapi-export` in trustbuddy-api.

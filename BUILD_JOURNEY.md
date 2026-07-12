@@ -85,7 +85,7 @@ src/
 
 ## Phase 1 — Initial setup
 
-**Status:** In progress (partial). #4 docs/Docker/lint, #5 Orval/deps/alias; this PR adds the feature folder spine.
+**Status:** In progress on `feat/phase-1-setup` (no PR). Spine + Husky landed; tests/verify still open.
 
 ### Done
 
@@ -100,10 +100,10 @@ src/
 - [x] `@/` path alias (Vite + TypeScript, no deprecated `baseUrl`)
 - [x] Docs updated for Orval (`AGENTS.md`, `ARCHITECTURE.md`, this plan)
 - [x] Feature folder spine: `src/features/{common,auth,quotes,wizard}`, `src/routes/`, `src/test/`
+- [x] Husky + lint-staged
 
-### Remaining (follow-up PRs)
+### Remaining (follow-up)
 
-- [ ] Husky + lint-staged
 - [ ] Makefile `install`, `test`, `verify` (and align `run` with plan’s `dev` naming if desired)
 - [ ] Vitest + Testing Library + Playwright stub; empty smoke test so `make verify` passes
 - [ ] Wire Orval MSW handlers into `src/test/msw/` when tests land
