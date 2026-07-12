@@ -18,6 +18,20 @@ function renderCoverageForm(
   return { onSubmit };
 }
 
+async function answerRequiredHealthQuestions(
+  user: ReturnType<typeof userEvent.setup>,
+) {
+  await user.click(
+    screen.getByRole("button", {
+      name: /takes prescription medication, no/i,
+    }),
+  );
+  await user.click(screen.getByRole("button", { name: /uses tobacco, yes/i }));
+  await user.click(
+    screen.getByRole("button", { name: /needs spouse coverage, no/i }),
+  );
+}
+
 describe("CoverageForm", () => {
   it("given_missingCoverageType_when_submitted_then_showsValidationError", async () => {
     const user = userEvent.setup();
@@ -35,9 +49,8 @@ describe("CoverageForm", () => {
     const user = userEvent.setup();
     const { onSubmit } = renderCoverageForm();
 
-    await user.click(screen.getByLabelText("Coverage type"));
-    await user.click(screen.getByRole("option", { name: /standard/i }));
-    await user.click(screen.getByLabelText("Uses tobacco"));
+    await user.click(screen.getByRole("radio", { name: /^standard$/i }));
+    await answerRequiredHealthQuestions(user);
     await user.click(screen.getByRole("button", { name: /continue/i }));
 
     await waitFor(() => {
@@ -57,8 +70,8 @@ describe("CoverageForm", () => {
     const user = userEvent.setup();
     const { onSubmit } = renderCoverageForm({ age: 70 });
 
-    await user.click(screen.getByLabelText("Coverage type"));
-    await user.click(screen.getByRole("option", { name: /basic/i }));
+    await user.click(screen.getByRole("radio", { name: /^basic$/i }));
+    await answerRequiredHealthQuestions(user);
     await user.click(screen.getByRole("button", { name: /continue/i }));
 
     expect(
@@ -73,10 +86,12 @@ describe("CoverageForm", () => {
     const user = userEvent.setup();
     const { onSubmit } = renderCoverageForm({ age: 70 });
 
-    await user.click(screen.getByLabelText("Coverage type"));
-    await user.click(screen.getByRole("option", { name: /premium/i }));
-    await user.click(screen.getByRole("radio", { name: /^yes$/i }));
-    await user.click(screen.getByLabelText("Diabetes"));
+    await user.click(screen.getByRole("radio", { name: /^premium$/i }));
+    await answerRequiredHealthQuestions(user);
+    await user.click(
+      screen.getByRole("button", { name: /pre-existing conditions, yes/i }),
+    );
+    await user.click(screen.getByRole("checkbox", { name: /^diabetes$/i }));
     await user.click(screen.getByRole("button", { name: /continue/i }));
 
     await waitFor(() => {
@@ -107,5 +122,6 @@ describe("CoverageForm", () => {
     expect(
       screen.queryByRole("button", { name: /continue/i }),
     ).not.toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: /^basic$/i })).toBeChecked();
   });
 });

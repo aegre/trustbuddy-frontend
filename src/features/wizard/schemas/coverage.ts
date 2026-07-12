@@ -58,18 +58,18 @@ export function createCoverageSchema(age?: number) {
 /** Explicit form values — Yup InferType diverges for age-conditional fields. */
 export type CoverageFormValues = {
   coverageType: CoverageTypeValue | "";
-  takesPrescriptionMedication: boolean;
-  usesTobacco: boolean;
-  needsSpouseCoverage: boolean;
+  takesPrescriptionMedication?: boolean;
+  usesTobacco?: boolean;
+  needsSpouseCoverage?: boolean;
   hasPreexistingConditions?: boolean;
   conditions: ConditionValue[];
 };
 
 export const emptyCoverageDefaults: CoverageFormValues = {
   coverageType: "",
-  takesPrescriptionMedication: false,
-  usesTobacco: false,
-  needsSpouseCoverage: false,
+  takesPrescriptionMedication: undefined,
+  usesTobacco: undefined,
+  needsSpouseCoverage: undefined,
   hasPreexistingConditions: undefined,
   conditions: [],
 };

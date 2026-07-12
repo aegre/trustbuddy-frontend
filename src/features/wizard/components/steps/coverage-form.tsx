@@ -2,21 +2,20 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
 import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormGroup from "@mui/material/FormGroup";
 import FormHelperText from "@mui/material/FormHelperText";
 import FormLabel from "@mui/material/FormLabel";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
 import Radio from "@mui/material/Radio";
 import RadioGroup from "@mui/material/RadioGroup";
-import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { Controller, useForm, useWatch, type Resolver } from "react-hook-form";
 import { formatQuotePremium } from "@/features/quotes/utils/format-quote";
+import { YesNoToggle } from "@/features/wizard/components/yes-no-toggle";
 import {
   CONDITION_LABELS,
   CONDITION_OPTIONS,
@@ -41,6 +40,26 @@ export type CoverageFormProps = {
 };
 
 const formSx = { width: "100%" } as const;
+
+const coverageTypeGridSx = {
+  display: "grid",
+  gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
+  gap: 1.5,
+} as const;
+
+const coverageCardLabelSx = {
+  m: 0,
+  width: "100%",
+  px: 2,
+  py: 2.5,
+  justifyContent: "center",
+  "& .MuiFormControlLabel-label": {
+    flex: 1,
+    textAlign: "center",
+  },
+} as const;
+
+const coverageTypeTitleSx = { fontWeight: 600 } as const;
 
 export function CoverageForm({
   onSubmit,
@@ -100,22 +119,53 @@ export function CoverageForm({
           name="coverageType"
           control={control}
           render={({ field }) => (
-            <FormControl fullWidth error={Boolean(errors.coverageType)}>
-              <InputLabel id="coverage-type-label">Coverage type</InputLabel>
-              <Select
-                {...field}
-                labelId="coverage-type-label"
-                id="coverage-type"
-                label="Coverage type"
-                disabled={disabled}
+            <FormControl
+              component="fieldset"
+              fullWidth
+              error={Boolean(errors.coverageType)}
+            >
+              <FormLabel id="coverage-type-label" component="legend">
+                Coverage type
+              </FormLabel>
+              <RadioGroup
+                aria-labelledby="coverage-type-label"
+                name={field.name}
                 value={field.value ?? ""}
+                onChange={(event) => field.onChange(event.target.value)}
+                sx={coverageTypeGridSx}
               >
-                {COVERAGE_TYPES.map((type) => (
-                  <MenuItem key={type} value={type}>
-                    {COVERAGE_TYPE_LABELS[type]}
-                  </MenuItem>
-                ))}
-              </Select>
+                {COVERAGE_TYPES.map((type) => {
+                  const selected = field.value === type;
+                  return (
+                    <Card
+                      key={type}
+                      variant="outlined"
+                      sx={{
+                        borderColor: selected ? "primary.main" : "divider",
+                        borderWidth: selected ? 2 : 1,
+                        bgcolor: selected
+                          ? "action.selected"
+                          : "background.paper",
+                      }}
+                    >
+                      <FormControlLabel
+                        value={type}
+                        disabled={disabled}
+                        control={<Radio />}
+                        label={
+                          <Typography
+                            variant="subtitle1"
+                            sx={coverageTypeTitleSx}
+                          >
+                            {COVERAGE_TYPE_LABELS[type]}
+                          </Typography>
+                        }
+                        sx={coverageCardLabelSx}
+                      />
+                    </Card>
+                  );
+                })}
+              </RadioGroup>
               {errors.coverageType?.message ? (
                 <FormHelperText>{errors.coverageType.message}</FormHelperText>
               ) : null}
@@ -127,15 +177,14 @@ export function CoverageForm({
           name="takesPrescriptionMedication"
           control={control}
           render={({ field }) => (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={Boolean(field.value)}
-                  onChange={(_, checked) => field.onChange(checked)}
-                  disabled={disabled}
-                />
-              }
+            <YesNoToggle
               label="Takes prescription medication"
+              labelId="takes-prescription-label"
+              value={field.value}
+              onChange={field.onChange}
+              disabled={disabled}
+              error={Boolean(errors.takesPrescriptionMedication)}
+              helperText={errors.takesPrescriptionMedication?.message}
             />
           )}
         />
@@ -144,15 +193,14 @@ export function CoverageForm({
           name="usesTobacco"
           control={control}
           render={({ field }) => (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={Boolean(field.value)}
-                  onChange={(_, checked) => field.onChange(checked)}
-                  disabled={disabled}
-                />
-              }
+            <YesNoToggle
               label="Uses tobacco"
+              labelId="uses-tobacco-label"
+              value={field.value}
+              onChange={field.onChange}
+              disabled={disabled}
+              error={Boolean(errors.usesTobacco)}
+              helperText={errors.usesTobacco?.message}
             />
           )}
         />
@@ -161,15 +209,14 @@ export function CoverageForm({
           name="needsSpouseCoverage"
           control={control}
           render={({ field }) => (
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={Boolean(field.value)}
-                  onChange={(_, checked) => field.onChange(checked)}
-                  disabled={disabled}
-                />
-              }
+            <YesNoToggle
               label="Needs spouse coverage"
+              labelId="needs-spouse-label"
+              value={field.value}
+              onChange={field.onChange}
+              disabled={disabled}
+              error={Boolean(errors.needsSpouseCoverage)}
+              helperText={errors.needsSpouseCoverage?.message}
             />
           )}
         />
@@ -179,37 +226,15 @@ export function CoverageForm({
             name="hasPreexistingConditions"
             control={control}
             render={({ field }) => (
-              <FormControl error={Boolean(errors.hasPreexistingConditions)}>
-                <FormLabel id="preexisting-label">
-                  Pre-existing conditions
-                </FormLabel>
-                <RadioGroup
-                  aria-labelledby="preexisting-label"
-                  row
-                  value={
-                    field.value === undefined ? "" : field.value ? "yes" : "no"
-                  }
-                  onChange={(event) =>
-                    field.onChange(event.target.value === "yes")
-                  }
-                >
-                  <FormControlLabel
-                    value="yes"
-                    control={<Radio disabled={disabled} />}
-                    label="Yes"
-                  />
-                  <FormControlLabel
-                    value="no"
-                    control={<Radio disabled={disabled} />}
-                    label="No"
-                  />
-                </RadioGroup>
-                {errors.hasPreexistingConditions?.message ? (
-                  <FormHelperText>
-                    {errors.hasPreexistingConditions.message}
-                  </FormHelperText>
-                ) : null}
-              </FormControl>
+              <YesNoToggle
+                label="Pre-existing conditions"
+                labelId="preexisting-label"
+                value={field.value}
+                onChange={field.onChange}
+                disabled={disabled}
+                error={Boolean(errors.hasPreexistingConditions)}
+                helperText={errors.hasPreexistingConditions?.message}
+              />
             )}
           />
         ) : null}

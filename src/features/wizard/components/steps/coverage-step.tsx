@@ -26,9 +26,9 @@ function toUpdateCoverageRequest(
   const senior = isSeniorApplicant(age);
   const request: UpdateCoverageRequest = {
     coverageType: values.coverageType as CoverageTypeValue,
-    takesPrescriptionMedication: values.takesPrescriptionMedication,
-    usesTobacco: values.usesTobacco,
-    needsSpouseCoverage: values.needsSpouseCoverage,
+    takesPrescriptionMedication: values.takesPrescriptionMedication === true,
+    usesTobacco: values.usesTobacco === true,
+    needsSpouseCoverage: values.needsSpouseCoverage === true,
   };
 
   if (senior) {
@@ -60,9 +60,9 @@ export function CoverageStep({ quoteId, quote, readOnly }: WizardStepProps) {
       coverageType:
         (quote.coverageType as CoverageTypeValue | undefined) ??
         ("" as CoverageTypeValue),
-      takesPrescriptionMedication: quote.takesPrescriptionMedication ?? false,
-      usesTobacco: quote.usesTobacco ?? false,
-      needsSpouseCoverage: quote.needsSpouseCoverage ?? false,
+      takesPrescriptionMedication: quote.takesPrescriptionMedication,
+      usesTobacco: quote.usesTobacco,
+      needsSpouseCoverage: quote.needsSpouseCoverage,
       hasPreexistingConditions: quote.hasPreexistingConditions,
       conditions: (quote.conditions as ConditionValue[] | undefined) ?? [],
     };

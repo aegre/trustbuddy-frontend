@@ -59,6 +59,7 @@ Each feature module uses subfolders as they gain files (no empty placeholders):
 - Run `make verify` before finishing (build + lint + format check + unit tests). CI runs the same via `.github/workflows/pr-validation.yml`.
 - After `npm install`, Husky installs the pre-commit hook via `prepare`. Use `make precommit` to format and lint **staged files only** (same as the hook).
 - **Testing** — Vitest + MSW. Prefer Orval-generated handlers from `src/api/generated/**/*.msw.ts` composed in `src/test/msw/`; do **not** mock API responses in the running app. Playwright config lives at repo root (`npm run test:e2e`) for later E2E flows.
+  - Prefer Testing Library **`getByRole` / `findByRole` / `queryByRole`** (with accessible name) over `getByLabelText`, `getByTestId`, or CSS/DOM selectors. Queries should mirror how users and assistive tech find controls — if a role query is awkward, fix the component’s accessible name (`aria-label`, labelledby, legend) rather than weakening the test.
 - Local API: frontend `make run` / `make dev` + trustbuddy-api `make run-dev`.
 - OpenAPI contract: `make openapi-update` syncs `../trustbuddy-api/openapi/openapi.json` → `openapi/openapi.json` (gitignored) and regenerates Orval clients/models/MSW via `orval.config.ts`. Use `make openapi-sync` or `make openapi-codegen` alone when needed. Refresh the API export first with `make openapi-export` in trustbuddy-api.
 - **API DTO types** — import from `@/api/types` only. Do **not** import generated model files outside `types.ts` / Orval output consumers.

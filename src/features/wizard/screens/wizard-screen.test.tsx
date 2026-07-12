@@ -130,7 +130,9 @@ describe("wizard routes", () => {
     expect(
       await screen.findByRole("heading", { name: /^coverage$/i }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText("Coverage type")).toBeInTheDocument();
+    expect(
+      screen.getByRole("radiogroup", { name: /coverage type/i }),
+    ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /^continue$/i }),
     ).toBeInTheDocument();
@@ -380,9 +382,18 @@ describe("wizard routes", () => {
       await screen.findByRole("heading", { name: /^coverage$/i }),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByLabelText("Coverage type"));
-    await user.click(screen.getByRole("option", { name: /standard/i }));
-    await user.click(screen.getByLabelText("Uses tobacco"));
+    await user.click(screen.getByRole("radio", { name: /^standard$/i }));
+    await user.click(
+      screen.getByRole("button", {
+        name: /takes prescription medication, no/i,
+      }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: /uses tobacco, yes/i }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: /needs spouse coverage, no/i }),
+    );
     await user.click(screen.getByRole("button", { name: /^continue$/i }));
 
     expect(
@@ -434,10 +445,20 @@ describe("wizard routes", () => {
       await screen.findByRole("heading", { name: /^coverage$/i }),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByLabelText("Coverage type"));
-    await user.click(screen.getByRole("option", { name: /premium/i }));
-    await user.click(screen.getByRole("radio", { name: /^yes$/i }));
-    await user.click(screen.getByLabelText("Diabetes"));
+    await user.click(screen.getByRole("radio", { name: /^premium$/i }));
+    await user.click(
+      screen.getByRole("button", {
+        name: /takes prescription medication, no/i,
+      }),
+    );
+    await user.click(screen.getByRole("button", { name: /uses tobacco, no/i }));
+    await user.click(
+      screen.getByRole("button", { name: /needs spouse coverage, no/i }),
+    );
+    await user.click(
+      screen.getByRole("button", { name: /pre-existing conditions, yes/i }),
+    );
+    await user.click(screen.getByRole("checkbox", { name: /^diabetes$/i }));
     await user.click(screen.getByRole("button", { name: /^continue$/i }));
 
     expect(
@@ -476,8 +497,16 @@ describe("wizard routes", () => {
       await screen.findByRole("heading", { name: /^coverage$/i }),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByLabelText("Coverage type"));
-    await user.click(screen.getByRole("option", { name: /basic/i }));
+    await user.click(screen.getByRole("radio", { name: /^basic$/i }));
+    await user.click(
+      screen.getByRole("button", {
+        name: /takes prescription medication, no/i,
+      }),
+    );
+    await user.click(screen.getByRole("button", { name: /uses tobacco, no/i }));
+    await user.click(
+      screen.getByRole("button", { name: /needs spouse coverage, no/i }),
+    );
     await user.click(screen.getByRole("button", { name: /^continue$/i }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
