@@ -2,12 +2,15 @@ import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import Stack from "@mui/material/Stack";
 import { useCallback, useMemo, type ReactNode } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { getUserFacingErrorMessage } from "@/api/types";
+import { QuoteNotEditableAlert } from "@/features/wizard/components/quote-not-editable-alert";
 import { useQuote } from "@/features/wizard/hooks/use-quote";
 import { WizardLayout } from "@/features/wizard/layouts/wizard-layout";
 import { WIZARD_STEP_BY_SLUG } from "@/features/wizard/types/wizard-step-registry";
+import { isQuoteEditable } from "@/features/wizard/utils/quote-edit-guards";
 import { parseWizardStepSlug } from "@/features/wizard/utils/step-guards";
 import { wizardHref } from "@/features/wizard/utils/wizard-href";
 
@@ -62,7 +65,13 @@ export function WizardScreen() {
       </Alert>
     );
   } else {
-    body = <StepComponent quoteId={quoteId} quote={quote} />;
+    const readOnly = !isQuoteEditable(quote);
+    body = (
+      <Stack spacing={2}>
+        {readOnly && quote ? <QuoteNotEditableAlert quote={quote} /> : null}
+        <StepComponent quoteId={quoteId} quote={quote} readOnly={readOnly} />
+      </Stack>
+    );
   }
 
   return (

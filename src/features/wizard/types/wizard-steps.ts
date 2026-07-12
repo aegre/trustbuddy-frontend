@@ -9,6 +9,8 @@ export type WizardStepProps = {
   quoteId?: string;
   /** Loaded when editing an existing quote (`quoteId` in the URL). */
   quote?: QuoteResponse;
+  /** False when the quote is not DRAFT (view-only). Defaults to editable. */
+  readOnly?: boolean;
 };
 
 export type WizardStepDefinition = {

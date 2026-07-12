@@ -146,7 +146,7 @@ src/
 
 ## Phase 4 — Wizard setup
 
-**Status:** In progress on `feat/phase-4-wizard-shell`.
+**Status:** Done on `feat/phase-4-wizard-shell` (ready to merge).
 
 **Deliverables** (under `features/wizard/`)
 
@@ -154,7 +154,7 @@ src/
 - [x] `utils/step-guards`, `utils/wizard-href`
 - [x] Quote loaded via Orval `useGetQuote` (`useQuote` wrapper; skip fetch when no `quoteId`)
 - [x] Stub step components; code-split wizard routes
-- [ ] DRAFT-only edit guards; UI-only context if needed
+- [x] DRAFT-only edit guards (`isQuoteEditable` + read-only banner; no UI context needed yet)
 
 **Done when:** Step navigation + chrome work without real forms.
 

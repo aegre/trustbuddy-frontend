@@ -59,6 +59,36 @@ describe("wizard routes", () => {
     expect(screen.queryByRole("link", { name: /^previous$/i })).toBeNull();
   });
 
+  it("given_submittedQuote_when_loaded_then_showsReadOnlyGuard", async () => {
+    mockQuote({
+      id: "q-sub",
+      name: "Submitted User",
+      status: "SUBMITTED",
+    });
+    renderWizardAt(`${paths.wizardPersonal}?quoteId=q-sub`);
+
+    expect(
+      await screen.findByText(
+        /this quote is submitted and can no longer be edited/i,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/viewing submitted user \(read-only\)/i),
+    ).toBeInTheDocument();
+  });
+
+  it("given_draftQuote_when_loaded_then_allowsEdit", async () => {
+    mockQuote({ id: "q-9", name: "Ada Lovelace", status: "DRAFT" });
+    renderWizardAt(`${paths.wizardPersonal}?quoteId=q-9`);
+
+    expect(
+      await screen.findByText(/editing ada lovelace \(draft\)/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/can no longer be edited/i),
+    ).not.toBeInTheDocument();
+  });
+
   it("given_quoteId_when_loaded_then_showsQuoteFromQuery", async () => {
     mockQuote({ id: "q-9", name: "Ada Lovelace", status: "DRAFT" });
     renderWizardAt(`${paths.wizardPersonal}?quoteId=q-9`);
