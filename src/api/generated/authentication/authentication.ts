@@ -115,14 +115,14 @@ export function useToken<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof token>>, TError, TData>
     > &
-    Pick<
-      DefinedInitialDataOptions<
-        Awaited<ReturnType<typeof token>>,
-        TError,
-        Awaited<ReturnType<typeof token>>
-      >,
-      "initialData"
-    >;
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof token>>,
+          TError,
+          Awaited<ReturnType<typeof token>>
+        >,
+        "initialData"
+      >;
     request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
@@ -138,14 +138,14 @@ export function useToken<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof token>>, TError, TData>
     > &
-    Pick<
-      UndefinedInitialDataOptions<
-        Awaited<ReturnType<typeof token>>,
-        TError,
-        Awaited<ReturnType<typeof token>>
-      >,
-      "initialData"
-    >;
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof token>>,
+          TError,
+          Awaited<ReturnType<typeof token>>
+        >,
+        "initialData"
+      >;
     request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
@@ -262,14 +262,14 @@ export function useLogout<
     query: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>
     > &
-    Pick<
-      DefinedInitialDataOptions<
-        Awaited<ReturnType<typeof logout>>,
-        TError,
-        Awaited<ReturnType<typeof logout>>
-      >,
-      "initialData"
-    >;
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof logout>>,
+          TError,
+          Awaited<ReturnType<typeof logout>>
+        >,
+        "initialData"
+      >;
     request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,
@@ -284,14 +284,14 @@ export function useLogout<
     query?: Partial<
       UseQueryOptions<Awaited<ReturnType<typeof logout>>, TError, TData>
     > &
-    Pick<
-      UndefinedInitialDataOptions<
-        Awaited<ReturnType<typeof logout>>,
-        TError,
-        Awaited<ReturnType<typeof logout>>
-      >,
-      "initialData"
-    >;
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof logout>>,
+          TError,
+          Awaited<ReturnType<typeof logout>>
+        >,
+        "initialData"
+      >;
     request?: SecondParameter<typeof customFetch>;
   },
   queryClient?: QueryClient,

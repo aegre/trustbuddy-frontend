@@ -31,8 +31,8 @@ flowchart LR
 | Auth          | Cookie JWT — `POST /api/v1/auth/token` + `credentials: 'include'`; Context only tracks logged-in / loading |
 | Server state  | TanStack Query via Orval-generated hooks                                                                   |
 | UI/auth state | React Context under `features/*/context/`                                                                  |
-| Types         | Orval → `src/api/generated/` (models, React Query hooks, MSW); import DTOs via `@/api/types`              |
-| Testing       | Vitest + MSW (`src/test/msw/`, Orval `*.msw.ts` handlers, factories); Playwright for critical E2E        |
+| Types         | Orval → `src/api/generated/` (models, React Query hooks, MSW); import DTOs via `@/api/types`               |
+| Testing       | Vitest + MSW (`src/test/msw/`, Orval `*.msw.ts` handlers, factories); Playwright for critical E2E          |
 | Docker        | Container runs the React app (Vite/Node), per README                                                       |
 
 ## Folder structure
@@ -63,16 +63,16 @@ src/
 
 **Feature subfolders:**
 
-| Subfolder     | Purpose                                                                      |
-| ------------- | ---------------------------------------------------------------------------- |
-| `components/` | Feature UI (forms, cards, shells); wizard: `steps/*-step.tsx` + `*-form.tsx` |
-| `screens/`    | Full-page composition (e.g. login)                                           |
-| `layouts/`    | Feature chrome / providers                                                   |
-| `context/`    | React context (auth, wizard UI-only)                                         |
-| `hooks/`      | Feature hooks (Query wrappers OK here)                                       |
-| `types/`      | Domain registries (wizard steps)                                             |
-| `utils/`      | Pure helpers, step guards, href builders                                     |
-| `schemas/`    | Yup form schemas aligned with request DTOs                                   |
+| Subfolder     | Purpose                                                                                         |
+| ------------- | ----------------------------------------------------------------------------------------------- |
+| `components/` | Feature UI (forms, cards, shells); wizard: `steps/*-step.tsx` + `*-form.tsx`                    |
+| `screens/`    | Full-page composition (e.g. login)                                                              |
+| `layouts/`    | Feature chrome / providers                                                                      |
+| `context/`    | React context (auth, wizard UI-only)                                                            |
+| `hooks/`      | Feature hooks (Query wrappers OK here)                                                          |
+| `types/`      | Domain registries (wizard steps)                                                                |
+| `utils/`      | Pure helpers, step guards, href builders                                                        |
+| `schemas/`    | Yup form schemas aligned with request DTOs                                                      |
 | `client/`     | Prefer Orval-generated hooks under `src/api/generated/`; keep feature wrappers only when needed |
 
 **Routes (target):** `/login` · `/` (quotes list) · `/wizard/:stepSlug?quoteId=` with steps `personal` | `coverage` | `review` · success after submit.

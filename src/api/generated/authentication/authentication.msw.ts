@@ -31,8 +31,8 @@ export const getTokenMockHandler = (
   overrideResponse?:
     | AuthTokenResponse
     | ((
-      info: Parameters<Parameters<typeof http.post>[1]>[0],
-    ) => Promise<AuthTokenResponse> | AuthTokenResponse),
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<AuthTokenResponse> | AuthTokenResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
@@ -57,8 +57,8 @@ export const getLogoutMockHandler = (
   overrideResponse?:
     | void
     | ((
-      info: Parameters<Parameters<typeof http.post>[1]>[0],
-    ) => Promise<void> | void),
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<void> | void),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
