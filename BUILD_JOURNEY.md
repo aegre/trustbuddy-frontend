@@ -85,7 +85,7 @@ src/
 
 ## Phase 1 — Initial setup
 
-**Status:** In progress on `feat/phase-1-setup` (no PR). Spine + Husky landed; tests/verify still open.
+**Status:** Phase 1 setup complete on `feat/phase-1-setup` (no PR yet). Ready for Phase 2 login work.
 
 ### Done
 
@@ -104,12 +104,9 @@ src/
 - [x] Makefile `install`, `test`, `verify`, and `dev` alias for `run`
 - [x] Vitest + Testing Library + Playwright stub; smoke test so `make verify` passes
 - [x] Wire Orval MSW handlers into `src/test/msw/`
+- [x] Shared `api` errors helper (`src/api/errors.ts`)
 
-### Remaining (follow-up)
-
-- [ ] Optional: shared `api` errors helper alongside codegen
-
-**Done when:** `make run` / `make verify` work; generated API clients committed; empty smoke test passes.
+**Done when:** `make run` / `make verify` work; generated API clients committed; empty smoke test passes. ✅
 
 ---
 
