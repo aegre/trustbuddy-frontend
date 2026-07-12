@@ -32,8 +32,9 @@ const sectionHeaderSx = {
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  gap: 2,
+  gap: 1,
   mb: 1.5,
+  flexWrap: "wrap",
 } as const;
 
 const sectionTitleSx = {
@@ -66,7 +67,7 @@ const detailSx = {
 } as const;
 
 const cardSx = {
-  p: 2.5,
+  p: { xs: 2, sm: 2.5 },
   borderRadius: 2,
 } as const;
 
@@ -75,8 +76,8 @@ const premiumBannerSx = {
   flexDirection: "column",
   alignItems: "flex-start",
   gap: 0.5,
-  px: 2.5,
-  py: 2.5,
+  px: { xs: 2, sm: 2.5 },
+  py: { xs: 2, sm: 2.5 },
   borderRadius: 2,
   bgcolor: "action.selected",
 } as const;
@@ -89,11 +90,15 @@ const summaryGridSx = {
 
 const actionsSx = {
   display: "flex",
+  flexDirection: { xs: "column-reverse", sm: "row" },
   flexWrap: "wrap",
   justifyContent: "space-between",
-  alignItems: "center",
+  alignItems: { xs: "stretch", sm: "center" },
   gap: 1.5,
   pt: 1,
+  "& > .MuiButton-root": {
+    width: { xs: "100%", sm: "auto" },
+  },
 } as const;
 
 function formatYesNo(value: boolean | undefined): string {
@@ -360,9 +365,7 @@ export function ReviewStep({ quoteId, quote }: WizardStepProps) {
           >
             Back
           </Button>
-        ) : (
-          <span />
-        )}
+        ) : null}
         {canSubmit ? (
           <Button
             type="button"

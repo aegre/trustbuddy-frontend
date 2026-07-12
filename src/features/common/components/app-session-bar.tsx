@@ -55,7 +55,12 @@ export function AppSessionBar() {
         </Box>
         <Box sx={spacerSx} />
         {username ? (
-          <Typography variant="body2" color="text.secondary" noWrap>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            noWrap
+            sx={{ maxWidth: { xs: "6.5rem", sm: "14rem" } }}
+          >
             {username}
           </Typography>
         ) : null}

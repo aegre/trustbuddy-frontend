@@ -11,7 +11,8 @@ describe("formatQuote", () => {
   it("formats premium and status", () => {
     expect(formatQuotePremium(120.5)).toMatch(/120/);
     expect(formatQuotePremium(undefined)).toBe("—");
-    expect(formatQuoteStatus("DRAFT")).toBe("DRAFT");
+    expect(formatQuoteStatus("DRAFT")).toBe("Draft");
+    expect(formatQuoteStatus("SUBMISSION_FAILED")).toBe("Failed");
     expect(formatQuoteStatus(undefined)).toBe("—");
   });
 

@@ -25,41 +25,49 @@ const listSx = {
 
 const cardSx = {
   display: "block",
-  p: 2.5,
+  p: { xs: 2, sm: 2.5 },
   borderRadius: 2,
   textDecoration: "none",
   color: "inherit",
   "&:hover": { bgcolor: "action.hover" },
 } as const;
 
-const cardHeaderSx = {
+const topRowSx = {
   display: "flex",
-  alignItems: "flex-start",
+  alignItems: "center",
   justifyContent: "space-between",
-  gap: 2,
-  flexWrap: "wrap",
+  gap: 1.5,
 } as const;
 
-const leadingSx = {
-  flex: "1 1 12rem",
+const nameSx = {
+  fontWeight: 600,
   minWidth: 0,
+  flex: "1 1 auto",
+  overflowWrap: "anywhere",
 } as const;
 
-const trailingSx = {
-  ml: "auto",
-  flexShrink: 0,
-  alignItems: "flex-end",
-  textAlign: "right",
+const emailSx = {
+  overflowWrap: "anywhere",
 } as const;
 
-const titleSx = { fontWeight: 600 } as const;
+const footerSx = {
+  display: "flex",
+  alignItems: "baseline",
+  justifyContent: "space-between",
+  gap: 1.5,
+  pt: 0.25,
+} as const;
 
 const premiumSx = {
   fontWeight: 700,
   lineHeight: 1.2,
+  m: 0,
+  fontSize: { xs: "1.375rem", sm: "1.5rem" },
+  textAlign: "right",
+  flexShrink: 0,
 } as const;
 
-const createdSx = { mt: 1.5, display: "block" } as const;
+const chipSx = { flexShrink: 0 } as const;
 
 export function QuotesCards({ quotes }: QuotesCardsProps) {
   if (quotes.length === 0) {
@@ -71,7 +79,12 @@ export function QuotesCards({ quotes }: QuotesCardsProps) {
   }
 
   return (
-    <Stack component="ul" spacing={1.5} aria-label="Quotes" sx={listSx}>
+    <Stack
+      component="ul"
+      spacing={{ xs: 1.25, sm: 1.5 }}
+      aria-label="Quotes"
+      sx={listSx}
+    >
       {quotes.map((quote) => {
         const name = quote.name ?? "Untitled quote";
         const status = formatQuoteStatus(quote.status);
@@ -90,33 +103,30 @@ export function QuotesCards({ quotes }: QuotesCardsProps) {
               aria-label={`${name}, ${status}, ${premium}`}
               sx={cardSx}
             >
-              <Box sx={cardHeaderSx}>
-                <Box sx={leadingSx}>
-                  <Typography component="h2" variant="subtitle1" sx={titleSx}>
+              <Stack spacing={1}>
+                <Box sx={topRowSx}>
+                  <Typography component="h2" variant="subtitle1" sx={nameSx}>
                     {name}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {quote.email ?? "—"}
-                  </Typography>
-                </Box>
-                <Stack spacing={0.75} sx={trailingSx}>
                   <Chip
                     label={status}
                     size="small"
                     color={quoteStatusChipColor(quote.status)}
+                    sx={chipSx}
                   />
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={emailSx}>
+                  {quote.email ?? "—"}
+                </Typography>
+                <Box sx={footerSx}>
+                  <Typography variant="caption" color="text.secondary">
+                    Created {formatQuoteDate(quote.createdAt)}
+                  </Typography>
                   <Typography variant="h5" component="p" sx={premiumSx}>
                     {premium}
                   </Typography>
-                </Stack>
-              </Box>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={createdSx}
-              >
-                Created {formatQuoteDate(quote.createdAt)}
-              </Typography>
+                </Box>
+              </Stack>
             </Paper>
           </Box>
         );

@@ -46,7 +46,7 @@ describe("QuotesListScreen", () => {
     );
     expect(await screen.findByText("Grace Hopper")).toBeInTheDocument();
     expect(screen.getByText("grace@example.com")).toBeInTheDocument();
-    expect(screen.getByText("DRAFT")).toBeInTheDocument();
+    expect(screen.getByText("Draft")).toBeInTheDocument();
 
     const card = screen.getByRole("link", { name: /grace hopper/i });
     expect(card).toHaveAttribute("href", wizardPersonalHref("q-42"));

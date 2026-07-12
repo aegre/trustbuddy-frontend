@@ -33,15 +33,25 @@ export type WizardLayoutProps = {
   children: ReactNode;
 };
 
-const containerSx = { py: 3 } as const;
+const containerSx = { py: { xs: 2, sm: 3 }, px: { xs: 2, sm: 3 } } as const;
 const navSx = {
   display: "flex",
+  flexDirection: { xs: "column-reverse", sm: "row" },
   justifyContent: "space-between",
-  gap: 2,
+  alignItems: { xs: "stretch", sm: "center" },
+  gap: 1.5,
   pt: 1,
+  "& > .MuiButton-root": {
+    width: { xs: "100%", sm: "auto" },
+  },
 } as const;
-const paperSx = { p: { xs: 2.5, sm: 3.5 } } as const;
+const paperSx = { p: { xs: 2, sm: 3.5 } } as const;
 const stepMetaSx = { mb: 0.5 } as const;
+const stepperSx = {
+  "& .MuiStepLabel-label": {
+    typography: { xs: "caption", sm: "body2" },
+  },
+} as const;
 
 export function WizardLayout({
   stepSlug,
@@ -65,7 +75,12 @@ export function WizardLayout({
     <Container component="main" maxWidth="md" sx={containerSx}>
       <Stack spacing={2}>
         {showStepChrome ? (
-          <Stepper nonLinear activeStep={activeStep} alternativeLabel>
+          <Stepper
+            nonLinear
+            activeStep={activeStep}
+            alternativeLabel
+            sx={stepperSx}
+          >
             {WIZARD_STEPS.map((step) => {
               const accessible = isWizardStepAccessible(
                 step.slug,
@@ -130,7 +145,7 @@ export function WizardLayout({
                 Back
               </Button>
             ) : (
-              <span />
+              <Box sx={{ display: { xs: "none", sm: "block" } }} />
             )}
             {next ? (
               <Button
@@ -141,7 +156,7 @@ export function WizardLayout({
                 Next
               </Button>
             ) : (
-              <span />
+              <Box sx={{ display: { xs: "none", sm: "block" } }} />
             )}
           </Box>
         ) : null}

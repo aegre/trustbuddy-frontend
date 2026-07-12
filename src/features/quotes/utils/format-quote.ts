@@ -31,7 +31,18 @@ export function formatQuotePremium(
 }
 
 export function formatQuoteStatus(status: QuoteResponse["status"]): string {
-  return status ?? "—";
+  switch (status) {
+    case "DRAFT":
+      return "Draft";
+    case "SUBMITTED":
+      return "Submitted";
+    case "SUBMISSION_FAILED":
+      return "Failed";
+    case "EXPIRED":
+      return "Expired";
+    default:
+      return status ?? "—";
+  }
 }
 
 export type QuoteStatusChipColor =
