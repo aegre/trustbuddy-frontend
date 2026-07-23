@@ -11,8 +11,6 @@ node_modules
 dist
 dist-ssr
 *.local
-.env
-.env.local
 .env.*.local
 
 # OpenAPI contract synced from trustbuddy-api (regenerate locally)
@@ -25,7 +23,6 @@ openapi/openapi.json
 /playwright/.cache/
 
 # Editor directories and files
-.vscode
 .idea
 .DS_Store
 *.suo
