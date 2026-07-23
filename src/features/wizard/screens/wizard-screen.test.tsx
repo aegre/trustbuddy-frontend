@@ -729,4 +729,141 @@ describe("wizard routes", () => {
       screen.queryByRole("button", { name: /submit/i }),
     ).not.toBeInTheDocument();
   });
+
+  it("given_draftReview_when_promoApplied_then_showsDiscountAndDiscountedPremium", async () => {
+    const base = {
+      id: "q-promo",
+      name: "Promo Ada",
+      status: "DRAFT" as const,
+      coverageType: "STANDARD" as const,
+      estimatedMonthlyPremium: 100,
+    };
+    let quote = createQuoteFixture(base);
+    server.use(
+      http.get("*/api/v1/quotes/:id", () =>
+        HttpResponse.json(quote, { status: 200 }),
+      ),
+      http.patch("*/api/v1/quotes/:id/promo-code", async ({ request }) => {
+        const body = (await request.json()) as { code?: string };
+        quote = createQuoteFixture({
+          ...base,
+          promoCode: body.code,
+          promotionPercentage: 10,
+          discountAmount: 10,
+        });
+        return HttpResponse.json(quote, { status: 200 });
+      }),
+    );
+
+    const user = userEvent.setup();
+    renderWizardAt(`${paths.wizardBase}/review?quoteId=q-promo`);
+
+    expect(
+      await screen.findByRole("textbox", { name: /promo code/i }),
+    ).toBeInTheDocument();
+    await user.type(
+      screen.getByRole("textbox", { name: /promo code/i }),
+      "SAVE10",
+    );
+    await user.click(screen.getByRole("button", { name: /^apply$/i }));
+
+    expect(
+      await screen.findByRole("button", { name: /^remove$/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/promo code applied/i)).toHaveTextContent(/SAVE10/);
+    expect(screen.getByText(/discount \(SAVE10 · 10%\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/−\$10\.00/)).toBeInTheDocument();
+    expect(screen.getByText(/discounted monthly premium/i)).toBeInTheDocument();
+    expect(screen.getByText(/\$90\.00/)).toBeInTheDocument();
+  });
+
+  it("given_invalidPromo_when_applied_then_showsAlertAndStays", async () => {
+    mockQuote({
+      id: "q-promo-bad",
+      name: "Bad Promo Ada",
+      status: "DRAFT",
+      coverageType: "BASIC",
+      estimatedMonthlyPremium: 100,
+    });
+    server.use(
+      http.patch("*/api/v1/quotes/:id/promo-code", () =>
+        HttpResponse.json(
+          { message: "Promotion code not found: BADCODE" },
+          { status: 400 },
+        ),
+      ),
+    );
+
+    const user = userEvent.setup();
+    const { router } = renderWizardAt(
+      `${paths.wizardBase}/review?quoteId=q-promo-bad`,
+    );
+
+    expect(
+      await screen.findByRole("textbox", { name: /promo code/i }),
+    ).toBeInTheDocument();
+    await user.type(
+      screen.getByRole("textbox", { name: /promo code/i }),
+      "BADCODE",
+    );
+    await user.click(screen.getByRole("button", { name: /^apply$/i }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Promotion code not found: BADCODE",
+    );
+    expect(router.state.location.pathname).toBe(`${paths.wizardBase}/review`);
+    expect(router.state.location.search).toBe("?quoteId=q-promo-bad");
+    expect(
+      screen.queryByText(/discounted monthly premium/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it("given_appliedPromo_when_removed_then_hidesDiscount", async () => {
+    const base = {
+      id: "q-promo-clear",
+      name: "Clear Promo Ada",
+      status: "DRAFT" as const,
+      coverageType: "PREMIUM" as const,
+      estimatedMonthlyPremium: 100,
+      promoCode: "SAVE10",
+      promotionPercentage: 10,
+      discountAmount: 10,
+    };
+    let quote = createQuoteFixture(base);
+    server.use(
+      http.get("*/api/v1/quotes/:id", () =>
+        HttpResponse.json(quote, { status: 200 }),
+      ),
+      http.delete("*/api/v1/quotes/:id/promo-code", () => {
+        quote = createQuoteFixture({
+          id: base.id,
+          name: base.name,
+          status: base.status,
+          coverageType: base.coverageType,
+          estimatedMonthlyPremium: base.estimatedMonthlyPremium,
+        });
+        return HttpResponse.json(quote, { status: 200 });
+      }),
+    );
+
+    const user = userEvent.setup();
+    renderWizardAt(`${paths.wizardBase}/review?quoteId=q-promo-clear`);
+
+    expect(
+      await screen.findByRole("button", { name: /^remove$/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/discounted monthly premium/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /^remove$/i }));
+
+    expect(
+      await screen.findByRole("textbox", { name: /promo code/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/discounted monthly premium/i),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^remove$/i }),
+    ).not.toBeInTheDocument();
+  });
 });
