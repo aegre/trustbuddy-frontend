@@ -22,3 +22,4 @@ export * from "./updateCoverageRequest";
 export * from "./updateCoverageRequestConditionsItem";
 export * from "./updateCoverageRequestCoverageType";
 export * from "./updatePersonalInfoRequest";
+export * from "./updatePromoRequest";

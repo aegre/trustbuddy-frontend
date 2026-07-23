@@ -12,10 +12,10 @@ import type { SortObject } from "./sortObject";
 export interface PageQuoteResponse {
   totalElements?: number;
   totalPages?: number;
-  numberOfElements?: number;
   pageable?: PageableObject;
-  last?: boolean;
   first?: boolean;
+  last?: boolean;
+  numberOfElements?: number;
   size?: number;
   content?: QuoteResponse[];
   number?: number;
