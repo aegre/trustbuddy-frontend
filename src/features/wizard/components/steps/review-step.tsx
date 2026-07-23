@@ -503,10 +503,7 @@ export function ReviewStep({ quoteId, quote }: WizardStepProps) {
                     variant="body2"
                     sx={{ flex: 1, alignSelf: { sm: "center" } }}
                   >
-                    Promo code applied:{" "}
-                    <Typography component="span" sx={{ fontWeight: 600 }}>
-                      {quote.promoCode}
-                    </Typography>
+                    Promo code applied: <strong>{quote.promoCode}</strong>
                   </Typography>
                   <Button
                     type="button"
@@ -566,10 +563,7 @@ export function ReviewStep({ quoteId, quote }: WizardStepProps) {
               )
             ) : quote?.promoCode ? (
               <Typography variant="body2">
-                Promo code applied:{" "}
-                <Typography component="span" sx={{ fontWeight: 600 }}>
-                  {quote.promoCode}
-                </Typography>
+                Promo code applied: <strong>{quote.promoCode}</strong>
               </Typography>
             ) : null}
           </Stack>
