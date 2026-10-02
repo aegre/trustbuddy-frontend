@@ -28,6 +28,7 @@ import type {
   QuoteResponse,
   UpdateCoverageRequest,
   UpdatePersonalInfoRequest,
+  UpdatePromoRequest,
 } from "../model";
 
 import { customFetch } from "../../mutator/custom-fetch";
@@ -671,6 +672,195 @@ export const useUpdatePersonalInfo = <TError = unknown, TContext = unknown>(
     getUpdatePersonalInfoMutationOptions(options),
     queryClient,
   );
+};
+export type clearPromoCodeResponse200 = {
+  data: QuoteResponse;
+  status: 200;
+};
+
+export type clearPromoCodeResponseSuccess = clearPromoCodeResponse200 & {
+  headers: Headers;
+};
+export type clearPromoCodeResponse = clearPromoCodeResponseSuccess;
+
+export const getClearPromoCodeUrl = (id: string) => {
+  return `/api/v1/quotes/${id}/promo-code`;
+};
+
+/**
+ * @summary Clear the promotion code from a draft quote
+ */
+export const clearPromoCode = async (
+  id: string,
+  options?: RequestInit,
+): Promise<clearPromoCodeResponse> => {
+  return customFetch<clearPromoCodeResponse>(getClearPromoCodeUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getClearPromoCodeMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof clearPromoCode>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof clearPromoCode>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["clearPromoCode"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof clearPromoCode>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return clearPromoCode(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ClearPromoCodeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof clearPromoCode>>
+>;
+
+export type ClearPromoCodeMutationError = unknown;
+
+/**
+ * @summary Clear the promotion code from a draft quote
+ */
+export const useClearPromoCode = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof clearPromoCode>>,
+      TError,
+      { id: string },
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof clearPromoCode>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getClearPromoCodeMutationOptions(options), queryClient);
+};
+export type updatePromoCodeResponse200 = {
+  data: QuoteResponse;
+  status: 200;
+};
+
+export type updatePromoCodeResponseSuccess = updatePromoCodeResponse200 & {
+  headers: Headers;
+};
+export type updatePromoCodeResponse = updatePromoCodeResponseSuccess;
+
+export const getUpdatePromoCodeUrl = (id: string) => {
+  return `/api/v1/quotes/${id}/promo-code`;
+};
+
+/**
+ * @summary Apply or replace a promotion code on a draft quote
+ */
+export const updatePromoCode = async (
+  id: string,
+  updatePromoRequest: UpdatePromoRequest,
+  options?: RequestInit,
+): Promise<updatePromoCodeResponse> => {
+  return customFetch<updatePromoCodeResponse>(getUpdatePromoCodeUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updatePromoRequest),
+  });
+};
+
+export const getUpdatePromoCodeMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updatePromoCode>>,
+    TError,
+    { id: string; data: UpdatePromoRequest },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updatePromoCode>>,
+  TError,
+  { id: string; data: UpdatePromoRequest },
+  TContext
+> => {
+  const mutationKey = ["updatePromoCode"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updatePromoCode>>,
+    { id: string; data: UpdatePromoRequest }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updatePromoCode(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdatePromoCodeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updatePromoCode>>
+>;
+export type UpdatePromoCodeMutationBody = UpdatePromoRequest;
+export type UpdatePromoCodeMutationError = unknown;
+
+/**
+ * @summary Apply or replace a promotion code on a draft quote
+ */
+export const useUpdatePromoCode = <TError = unknown, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updatePromoCode>>,
+      TError,
+      { id: string; data: UpdatePromoRequest },
+      TContext
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updatePromoCode>>,
+  TError,
+  { id: string; data: UpdatePromoRequest },
+  TContext
+> => {
+  return useMutation(getUpdatePromoCodeMutationOptions(options), queryClient);
 };
 export type updateCoverageResponse200 = {
   data: QuoteResponse;

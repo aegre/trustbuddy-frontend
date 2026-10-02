@@ -11,6 +11,7 @@ export type {
   QuoteResponse,
   UpdatePersonalInfoRequest,
   UpdateCoverageRequest,
+  UpdatePromoRequest,
   PageQuoteResponse,
 } from "@/api/generated/model";
 

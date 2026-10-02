@@ -22,6 +22,9 @@ export interface QuoteResponse {
   usesTobacco?: boolean;
   needsSpouseCoverage?: boolean;
   estimatedMonthlyPremium?: number;
+  promoCode?: string;
+  promotionPercentage?: number;
+  discountAmount?: number;
   status?: QuoteResponseStatus;
   createdAt?: string;
   updatedAt?: string;
